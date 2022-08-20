@@ -332,7 +332,7 @@
   #'  Estimate temporal overlap between predators and prey when cattle are/aren't detected
   #'  Focusing on only OK study area since big difference in number of cameras 
   #'  with cattle in NE vs OK, pooling across study areas can bias results
-  nboot <- 100
+  nboot <- 10000
   ####  Cougar - Mule deer  ####
   coug_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
                                           spp2 = filter(dets_smr, Species == "Mule Deer"), 
@@ -648,7 +648,7 @@
                             bear_moose_smr_over, bear_moose_fall_over, bear_moose_sprg_over,
                             bear_wtd_smr_over, bear_wtd_fall_over, bear_wtd_sprg_over1, bear_wtd_sprg_over4)
   bob_prey_overlap <- list(bob_md_smr_over, bob_md_fall_over, bob_md_sprg_over,
-                           bob_wtd_smr_over, bob_wtd_fall_over1, bob_wtd_fall_over4, bob_wtd_wtr_over, bear_wtd_sprg_over)
+                           bob_wtd_smr_over, bob_wtd_fall_over1, bob_wtd_fall_over4, bob_wtd_wtr_over, bob_wtd_sprg_over)
   coy_prey_overlap <- list(coy_md_smr_over, coy_md_fall_over, coy_md_wtr_over, coy_md_sprg_over,
                            coy_wtd_smr_over, coy_wtd_fall_over, coy_wtd_wtr_over, coy_wtd_sprg_over)
   pred_prey_overlap <- list(coug_prey_overlap, wolf_prey_overlap, bear_prey_overlap, bob_prey_overlap, coy_prey_overlap)
