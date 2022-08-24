@@ -655,64 +655,62 @@
   
   save(pred_prey_overlap, file = paste("./Outputs/Temporal Overlap/PredPrey_LowHi_Overlap_", Sys.Date(), ".RData"))
   
+  
+  
   #'  --------------------------------------------
   ####  Single species temporal overlap analysis  ####
   #'  --------------------------------------------
   #'  Function to estimate differences in temporal activity for a species at camera  
-  #'  sites where cattle/humans are present (detected) vs absent (not detected).
-  #'  Using spp3 to also represent cameras on public vs private land in this function.
-  spp_overlap <- function(spp1, spp2, name1, name2, nboot, dhat) { #, i
-    #'  Create logical vectors (T/F) indicating which cameras spp1 was detected 
-    #'  at with and without spp2
-    both.present <- spp1$CameraLocation %in% spp2$CameraLocation
-    spp1_dat <- cbind(spp1, both.present) 
-    #'  Split out data into camera locations where both are present vs spp2 absent
-    spp1_spp2.present <- spp1_dat[spp1_dat$both.present == T,]
-    spp1_spp2.absent <- spp1_dat[spp1_dat$both.present == F,]
+  #'  sites where background predation risk is high and low based on level of
+  #'  habitat complexity and whether predators were ever detected at a site.
+  spp_overlap <- function(spp2_dat, risky_sites, name1, name2, nboot, dhat) { #, i
+    #'  Create a logical vector (T/F) indicating whether background risk was high 
+    #'  or low at each site where spp2 was detected
+    risk <- spp2_dat$CameraLocation %in% risky_sites
+    spp2_dat <- cbind(spp2_dat, risk) %>% mutate(risk = ifelse(risk == TRUE, "Low", "High"))
+    spp2_lowrisk <- filter(spp2_dat, spp2_dat$risk == "Low")
+    spp2_highrisk <- filter(spp2_dat, spp2_dat$risk == "High")
     
     #'  Review sample size per species- smaller sample will determine which coefficient
     #'  of overlap estimator to use (delta1 for small samples [<50 detection events], 
     #'  delta4 for larger samples [>75 detection events])
-    ndet_spp2.present <- nrow(spp1_spp2.present)
-    ndet_spp2.absent <- nrow(spp1_spp2.absent)
-    print(ndet_spp2.present); print(ndet_spp2.absent)
+    ndet_spp2.lowrisk <- nrow(spp2_lowrisk)
+    ndet_spp2.highrisk <- nrow(spp2_highrisk)
+    print(ndet_spp2.lowrisk); print(ndet_spp2.highrisk)
     
-    #' #'  Visualize general temporal activity with density plots
-    densityPlot(spp1$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name1, " Daily Activity"))
-    densityPlot(spp2$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+    #'  Visualize general temporal activity with density plots
+    densityPlot(spp2_dat$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
     
     #'  Visualize temporal overlap
-    saveOverlap <- overlapPlot(spp1_spp2.present$sunTime, spp1_spp2.absent$sunTime, rug = T, 
+    saveOverlap <- overlapPlot(spp2_lowrisk$sunTime, spp2_highrisk$sunTime, rug = T, 
                                xscale = NA, xcenter = "noon", linet = c(1, 1), linec = c("red", "blue"), 
-                               linew = c(2, 2), main = paste0("Overlap Plots of ", name1, " diel activity \nwhen ", name2, " are Present and Absente")) 
-    saveDensity <- densityPlot(spp2$sunTime, add = T, xscale = NA, linec = "black", lwd = 2, lty = 2, extend = NULL)
-    legend("topleft", c("Anthro activity present", "Anthro activity  absent", "Anthro activity"), lty=c(1, 1, 2), col=c("red", "blue", "black"), bg = "white", bty = "n")
+                               linew = c(2, 2), main = paste0("Overlap Plot of ", name2, " diel activity when \nbackground risk is low (red) & high (blue)")) 
+    legend("topleft", c("Low risk", "High risk"), lty=c(1, 1), col=c("red", "blue"), bg = "white", bty = "n", title = paste0("Risk type: ", name1))
     
     #'  Wrangle density data from wide to long format
-    DensityA <- saveOverlap[,1:2] %>%
-      mutate(Anthro_Activity = "Present")
-    DensityB <- saveOverlap[,c(1,3)] %>%
-      mutate(Anthro_Activity = "Absent")
-    plotdata <- full_join(DensityA, DensityB, by = "x") %>%
-      full_join(saveDensity, by ="x") %>%
-      mutate(Species.z = name2)
-    
-    # plotdata <- full_join(saveOverlap, saveDensity, by = "x")
-    # colnames(plotdata) <- c("x", "DensityA", "DensityB", "Anthro_Activity")
-    
+    Density_low <- saveOverlap[,1:2] %>%
+      mutate(BackgroundRisk = "Low")
+    colnames(Density_low) <- c("x", "density", "BackgroundRisk")
+    Density_high <- saveOverlap[,c(1,3)] %>%
+      mutate(BackgroundRisk = "High")
+    colnames(Density_high) <- c("x", "density", "BackgroundRisk")
+    #'  Bind into single long data set of density estimates to make custom overlap plots
+    plotdata <- rbind(Density_low, Density_high) %>%
+      mutate(Species = name2,
+             RiskType = name1)
+       
     #'  Calculate coefficient of overlap
-    dhats_spp1.spp2 <- overlapEst(A = spp1_spp2.present$sunTime, 
-                                  B = spp1_spp2.absent$sunTime, type = dhat) 
+    dhats_spp2.lowhigh <- overlapEst(A = spp2_lowrisk$sunTime, B = spp2_highrisk$sunTime, type = dhat) 
     
     #'  Bootstrap to estimate standard errors
     #'  FYI: smooth = TRUE is default and allows bootstrap to randomly sample from 
     #'  a distribution of times that have a wider range than the original sample
     #'  (see pg. 5 in Overlap package vignette for details) 
-    spp1.spp2.boot <- bootstrap(spp1_spp2.present$sunTime, spp1_spp2.absent$sunTime, 
-                                nboot, smooth = TRUE, type = dhat)  
+    spp2.lowhigh.boot <- bootstrap(spp2_lowrisk$sunTime, spp2_highrisk$sunTime,
+                                   nboot, smooth = TRUE, type = dhat)  
     #'  Bootstrap mean will be a little different then detla coefficient due to
     #'  bootstrap bias (BSmean - delta) that needs to be accounted for in 95% CIs
-    BSmean <- mean(spp1.spp2.boot)
+    BSmean <- mean(spp2.lowhigh.boot)
     
     #'  Bootstrap 95% Confidence Intervals
     #'  norm0 uses the standard deviation of bootstrap results to calculate CI (delta +/- 1.96*SDboot)
@@ -723,27 +721,394 @@
     #'  Using bootCIlogit instead of bootCI so that bias corrections are done on
     #'  the logit scale, then backtransformed. Without this, 95% CIs can fall
     #'  outside (0, 1) interval. See Overlap vignette for more details.
-    CI <- bootCIlogit(dhats_spp1.spp2, spp1.spp2.boot) #dhats_spp1.spp2[i]
+    CI <- bootCIlogit(dhats_spp2.lowhigh, spp2.lowhigh.boot) #dhats_spp1.spp2[i]
     
     #'  Print results
     #'  Effect of spp2 being present
-    print("Overlap coefficients when spp2 is present"); print(dhats_spp1.spp2)
+    print("Overlap coefficients when spp2 is present"); print(dhats_spp2.lowhigh)
     print("Bootstrap mean"); print(BSmean)
     print("Bootstrap 95% CI"); print(CI)
     
     #'  Save as a giant list
-    overlap_list <- list(dhats_spp1.spp2, spp1.spp2.boot, CI, ndet_spp2.present, ndet_spp2.absent, plotdata)
-    names(overlap_list) <- c("dhats_spp1.spp2", "spp1.spp2.boot", "CI", "ndet_spp2.present", "ndet_spp2.absent", "overlap.plot.data")
+    overlap_list <- list(dhats_spp2.lowhigh, spp2.lowhigh.boot, CI, ndet_spp2.lowrisk, ndet_spp2.highrisk, plotdata)
+    names(overlap_list) <- c("dhats_spp2.lowhigh", "spp2.lowhigh.boot", "CI", "ndet_spp2.lowrisk", "ndet_spp2.highrisk", "overlap.plot.data")
     
     return(overlap_list)
   }
-  #'  Estimate temporal overlap for a species when cattle are/aren't detected
-  #'  Focusing on only OK study area since big difference in number of cameras 
-  #'  with cattle in NE vs OK, pooling across study areas could be confounding
-  #'  any apparent temporal patterns
-  ####  Single-Species Overlap Grazing Season  ####
-  coug_graze_over <- spp_overlap(spp1 = filter(grazing_first_OK, Species == "Cougar"),
-                                 spp2 = filter(grazing_first_OK, Species == "Cattle"), 
-                                 name1 = "Cougar", name2 = "Cattle", nboot = 10000, dhat = "Dhat1") #i = 1
+  #'  Estimate temporal overlap for each prey species based on varying levels of 
+  #'  background risk - habitat complexity and predator presence (cougar, wolf,
+  #'  black bear, bobcat, and coyote)
+  nboot <- 10000
+  
+  ####  Mule deer  ####
+  #'  Summer activity
+  md_smr_hab_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                 name1 = "Habitat complexity", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4") #i = 1
+  md_smr_coug_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                 name1 = "Cougar detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  md_smr_wolf_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                  name1 = "Wolf detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_smr_bear_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                  name1 = "Black bear detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_smr_bob_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                  name1 = "Bobcat detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_smr_coy_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                  name1 = "Coyote detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  #'  Fall activity
+  md_fall_hab_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                 name1 = "Habitat complexity", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4") #i = 1
+  md_fall_coug_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                  name1 = "Cougar detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_fall_wolf_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                  name1 = "Wolf detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_fall_bear_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                  name1 = "Black bear detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_fall_bob_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                 name1 = "Bobcat detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  md_fall_coy_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                 name1 = "Coyote detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  #'  Winter activity
+  md_wtr_hab_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                 name1 = "Habitat complexity", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4") #i = 1
+  md_wtr_coug_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                  name1 = "Cougar detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_wtr_wolf_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                  name1 = "Wolf detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  # md_wtr_bear_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
+  #                                 risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+  #                                 name1 = "Black bear detected", name2 = "Mule Deer", 
+  #                                 nboot = nboot, dhat = "Dhat4")
+  md_wtr_bob_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                 name1 = "Bobcat detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  md_wtr_coy_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                 name1 = "Coyote detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  #'  Spring activity
+  md_sprg_hab_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                 name1 = "Habitat complexity", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4") #i = 1
+  md_sprg_coug_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                  name1 = "Cougar detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_sprg_wolf_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                  name1 = "Wolf detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_sprg_bear_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                  name1 = "Black bear detected", name2 = "Mule Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  md_sprg_bob_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                 name1 = "Bobcat detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  md_sprg_coy_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                 name1 = "Coyote detected", name2 = "Mule Deer", 
+                                 nboot = nboot, dhat = "Dhat4")
+  #'  List all mule deer overlap results together
+  md_overlap_list <- list(md_smr_hab_over, md_smr_coug_over, md_smr_wolf_over, md_smr_bear_over, md_smr_bob_over, md_smr_coy_over,
+                          md_fall_hab_over, md_fall_coug_over, md_fall_wolf_over, md_fall_bear_over, md_fall_bob_over, md_fall_coy_over,
+                          md_wtr_hab_over, md_wtr_coug_over, md_wtr_wolf_over, md_wtr_bob_over, md_wtr_coy_over, #md_wtr_bear_over, 
+                          md_sprg_hab_over, md_sprg_coug_over, md_sprg_wolf_over, md_sprg_bear_over, md_sprg_bob_over, md_sprg_coy_over)
+  
+  ####  Elk  ####
+  #'  Summer activity
+  elk_smr_hab_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Elk"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                 name1 = "Habitat complexity", name2 = "Elk", 
+                                 nboot = nboot, dhat = "Dhat4") #i = 1
+  elk_smr_coug_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Elk"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                  name1 = "Cougar detected", name2 = "Elk", 
+                                  nboot = nboot, dhat = "Dhat4")
+  elk_smr_wolf_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Elk"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                  name1 = "Wolf detected", name2 = "Elk", 
+                                  nboot = nboot, dhat = "Dhat4")
+  elk_smr_bear_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Elk"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                  name1 = "Black bear detected", name2 = "Elk", 
+                                  nboot = nboot, dhat = "Dhat4")
+  #'  Fall activity
+  elk_fall_hab_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Elk"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                  name1 = "Habitat complexity", name2 = "Elk", 
+                                  nboot = nboot, dhat = "Dhat1") 
+  elk_fall_coug_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Elk"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                   name1 = "Cougar detected", name2 = "Elk", 
+                                   nboot = nboot, dhat = "Dhat1")
+  elk_fall_wolf_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Elk"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                   name1 = "Wolf detected", name2 = "Elk", 
+                                   nboot = nboot, dhat = "Dhat1")
+  elk_fall_bear_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Elk"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                   name1 = "Black bear detected", name2 = "Elk", 
+                                   nboot = nboot, dhat = "Dhat1")
+  #'  Winter activity
+  elk_wtr_hab_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Elk"),
+                                 risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                 name1 = "Habitat complexity", name2 = "Elk", 
+                                 nboot = nboot, dhat = "Dhat1") 
+  elk_wtr_coug_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Elk"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                  name1 = "Cougar detected", name2 = "Elk", 
+                                  nboot = nboot, dhat = "Dhat1")
+  # elk_wtr_wolf_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Elk"),
+  #                                 risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+  #                                 name1 = "Wolf detected", name2 = "Elk",
+  #                                 nboot = nboot, dhat = "Dhat1")
+  # elk_wtr_bear_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Elk"),
+  #                                 risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+  #                                 name1 = "Black bear detected", name2 = "Elk", 
+  #                                 nboot = nboot, dhat = "Dhat4")
+  #'  Spring activity
+  elk_sprg_hab_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Elk"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                  name1 = "Habitat complexity", name2 = "Elk", 
+                                  nboot = nboot, dhat = "Dhat4") #i = 1
+  elk_sprg_coug_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Elk"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                   name1 = "Cougar detected", name2 = "Elk", 
+                                   nboot = nboot, dhat = "Dhat1")
+  elk_sprg_wolf_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Elk"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                   name1 = "Wolf detected", name2 = "Elk", 
+                                   nboot = nboot, dhat = "Dhat1")
+  elk_sprg_bear_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Elk"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                   name1 = "Black bear detected", name2 = "Elk", 
+                                   nboot = nboot, dhat = "Dhat1")
+  
+  #'  List all elk overlap results together
+  elk_overlap_list <- list(elk_smr_hab_over, elk_smr_coug_over, elk_smr_wolf_over, elk_smr_bear_over,
+                          elk_fall_hab_over, elk_fall_coug_over, elk_fall_wolf_over, elk_fall_bear_over,
+                          elk_wtr_hab_over, elk_wtr_coug_over, #elk_wtr_wolf_over,
+                          elk_sprg_hab_over, elk_sprg_coug_over, elk_sprg_wolf_over, elk_sprg_bear_over)
+  
+  ####  Moose  ####
+  #'  Summer activity
+  moose_smr_hab_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Moose"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                  name1 = "Habitat complexity", name2 = "Moose", 
+                                  nboot = nboot, dhat = "Dhat4") #i = 1
+  moose_smr_coug_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                   name1 = "Cougar detected", name2 = "Moose", 
+                                   nboot = nboot, dhat = "Dhat4")
+  moose_smr_wolf_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                   name1 = "Wolf detected", name2 = "Moose", 
+                                   nboot = nboot, dhat = "Dhat4")
+  moose_smr_bear_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                   name1 = "Black bear detected", name2 = "Moose", 
+                                   nboot = nboot, dhat = "Dhat1")
+  #'  Fall activity
+  moose_fall_hab_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                   name1 = "Habitat complexity", name2 = "Moose", 
+                                   nboot = nboot, dhat = "Dhat4") #i = 1
+  moose_fall_coug_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Moose"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                    name1 = "Cougar detected", name2 = "Moose", 
+                                    nboot = nboot, dhat = "Dhat4")
+  moose_fall_wolf_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Moose"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                    name1 = "Wolf detected", name2 = "Moose", 
+                                    nboot = nboot, dhat = "Dhat4")
+  moose_fall_bear_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Moose"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                    name1 = "Black bear detected", name2 = "Moose", 
+                                    nboot = nboot, dhat = "Dhat1")
+  #'  Winter activity
+  moose_wtr_hab_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Moose"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                  name1 = "Habitat complexity", name2 = "Moose", 
+                                  nboot = nboot, dhat = "Dhat4") #i = 1
+  moose_wtr_coug_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                   name1 = "Cougar detected", name2 = "Moose", 
+                                   nboot = nboot, dhat = "Dhat4")
+  moose_wtr_wolf_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                   name1 = "Wolf detected", name2 = "Moose",
+                                   nboot = nboot, dhat = "Dhat4")
+  # moose_wtr_bear_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Moose"),
+  #                                 risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+  #                                 name1 = "Black bear detected", name2 = "Moose", 
+  #                                 nboot = nboot, dhat = "Dhat4")
+  #'  Spring activity
+  moose_sprg_hab_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Moose"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                   name1 = "Habitat complexity", name2 = "Moose", 
+                                   nboot = nboot, dhat = "Dhat4") #i = 1
+  moose_sprg_coug_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Moose"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                    name1 = "Cougar detected", name2 = "Moose", 
+                                    nboot = nboot, dhat = "Dhat1")
+  moose_sprg_wolf_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Moose"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                    name1 = "Wolf detected", name2 = "Moose", 
+                                    nboot = nboot, dhat = "Dhat4")
+  moose_sprg_bear_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Moose"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                    name1 = "Black bear detected", name2 = "Moose", 
+                                    nboot = nboot, dhat = "Dhat1")
+  #'  List all moose overlap results together
+  moose_overlap_list <- list(moose_smr_hab_over, moose_smr_coug_over, moose_smr_wolf_over, moose_smr_bear_over,
+                           moose_fall_hab_over, moose_fall_coug_over, moose_fall_wolf_over, moose_fall_bear_over,
+                           moose_wtr_hab_over, moose_wtr_coug_over, moose_wtr_wolf_over,
+                           moose_sprg_hab_over, moose_sprg_coug_over, moose_sprg_wolf_over, moose_sprg_bear_over)
+  
+  ####  White-tailed deer  ####
+  #'  Summer activity
+  wtd_smr_hab_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "White-tailed Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                  name1 = "Habitat complexity", name2 = "White-tailed Deer", 
+                                  nboot = nboot, dhat = "Dhat4") #i = 1
+  wtd_smr_coug_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                   name1 = "Cougar detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  wtd_smr_wolf_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                   name1 = "Wolf detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  wtd_smr_bear_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                   name1 = "Black bear detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  wtd_smr_bob_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "White-tailed Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                  name1 = "Bobcat detected", name2 = "White-tailed Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  wtd_smr_coy_over <- spp_overlap(spp2_dat = filter(dets_smr, Species == "White-tailed Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                  name1 = "Coyote detected", name2 = "White-tailed Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  #'  Fall activity
+  wtd_fall_hab_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                   name1 = "Habitat complexity", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4") #i = 1
+  wtd_fall_coug_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                    name1 = "Cougar detected", name2 = "White-tailed Deer", 
+                                    nboot = nboot, dhat = "Dhat4")
+  wtd_fall_wolf_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                    name1 = "Wolf detected", name2 = "White-tailed Deer", 
+                                    nboot = nboot, dhat = "Dhat4")
+  wtd_fall_bear_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                    name1 = "Black bear detected", name2 = "White-tailed Deer", 
+                                    nboot = nboot, dhat = "Dhat4")
+  wtd_fall_bob_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                   name1 = "Bobcat detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  wtd_fall_coy_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                   name1 = "Coyote detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  #'  Winter activity
+  wtd_wtr_hab_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                  name1 = "Habitat complexity", name2 = "White-tailed Deer", 
+                                  nboot = nboot, dhat = "Dhat4") #i = 1
+  wtd_wtr_coug_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                   name1 = "Cougar detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  wtd_wtr_wolf_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                   name1 = "Wolf detected", name2 = "White-tailed Deer",
+                                   nboot = nboot, dhat = "Dhat4")
+  # wtd_wtr_bear_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
+  #                                 risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+  #                                 name1 = "Black bear detected", name2 = "White-tailed Deer", 
+  #                                 nboot = nboot, dhat = "Dhat4")
+  wtd_wtr_bob_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                  name1 = "Bobcat detected", name2 = "White-tailed Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  wtd_wtr_coy_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
+                                  risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                  name1 = "Coyote detected", name2 = "White-tailed Deer", 
+                                  nboot = nboot, dhat = "Dhat4")
+  #'  Spring activity
+  wtd_sprg_hab_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$backgroundRisk == "Low"],
+                                   name1 = "Habitat complexity", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4") #i = 1
+  wtd_sprg_coug_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$coug_det == 0],
+                                    name1 = "Cougar detected", name2 = "White-tailed Deer", 
+                                    nboot = nboot, dhat = "Dhat4")
+  wtd_sprg_wolf_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$wolf_det == 0],
+                                    name1 = "Wolf detected", name2 = "White-tailed Deer", 
+                                    nboot = nboot, dhat = "Dhat4")
+  wtd_sprg_bear_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
+                                    risky_sites = stations_data$CameraLocation[stations_data$bear_det == 0],
+                                    name1 = "Black bear detected", name2 = "White-tailed Deer", 
+                                    nboot = nboot, dhat = "Dhat4")
+  wtd_sprg_bob_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$bob_det == 0],
+                                   name1 = "Bobcat detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  wtd_sprg_coy_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
+                                   risky_sites = stations_data$CameraLocation[stations_data$coy_det == 0],
+                                   name1 = "Coyote detected", name2 = "White-tailed Deer", 
+                                   nboot = nboot, dhat = "Dhat4")
+  #'  List all white-tailed deer overlap results together
+  wtd_overlap_list <- list(wtd_smr_hab_over, wtd_smr_coug_over, wtd_smr_wolf_over, wtd_smr_bear_over, wtd_smr_bob_over, wtd_smr_coy_over,
+                           wtd_fall_hab_over, wtd_fall_coug_over, wtd_fall_wolf_over, wtd_fall_bear_over, wtd_fall_bob_over, wtd_fall_coy_over,
+                           wtd_wtr_hab_over, wtd_wtr_coug_over, wtd_wtr_wolf_over, wtd_wtr_bob_over, wtd_wtr_coy_over, #wtd_wtr_bear_over, 
+                           wtd_sprg_hab_over, wtd_sprg_coug_over, wtd_sprg_wolf_over, wtd_sprg_bear_over, wtd_sprg_bob_over, wtd_sprg_coy_over)
+  
+  #'  Save all species-specific overlap plots in one giant list
+  prey_overlap <- list(md_overlap_list, elk_overlap_list, moose_overlap_list, wtd_overlap_list)
+  save(prey_overlap, file = paste("./Outputs/Temporal Overlap/PreyOnly_LowHi_Overlap_", Sys.Date(), ".RData"))
+  
+  
   
   
