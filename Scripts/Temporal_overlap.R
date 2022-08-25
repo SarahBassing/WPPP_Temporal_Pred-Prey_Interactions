@@ -4,7 +4,7 @@
   #'  Sarah Bassing
   #'  June 2022
   #'  ==================================================================
-  #'  Script to estimate temporal overlap of prey species in repsonse to varying
+  #'  Script to estimate temporal overlap of prey species in response to varying
   #'  levels of background predation risk in a multi-predator system. 
   #'  ==================================================================
   
@@ -13,12 +13,6 @@
   library(chron)
   library(overlap)
   library(circular)
-  library(ggplot2)
-  library(khroma)
-  library(patchwork)
-  library(sp)
-  library(raster)
-  library(tidyverse)
   
   #'  Load and format detection data
   megadata <- read.csv("./Data/full_camdata18-21_2022-08-19.csv") %>%  
@@ -248,10 +242,12 @@
     
     #'  Wrangle density data from wide to long format
     DensityA_low <- saveOverlap_lowrisk[,1:2] %>%
-      mutate(Species = "Predator",
+      mutate(PredPrey = "Predator",
+             Species = name1,
              BackgroundRisk = "Low")
     DensityB_low <- saveOverlap_lowrisk[,c(1,3)] %>%
-      mutate(Species = "Prey",
+      mutate(PredPrey = "Prey",
+             Species = name2,
              BackgroundRisk = "Low")
     overlap_lowrisk <- full_join(DensityA_low, DensityB_low, by = c("x", "BackgroundRisk")) 
     
@@ -262,10 +258,12 @@
     
     #'  Wrangle from wide to long format
     DensityA_high <- saveOverlap_highrisk[,1:2] %>%
-      mutate(Species = "Predator",
+      mutate(PredPrey = "Predator",
+             Species = name1,
              BackgroundRisk = "High")
     DensityB_high <- saveOverlap_highrisk[,c(1,3)] %>%
-      mutate(Species = "Prey",
+      mutate(PredPrey = "Prey",
+             Species = name2,
              BackgroundRisk = "High")
     overlap_highrisk <- full_join(DensityA_high, DensityB_high, by = c("x", "BackgroundRisk")) 
     
@@ -332,7 +330,7 @@
   #'  Estimate temporal overlap between predators and prey when cattle are/aren't detected
   #'  Focusing on only OK study area since big difference in number of cameras 
   #'  with cattle in NE vs OK, pooling across study areas can bias results
-  nboot <- 10000
+  nboot <- 100
   ####  Cougar - Mule deer  ####
   coug_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
                                           spp2 = filter(dets_smr, Species == "Mule Deer"), 
@@ -416,6 +414,12 @@
                                              spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                              name1 = "Cougar", name2 = "wtd", 
                                              nboot = nboot, dhat = "Dhat1")
+  #'  Save cougar-prey overlap results
+  coug_prey_overlap <- list(coug_md_smr_over, coug_md_fall_over, coug_md_wtr_over, coug_md_sprg_over1, coug_md_sprg_over4,
+                            coug_elk_smr_over, coug_elk_fall_over, coug_elk_wtr_over, coug_elk_sprg_over,
+                            coug_moose_smr_over, coug_moose_fall_over, coug_moose_wtr_over, coug_moose_sprg_over,
+                            coug_wtd_smr_over, coug_wtd_fall_over1, coug_wtd_fall_over4, coug_wtd_wtr_over1, coug_wtd_wtr_over4, coug_wtd_sprg_over)
+  
   ####  Wolf - Mule deer  ####
   wolf_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
                                         spp2 = filter(dets_smr, Species == "Mule Deer"), 
@@ -484,6 +488,11 @@
   #                                        spp2 = filter(dets_sprg, Species == "White-tailed Deer"),
   #                                        name1 = "Wolf", name2 = "White-tailed Deer",
   #                                        nboot = nboot, dhat = "Dhat1")
+  #'  Save wolf-prey overlap results
+  wolf_prey_overlap <- list(wolf_md_smr_over, wolf_md_fall_over, wolf_md_sprg_over,
+                            wolf_elk_smr_over, wolf_moose_smr_over, wolf_moose_fall_over, 
+                            wolf_moose_wtr_over, wolf_wtd_smr_over, wolf_wtd_fall_over, wolf_wtd_wtr_over)
+  
   ####  Black bear - Mule Deer  ####
   bear_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
                                         spp2 = filter(dets_smr, Species == "Mule Deer"), 
@@ -562,6 +571,12 @@
                                           spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                           name1 = "Black Bear", name2 = "wtd", 
                                           nboot = nboot, dhat = "Dhat4")
+  #'  Save black bear-prey overlap results
+  bear_prey_overlap <- list(bear_md_smr_over, bear_md_fall_over1, bear_md_fall_over4, bear_md_sprg_over,
+                            bear_elk_smr_over, bear_elk_fall_over, bear_elk_sprg_over,
+                            bear_moose_smr_over, bear_moose_fall_over, bear_moose_sprg_over,
+                            bear_wtd_smr_over, bear_wtd_fall_over, bear_wtd_sprg_over1, bear_wtd_sprg_over4)
+  
   ####  Bobcat - Mule deer  ####
   bob_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Bobcat"), 
                                         spp2 = filter(dets_smr, Species == "Mule Deer"), 
@@ -584,6 +599,7 @@
                                        spp2 = filter(dets_smr, Species == "White-tailed Deer"), 
                                        name1 = "Bobcat", name2 = "White-tailed Deer", 
                                        nboot = nboot, dhat = "Dhat4")
+  #'  Low risk <50 bobcat; High risk >50 bobcat
   bob_wtd_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
                                         spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                         name1 = "Bobcat", name2 = "White-tailed Deer", 
@@ -600,6 +616,11 @@
                                         spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                         name1 = "Bobcat", name2 = "White-tailed Deer", 
                                         nboot = nboot, dhat = "Dhat1")
+  #'  Save bobcat-prey overlap results
+  bob_prey_overlap <- list(bob_md_smr_over, bob_md_fall_over, bob_md_sprg_over,
+                           bob_wtd_smr_over, bob_wtd_fall_over1, bob_wtd_fall_over4,
+                           bob_wtd_wtr_over, bob_wtd_sprg_over)
+  
   ####  Coyote - Mule deer  ####
   coy_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Coyote"), 
                                        spp2 = filter(dets_smr, Species == "Mule Deer"), 
@@ -634,26 +655,14 @@
                                          spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                          name1 = "Coyote", name2 = "White-tailed Deer", 
                                          nboot = nboot, dhat = "Dhat4")
-  
-  #'  Save this monster
-  coug_prey_overlap <- list(coug_md_smr_over, coug_md_fall_over, coug_md_wtr_over, coug_md_sprg_over1, coug_md_sprg_over4,
-                            coug_elk_smr_over, coug_elk_fall_over, coug_elk_wtr_over, coug_elk_sprg_over,
-                            coug_moose_smr_over, coug_moose_fall_over, coug_moose_wtr_over, coug_moose_sprg_over,
-                            coug_wtd_smr_over, coug_wtd_fall_over1, coug_wtd_fall_over4, coug_wtd_wtr_over1, coug_wtd_wtr_over4, coug_wtd_sprg_over)
-  wolf_prey_overlap <- list(wolf_md_smr_over, wolf_md_fall_over, wolf_md_sprg_over,
-                            wolf_elk_smr_over, wolf_moose_smr_over, wolf_moose_fall_over, wolf_moose_wtr_over,
-                            wolf_wtd_smr_over, wolf_wtd_fall_over, wolf_wtd_wtr_over)
-  bear_prey_overlap <- list(bear_md_smr_over, bear_md_fall_over1, bear_md_fall_over4, bear_md_sprg_over,
-                            bear_elk_smr_over, bear_elk_fall_over, bear_elk_sprg_over,
-                            bear_moose_smr_over, bear_moose_fall_over, bear_moose_sprg_over,
-                            bear_wtd_smr_over, bear_wtd_fall_over, bear_wtd_sprg_over1, bear_wtd_sprg_over4)
-  bob_prey_overlap <- list(bob_md_smr_over, bob_md_fall_over, bob_md_sprg_over,
-                           bob_wtd_smr_over, bob_wtd_fall_over1, bob_wtd_fall_over4, bob_wtd_wtr_over, bob_wtd_sprg_over)
+  #'  Save coyote-prey overlap results
   coy_prey_overlap <- list(coy_md_smr_over, coy_md_fall_over, coy_md_wtr_over, coy_md_sprg_over,
                            coy_wtd_smr_over, coy_wtd_fall_over, coy_wtd_wtr_over, coy_wtd_sprg_over)
+  
+  #'  Save this monster --> list of lists!
   pred_prey_overlap <- list(coug_prey_overlap, wolf_prey_overlap, bear_prey_overlap, bob_prey_overlap, coy_prey_overlap)
   
-  save(pred_prey_overlap, file = paste("./Outputs/Temporal Overlap/PredPrey_LowHi_Overlap_", Sys.Date(), ".RData"))
+  save(pred_prey_overlap, file = paste0("./Outputs/Temporal Overlap/PredPrey_LowHi_Overlap_", Sys.Date(), ".RData"))
   
   
   
@@ -1107,7 +1116,8 @@
   
   #'  Save all species-specific overlap plots in one giant list
   prey_overlap <- list(md_overlap_list, elk_overlap_list, moose_overlap_list, wtd_overlap_list)
-  save(prey_overlap, file = paste("./Outputs/Temporal Overlap/PreyOnly_LowHi_Overlap_", Sys.Date(), ".RData"))
+  save(prey_overlap, file = paste0("./Outputs/Temporal Overlap/PreyOnly_LowHi_Overlap_", Sys.Date(), ".RData"))
+  
   
   
   
