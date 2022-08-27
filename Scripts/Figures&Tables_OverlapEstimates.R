@@ -17,7 +17,7 @@
   library(tidyverse)  
 
   #'  Load output from temporal overlap analysis
-  load("./Outputs/Temporal Overlap/PredPrey_LowHi_Overlap_2022-08-20.RData")
+  load("./Outputs/Temporal Overlap/PredPrey_LowHi_Overlap_2022-08-25.RData")
   load("./Outputs/Temporal Overlap/PreyOnly_LowHi_Overlap_2022-08-25.RData")
   
   
@@ -98,7 +98,6 @@
                          coug_elk_smr_out, coug_elk_fall_out, coug_elk_wtr_out, coug_elk_sprg_out,
                          coug_moose_smr_out, coug_moose_fall_out, coug_moose_wtr_out, coug_moose_sprg_out,
                          coug_wtd_smr_out, coug_wtd_fall_out, coug_wtd_wtr_out, coug_wtd_sprg_out)
-  write.csv(coug_prey_out, file = paste0("./Outputs/Temporal Overlap/cougar-prey_overlap_tbl_", Sys.Date(), ".RData"))
   
   ####  Wolf - Prey Output  ####
   #'  Wolf-mule deer
@@ -116,10 +115,9 @@
   wolf_wtd_fall_out <- predprey_table(pred_prey_overlap[[2]][[9]], spp1 = "Wolf", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Fall")
   wolf_wtd_wtr_out <- predprey_table(pred_prey_overlap[[2]][[10]], spp1 = "Wolf", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Winter")
   #'  Wolf-prey results table
-  wolf_prey_out <- rbind(wolf_md_smr_out, wolf_md_fall_out, wolf_md_sprg_out, wolf_elk_smr_out, 
-                         wolf_moose_smr_out, wolf_moose_fall_out, wolf_moose_wtr_out, 
+  wolf_prey_out <- rbind(wolf_md_smr_out, wolf_md_fall_out, wolf_md_sprg_out, wolf_elk_smr_out,
+                         wolf_moose_smr_out, wolf_moose_fall_out, wolf_moose_wtr_out,
                          wolf_wtd_smr_out, wolf_wtd_fall_out, wolf_wtd_wtr_out)
-  write.csv(wolf_prey_out, file = paste0("./Outputs/Temporal Overlap/wolf-prey_overlap_tbl_", Sys.Date(), ".RData"))
   
   ####  Black bear - Prey Output  ####
   #'  Black bear-mule deer
@@ -149,7 +147,6 @@
                          bear_elk_smr_out, bear_elk_fall_out, bear_elk_sprg_out,
                          bear_moose_smr_out, bear_moose_fall_out, bear_moose_sprg_out,
                          bear_wtd_smr_out, bear_wtd_fall_out, bear_wtd_sprg_out)
-  write.csv(bear_prey_out, file = paste0("./Outputs/Temporal Overlap/bear-prey_overlap_tbl_", Sys.Date(), ".RData"))
   
   ####  Bobcat - Prey Overlap  ####
   #'  Bobcat-mule deer
@@ -167,7 +164,6 @@
   #'  Bobcat-prey results table
   bob_prey_out <- rbind(bob_md_smr_out, bob_md_fall_out, bob_md_sprg_out,
                         bob_wtd_smr_out, bob_wtd_fall_out, bob_wtd_wtr_out, bob_wtd_sprg_out)
-  write.csv(bob_prey_out, file = paste0("./Outputs/Temporal Overlap/bob-prey_overlap_tbl_", Sys.Date(), ".RData"))
   
   ####  Coyote - Prey Overlap  ####
   #'  Coyote-mule deer
@@ -183,8 +179,9 @@
   #'  Coyote-prey results table
   coy_prey_out <- rbind(coy_md_smr_out, coy_md_fall_out, coy_md_wtr_out, coy_md_sprg_out,
                         coy_wtd_smr_out, coy_wtd_fall_out, coy_wtd_wtr_out, coy_wtd_sprg_out)
-  write.csv(coy_prey_out, file = paste0("./Outputs/Temporal Overlap/coy-prey_overlap_tbl_", Sys.Date(), ".RData"))
   
+  pred_prey_out_tbl <- rbind(coug_prey_out, wolf_prey_out, bear_prey_out, bob_prey_out, coy_prey_out)
+  # write.csv(pred_prey_out_tbl, file = paste0("./Outputs/Temporal Overlap/pred-prey_overlap_tbl_", Sys.Date(), ".csv"))
 
   #'  -------------------------------
   #'  Species-specific results tables
@@ -240,7 +237,6 @@
                       md_fall_hab_out, md_fall_coug_out, md_fall_wolf_out, md_fall_bear_out, md_fall_bob_out, md_fall_coy_out,
                       md_wtr_hab_out, md_wtr_coug_out, md_wtr_wolf_out, md_wtr_bob_out, md_wtr_coy_out,
                       md_sprg_hab_out, md_sprg_coug_out, md_sprg_wolf_out, md_sprg_bear_out, md_sprg_bob_out, md_sprg_coy_out)
-  write.csv(md_overlap, file = paste0("./Outputs/Temporal Overlap/md_overlap_tbl_", Sys.Date(), ".RData"))
   
   ####  Elk Ouptut  ####
   #'  Summer
@@ -266,8 +262,6 @@
                        elk_fall_hab_out, elk_fall_coug_out, elk_fall_wolf_out, elk_fall_bear_out,
                        elk_wtr_hab_out, elk_wtr_coug_out, 
                        elk_sprg_hab_out, elk_sprg_coug_out, elk_sprg_wolf_out, elk_sprg_bear_out)
-  write.csv(elk_overlap, file = paste0("./Outputs/Temporal Overlap/elk_overlap_tbl_", Sys.Date(), ".RData"))
-  
   
   ####  Moose Ouptut  ####
   #'  Summer
@@ -294,7 +288,6 @@
                          moose_fall_hab_out, moose_fall_coug_out, moose_fall_wolf_out, moose_fall_bear_out,
                          moose_wtr_hab_out, moose_wtr_coug_out,  moose_wtr_wolf_out, 
                          moose_sprg_hab_out, moose_sprg_coug_out, moose_sprg_wolf_out, moose_sprg_bear_out)
-  write.csv(moose_overlap, file = paste0("./Outputs/Temporal Overlap/moose_overlap_tbl_", Sys.Date(), ".RData"))
   
   ####  White-tailed deer Ouptut  ####
   #'  Summer
@@ -329,8 +322,9 @@
                        wtd_fall_hab_out, wtd_fall_coug_out, wtd_fall_wolf_out, wtd_fall_bear_out, wtd_fall_bob_out, wtd_fall_coy_out,
                        wtd_wtr_hab_out, wtd_wtr_coug_out, wtd_wtr_wolf_out, wtd_wtr_bob_out, wtd_wtr_coy_out,
                        wtd_sprg_hab_out, wtd_sprg_coug_out, wtd_sprg_wolf_out, wtd_sprg_bear_out, wtd_sprg_bob_out, wtd_sprg_coy_out)
-  write.csv(wtd_overlap, file = paste0("./Outputs/Temporal Overlap/wtd_overlap_tbl_", Sys.Date(), ".RData"))
   
+  prey_overlap_tbl <- rbind(md_overlap, elk_overlap, moose_overlap, wtd_overlap)
+  # write.csv(prey_overlap_tbl, file = paste0("./Outputs/Temporal Overlap/prey_overlap_tbl_", Sys.Date(), ".csv"))
   
   #'  ---------------------------------
   ####  Coefficient Comparison Plots  ####
@@ -338,8 +332,9 @@
   #'  Compare coefficient of overlapping estimates for each species-pairing or
   #'  individual species at cameras with low versus high background risk
   
-  
-  
+  #'  Load data in table format
+  pred_prey_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/pred-prey_overlap_tbl_2022-08-26.csv")
+  prey_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/prey_overlap_tbl_2022-08-26.csv")
   
   
   #'  ----------------------------
