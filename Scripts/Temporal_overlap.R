@@ -13,6 +13,8 @@
   library(chron)
   library(overlap)
   library(circular)
+  library(sp)
+  library(raster)
   
   #'  Load and format detection data
   megadata <- read.csv("./Data/full_camdata18-21_2022-08-19.csv") %>%  
@@ -94,6 +96,8 @@
   
   #'  Add categorical variable designating level of background risk
   stations_data <- mutate(stations_data, backgroundRisk = ifelse(Complexity_index1 < mean(stations_data$Complexity_index1), "Low", "High"))
+  #' #'  Save for time-btwn-detection analyses
+  #' write.csv(stations_data, "./Data/cam_stations_hab_complex_data.csv")
   
   #'  Is naive predator occupancy associated with habitat complexity?
   bear_index_cor <- glm(bear_det ~ Complexity_index1, family = binomial(link = "logit"), data = stations_data); summary(bear_index_cor)
