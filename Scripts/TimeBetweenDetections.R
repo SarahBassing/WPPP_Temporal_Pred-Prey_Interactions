@@ -14,6 +14,8 @@
   library(data.table)
   library(lubridate)
   library(chron)
+  library(sp)
+  library(raster)
   library(tidyverse)
   
   #'  Read in and format data
@@ -184,6 +186,7 @@
   
   
   ####  NEED TO GROUP BY CAMERA FOR THIS NEXT FUNCTION!  ####
+  #### I think I've done it but will need to see how the rest of the code works out
   
   
   #'  Function to reduce detections to just series of a spp1 detection followed
@@ -231,8 +234,20 @@
     spp_pair <- as.factor(spp1spp2)
     capdata <- cbind(as.data.frame(dat), cam, spp_new1, spp_new2, spp_pair) %>%
       #'  Filter detection events to just situations where spp2 follows spp1
-      filter(spp_new1 == "Y" | spp_new2 == "Y")
-    
+      filter(spp_new1 == "Y" | spp_new2 == "Y") %>%
+      #'  Add columns designating predator hunting modes (ambush vs coursing) &  
+      #'  trophic level of each predator (apex vs meso). Note, considering
+      #'  black bears to be coursing predators for now even though they're more
+      #'  of a rambling, bump into prey sort or predator. But they are more of a
+      #'  courser than an ambush predator.
+      mutate(HuntingMode = ifelse(Species == "Bobcat" | Species == "Cougar" | Species == "Lynx", "Ambush", "Coursing"),
+             HuntingMode = ifelse(grepl("Bobcat", spp_pair), "Ambush", HuntingMode),
+             HuntingMode = ifelse(grepl("Cougar", spp_pair), "Ambush", HuntingMode),
+             HuntingMode = ifelse(grepl("Lynx", spp_pair), "Ambush", HuntingMode),
+             TrophicLevel = ifelse(Species == "Black Bear" | Species == "Cougar" | Species == "Wolf", "Apex", "Meso"),
+             TrophicLevel = ifelse(grepl("Black Bear", spp_pair), "Apex", TrophicLevel),
+             TrophicLevel = ifelse(grepl("Cougar", spp_pair), "Apex", TrophicLevel),
+             TrophicLevel = ifelse(grepl("Wolf", spp_pair), "Apex", TrophicLevel))
     return(capdata)
   }
   resp2pred_smr <- spppair_dat(lpfp_smr_thin, spp1 = "Predator", spp2 = "Prey")
@@ -259,6 +274,8 @@
       #'  the difference in time from previous detection to current detection
       if (detection_data$Category[i] != spp1) detection_data$TimeSinceLastDet[i] = difftime(detection_data$DateTime[i], detection_data$DateTime[i-1], units = unittime)
     }
+    #'  Retain only prey observations (don't need the actual predator detections)
+    detection_data <- filter(detection_data, Category == "Prey")
     return(detection_data)
   }
   #'  Calculate time between detections for different pairs of species of interest
@@ -269,24 +286,51 @@
   tbd_pred.prey_wtr <- tbd(resp2pred_wtr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_sprg <- tbd(resp2pred_sprg, spp1 = "Predator", unittime = "min")
 
+  #'  Add habitat complexity and other site-level covaraites to each observation
+  #'  FYI: Complexity_index1 = TRI_250m * (PercForest*100)
+  #'  "Low" risk = Complexity_index1 values < mean(Complexity_index1)
+  #'  "High" risk = Complexity_index1 values => mean(Complexity_index1)
+  stations_data <- read.csv("./Data/cam_stations_hab_complex_data.csv") %>%
+    dplyr::select(-"X") 
+  
+  #'  Join time-between-detection data with site-level covariates
+  tbd_pred.prey_smr <- left_join(tbd_pred.prey_smr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Summer")
+  tbd_pred.prey_fall <- left_join(tbd_pred.prey_fall, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Fall")
+  tbd_pred.prey_wtr <- left_join(tbd_pred.prey_wtr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Winter")
+  tbd_pred.prey_sprg <- left_join(tbd_pred.prey_sprg, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Spring")
+  
+  #'  Merge into one large dataset
+  tbd_pred.prey <- rbind(tbd_pred.prey_smr, tbd_pred.prey_fall, tbd_pred.prey_wtr, tbd_pred.prey_sprg) %>%
+    arrange(CameraLocation, DateTime) %>%
+    dplyr::select(-c(File, Category, caps_new, cam, spp_new1, spp_new2)) %>%
+    relocate(Year, .before = DateTime) %>%
+    relocate(Study_Area, .before = Year) %>%
+    relocate(Season, .before = DateTime) %>%
+    relocate(TimeSinceLastDet, .after = backgroundRisk)
+  
+  
   #'  Split data by species pairs of interest
-  unique(tbd_pred.prey_graze$spp_pair)
-  tbd_coug.md_graze <- filter(tbd_pred.prey_graze, spp_pair == "Cougar_Mule Deer")
-  tbd_coug.elk_graze <- filter(tbd_pred.prey_graze, spp_pair == "Cougar_Elk")
-  tbd_coug.wtd_graze <- filter(tbd_pred.prey_graze, spp_pair == "Cougar_White-tailed Deer")
-  tbd_coug.moose_graze <- filter(tbd_pred.prey_graze, spp_pair == "Cougar_Moose")
-  tbd_wolf.md_graze <- filter(tbd_pred.prey_graze, spp_pair == "Wolf_Mule Deer")
-  tbd_wolf.elk_graze <- filter(tbd_pred.prey_graze, spp_pair == "Wolf_Elk")
-  tbd_wolf.wtd_graze <- filter(tbd_pred.prey_graze, spp_pair == "Wolf_White-tailed Deer")
-  tbd_wolf.moose_graze <- filter(tbd_pred.prey_graze, spp_pair == "Wolf_Moose")
-  tbd_bear.md_graze <- filter(tbd_pred.prey_graze, spp_pair == "Black Bear_Mule Deer")
-  tbd_bear.elk_graze <- filter(tbd_pred.prey_graze, spp_pair == "Black Bear_Elk")
-  tbd_bear.wtd_graze <- filter(tbd_pred.prey_graze, spp_pair == "Black Bear_White-tailed Deer")
-  tbd_bear.moose_graze <- filter(tbd_pred.prey_graze, spp_pair == "Black Bear_Moose")
-  tbd_bob.md_graze <- filter(tbd_pred.prey_graze, spp_pair == "Bobcat_Mule Deer")
-  tbd_bob.wtd_graze <- filter(tbd_pred.prey_graze, spp_pair == "Bobcat_White-tailed Deer")
-  tbd_coy.md_graze <- filter(tbd_pred.prey_graze, spp_pair == "Coyote_Mule Deer")
-  tbd_coy.wtd_graze <- filter(tbd_pred.prey_graze, spp_pair == "Coyote_White-tailed Deer")
+  unique(tbd_pred.prey_smr$spp_pair)
+  tbd_coug.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_Mule Deer")
+  tbd_coug.elk_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_Elk")
+  tbd_coug.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_White-tailed Deer")
+  tbd_coug.moose_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_Moose")
+  tbd_wolf.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_Mule Deer")
+  tbd_wolf.elk_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_Elk")
+  tbd_wolf.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_White-tailed Deer")
+  tbd_wolf.moose_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_Moose")
+  tbd_bear.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_Mule Deer")
+  tbd_bear.elk_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_Elk")
+  tbd_bear.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_White-tailed Deer")
+  tbd_bear.moose_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_Moose")
+  tbd_bob.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Bobcat_Mule Deer")
+  tbd_bob.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Bobcat_White-tailed Deer")
+  tbd_coy.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Coyote_Mule Deer")
+  tbd_coy.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Coyote_White-tailed Deer")
   
   unique(tbd_pred.prey_hunt$spp_pair)
   tbd_coug.md_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Cougar_Mule Deer")
