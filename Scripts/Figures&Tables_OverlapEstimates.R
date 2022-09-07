@@ -83,16 +83,16 @@
   coug_moose_wtr_out <- predprey_table(pred_prey_overlap[[1]][[12]], spp1 = "Cougar", spp2 = "Moose", risk_type = "Complexity", season = "Winter")
   coug_moose_sprg_out <- predprey_table(pred_prey_overlap[[1]][[13]], spp1 = "Cougar", spp2 = "Moose", risk_type = "Complexity", season = "Spring")
   #'  Cougar-white-tailed deer
-  coug_wtd_smr_out <- predprey_table(pred_prey_overlap[[1]][[14]], spp1 = "Cougar", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Summer")
+  coug_wtd_smr_out <- predprey_table(pred_prey_overlap[[1]][[14]], spp1 = "Cougar", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Summer")
   #'  Low risk <50 cougars; High risk >50 cougars
-  coug_wtd_fall_out1 <- predprey_table(pred_prey_overlap[[1]][[15]], spp1 = "Cougar", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Fall")
-  coug_wtd_fall_out4 <- predprey_table(pred_prey_overlap[[1]][[16]], spp1 = "Cougar", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Fall")
+  coug_wtd_fall_out1 <- predprey_table(pred_prey_overlap[[1]][[15]], spp1 = "Cougar", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Fall")
+  coug_wtd_fall_out4 <- predprey_table(pred_prey_overlap[[1]][[16]], spp1 = "Cougar", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Fall")
   coug_wtd_fall_out <- rbind(coug_wtd_fall_out1[1,], coug_wtd_fall_out4[2,])
   #'  Low risk >50 cougars; High risk <50 cougars
-  coug_wtd_wtr_out1 <- predprey_table(pred_prey_overlap[[1]][[17]], spp1 = "Cougar", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Winter")
-  coug_wtd_wtr_out4 <- predprey_table(pred_prey_overlap[[1]][[18]], spp1 = "Cougar", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Winter")
+  coug_wtd_wtr_out1 <- predprey_table(pred_prey_overlap[[1]][[17]], spp1 = "Cougar", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Winter")
+  coug_wtd_wtr_out4 <- predprey_table(pred_prey_overlap[[1]][[18]], spp1 = "Cougar", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Winter")
   coug_wtd_wtr_out <- rbind(coug_wtd_wtr_out4[1,], coug_wtd_wtr_out1[2,])
-  coug_wtd_sprg_out <- predprey_table(pred_prey_overlap[[1]][[19]], spp1 = "Cougar", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Spring")
+  coug_wtd_sprg_out <- predprey_table(pred_prey_overlap[[1]][[19]], spp1 = "Cougar", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Spring")
   #'  Cougar-prey results table
   coug_prey_out <- rbind(coug_md_smr_out, coug_md_fall_out, coug_md_wtr_out, coug_md_sprg_out,
                          coug_elk_smr_out, coug_elk_fall_out, coug_elk_wtr_out, coug_elk_sprg_out,
@@ -101,8 +101,8 @@
   
   ####  Wolf - Prey Output  ####
   #'  Wolf-mule deer
-  wolf_md_smr_out <- predprey_table(pred_prey_overlap[[2]][[1]], spp1 = "wolfar", spp2 = "Mule Deer", risk_type = "Complexity", season = "Summer")
-  wolf_md_fall_out <- predprey_table(pred_prey_overlap[[2]][[2]], spp1 = "wolfar", spp2 = "Mule Deer", risk_type = "Complexity", season = "Fall")
+  wolf_md_smr_out <- predprey_table(pred_prey_overlap[[2]][[1]], spp1 = "Wolf", spp2 = "Mule Deer", risk_type = "Complexity", season = "Summer")
+  wolf_md_fall_out <- predprey_table(pred_prey_overlap[[2]][[2]], spp1 = "Wolf", spp2 = "Mule Deer", risk_type = "Complexity", season = "Fall")
   wolf_md_sprg_out <- predprey_table(pred_prey_overlap[[2]][[3]], spp1 = "Wolf", spp2 = "Mule Deer", risk_type = "Complexity", season = "Spring")
   #'  Wolf-elk
   wolf_elk_smr_out <- predprey_table(pred_prey_overlap[[2]][[4]], spp1 = "Wolf", spp2 = "Elk", risk_type = "Complexity", season = "Summer")
@@ -111,9 +111,9 @@
   wolf_moose_fall_out <- predprey_table(pred_prey_overlap[[2]][[6]], spp1 = "Wolf", spp2 = "Moose", risk_type = "Complexity", season = "Fall")
   wolf_moose_wtr_out <- predprey_table(pred_prey_overlap[[2]][[7]], spp1 = "Wolf", spp2 = "Moose", risk_type = "Complexity", season = "Winter")
   #'  Wolf-white-tailed deer
-  wolf_wtd_smr_out <- predprey_table(pred_prey_overlap[[2]][[8]], spp1 = "Wolf", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Summer")
-  wolf_wtd_fall_out <- predprey_table(pred_prey_overlap[[2]][[9]], spp1 = "Wolf", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Fall")
-  wolf_wtd_wtr_out <- predprey_table(pred_prey_overlap[[2]][[10]], spp1 = "Wolf", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Winter")
+  wolf_wtd_smr_out <- predprey_table(pred_prey_overlap[[2]][[8]], spp1 = "Wolf", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Summer")
+  wolf_wtd_fall_out <- predprey_table(pred_prey_overlap[[2]][[9]], spp1 = "Wolf", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Fall")
+  wolf_wtd_wtr_out <- predprey_table(pred_prey_overlap[[2]][[10]], spp1 = "Wolf", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Winter")
   #'  Wolf-prey results table
   wolf_prey_out <- rbind(wolf_md_smr_out, wolf_md_fall_out, wolf_md_sprg_out, wolf_elk_smr_out,
                          wolf_moose_smr_out, wolf_moose_fall_out, wolf_moose_wtr_out,
@@ -136,11 +136,11 @@
   bear_moose_fall_out <- predprey_table(pred_prey_overlap[[3]][[9]], spp1 = "Black bear", spp2 = "Moose", risk_type = "Complexity", season = "Fall")
   bear_moose_sprg_out <- predprey_table(pred_prey_overlap[[3]][[10]], spp1 = "Black bear", spp2 = "Moose", risk_type = "Complexity", season = "Spring")
   #'  Black bear-white-tailed deer
-  bear_wtd_smr_out <- predprey_table(pred_prey_overlap[[3]][[11]], spp1 = "Black bear", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Summer")
-  bear_wtd_fall_out <- predprey_table(pred_prey_overlap[[3]][[12]], spp1 = "Black bear", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Fall")
+  bear_wtd_smr_out <- predprey_table(pred_prey_overlap[[3]][[11]], spp1 = "Black bear", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Summer")
+  bear_wtd_fall_out <- predprey_table(pred_prey_overlap[[3]][[12]], spp1 = "Black bear", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Fall")
   #'  Low risk >50 black bears; High risk <50 black bears
-  bear_wtd_sprg_out1 <- predprey_table(pred_prey_overlap[[3]][[13]], spp1 = "Black bear", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Spring")
-  bear_wtd_sprg_out4 <- predprey_table(pred_prey_overlap[[3]][[14]], spp1 = "Black bear", spp2 = "White-tailed deer", risk_type = "Complexity", season = "Spring")
+  bear_wtd_sprg_out1 <- predprey_table(pred_prey_overlap[[3]][[13]], spp1 = "Black bear", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Spring")
+  bear_wtd_sprg_out4 <- predprey_table(pred_prey_overlap[[3]][[14]], spp1 = "Black bear", spp2 = "White-tailed Deer", risk_type = "Complexity", season = "Spring")
   bear_wtd_sprg_out <- rbind(bear_wtd_sprg_out4[1,], bear_wtd_sprg_out1[2,])
   #'  Black bear-prey results table
   bear_prey_out <- rbind(bear_md_smr_out, bear_md_fall_out, bear_md_sprg_out,
@@ -323,8 +323,8 @@
                        wtd_wtr_hab_out, wtd_wtr_coug_out, wtd_wtr_wolf_out, wtd_wtr_bob_out, wtd_wtr_coy_out,
                        wtd_sprg_hab_out, wtd_sprg_coug_out, wtd_sprg_wolf_out, wtd_sprg_bear_out, wtd_sprg_bob_out, wtd_sprg_coy_out)
   
-  prey_overlap_tbl <- rbind(md_overlap, elk_overlap, moose_overlap, wtd_overlap)
-  # write.csv(prey_overlap_tbl, file = paste0("./Outputs/Temporal Overlap/prey_overlap_tbl_", Sys.Date(), ".csv"))
+  prey_out_tbl <- rbind(md_overlap, elk_overlap, moose_overlap, wtd_overlap)
+  # write.csv(prey_out_tbl, file = paste0("./Outputs/Temporal Overlap/prey_overlap_tbl_", Sys.Date(), ".csv"))
   
   #'  ---------------------------------
   ####  Coefficient Comparison Plots  ####
@@ -336,12 +336,193 @@
   pred_prey_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/pred-prey_overlap_tbl_2022-08-26.csv")
   prey_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/prey_overlap_tbl_2022-08-26.csv")
   
+  #'  Set seasonal factor levels
+  pred_prey_overlap_tbl$season <- factor(pred_prey_overlap_tbl$season, levels = c("Summer", "Fall", "Winter", "Spring"))
+  prey_overlap_tbl$Risk <- factor(prey_overlap_tbl$Risk, levels = c("Habitat complexity", "Black bear detected", "Bobcat detected", "Cougar detected", "Coyote detected", "Wolf detected"))
+  
+  #'  Effect of habitat complexity on seasonal predator-prey temporal overlap
+  pred_prey_smr_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Summer",], aes(x = predator, y = Dhat, group = Complexity_background_risk)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
+    geom_point(stat = "identity", aes(col = predator, shape = Complexity_background_risk), size = 2.75, position = position_dodge(width = 0.4)) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none", shape = guide_legend(title = "Background predation risk")) + 
+    ggtitle("Effect of habitat complexity on summer predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~prey, scales = "free", space = "free")
+  pred_prey_smr_coeff_plot
+  
+  pred_prey_fall_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Fall",], aes(x = predator, y = Dhat, group = Complexity_background_risk)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
+    geom_point(stat = "identity", aes(col = predator, shape = Complexity_background_risk), size = 2.75, position = position_dodge(width = 0.4)) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none", shape = guide_legend(title = "Background predation risk")) + 
+    ggtitle("Effect of habitat complexity on fall predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~prey, scales = "free", space = "free")
+  pred_prey_fall_coeff_plot
+  
+  pred_prey_wtr_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Winter",], aes(x = predator, y = Dhat, group = Complexity_background_risk)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
+    geom_point(stat = "identity", aes(col = predator, shape = Complexity_background_risk), size = 2.75, position = position_dodge(width = 0.4)) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none", shape = guide_legend(title = "Background predation risk")) + 
+    ggtitle("Effect of habitat complexity on winter predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~prey, scales = "free", space = "free")
+  pred_prey_wtr_coeff_plot
+  
+  pred_prey_sprg_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Spring",], aes(x = predator, y = Dhat, group = Complexity_background_risk)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
+    geom_point(stat = "identity", aes(col = predator, shape = Complexity_background_risk), size = 2.75, position = position_dodge(width = 0.4)) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none", shape = guide_legend(title = "Background predation risk")) + 
+    ggtitle("Effect of habitat complexity on spring predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~prey, scales = "free", space = "free")
+  pred_prey_sprg_coeff_plot
+  
+    
+  #'  Effect of habitat complexity on prey temporal overlap
+  prey_smr_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Season == "Summer",], aes(x = Risk, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Effect of background risk on summer predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~Species, scales = "free", space = "free")
+  prey_smr_coeff_plot
+  
+  prey_fall_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Season == "Fall",], aes(x = Risk, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Effect of background risk on fall predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~Species, scales = "free", space = "free")
+  prey_fall_coeff_plot
+  
+  prey_wtr_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Season == "Winter",], aes(x = Risk, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Effect of background risk on winter predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~Species, scales = "free", space = "free")
+  prey_wtr_coeff_plot
+  
+  prey_sprg_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Season == "Spring",], aes(x = Risk, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Effect of background risk on spring predator-prey diel activity patterns") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    facet_grid(~Species, scales = "free", space = "free")
+  prey_sprg_coeff_plot
+  
+  #' Save 'em - predator-prey overlap coefficients
+  ggsave(pred_prey_smr_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_smr_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(pred_prey_fall_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_fall_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(pred_prey_wtr_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_wtr_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(pred_prey_wtr_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_sprg_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  #' Save 'em - prey overlap coefficients
+  ggsave(prey_smr_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_prey_smr_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(prey_fall_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_fall_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(prey_wtr_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_wtr_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(prey_sprg_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_sprg_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
+  
   
   #'  ----------------------------
   ####  Activity Overlap Curves  ####
   #'  ----------------------------
   #'  Plot activity curves for each species-pairing or individual species at 
   #'  cameras with low versus high levels of background risk
+  overlap_pred_prey_plots <- function(dat, name1, name2, name3, dhat, y_up) {
+    #'  Sample sizes for predators[1] and prey[2] where background risk is low or high
+    n1low <- dat[[7]]; n1high <- dat[[9]]
+    n2low <- dat[[8]]; n2high <- dat[[10]]
+    spp1low <- paste0(name1, ", n = ", n1low); spp1high <- paste0(name1, " (n = ", n1high, ")")
+    spp2low <- paste0(name2, ", n = ", n2low); spp2high <- paste0(name2, " (n = ", n2high, ")")
+    #'  Temporal overlap between predators and prey where background risk is low or high
+    dhatlow <- dhat[1,5]; dhatlowl <- dhat[1,6]; dhatlowu<- dhat[1,7]
+    dhathigh <- dhat[2,5]; dhathighl <- dhat[2,6]; dhathighu<- dhat[2,7]
+    #'  Density data for overlap plots
+    overdensity <- dat[[11]]
+    #'  Separate data sets based on whether background risk is low or high
+    lowrisk <- overdensity[overdensity$BackgroundRisk == "Low",]
+    highrisk <- overdensity[overdensity$BackgroundRisk == "High",]
+    
+    overlap_low <- ggplot(lowrisk, aes(x, densityA, colour = Species.x)) +
+      geom_line(lwd = 0.75) + 
+      geom_line(aes(x, densityB, colour = Species.y), lwd = 0.75) +  
+      geom_area(aes(y = pmin(densityA, densityB)),
+                alpha = 0.3, color = NA) +
+      geom_line(aes(x, y, colour =  Species.z), linetype = "dashed", lwd = 0.75) +  
+      scale_x_continuous(breaks = c(0, 1.57, 3.0, 4.71, 6.0),
+                         labels = c('Midnight', 'Dawn', 'Noon', 'Dusk', 'Midnight')) +
+      geom_vline(xintercept = pi/2, linetype="dotted") +
+      geom_vline(xintercept = (3*pi)/2, linetype="dotted") +
+      theme_bw() +
+      theme(legend.background = element_rect(fill = "transparent"),
+            legend.key = element_rect(colour = NA, fill = NA)) +
+      ylim(0, y_up) +
+      labs(x = "Time of day", y = "Density", color = paste0("\u0394 = ", dhatp, " (", dhatpl, " - ", dhatpu, ")"), title = paste0(name3, " low")) + 
+      scale_color_manual(labels = c(name3, spp1p, spp2p), values = c("black", "red", "blue")) 
+    plot(overlap_low)
+    
+    overlap_high <- ggplot(highrisk, aes(x, densityA, colour = Species.x)) +
+      geom_line(lwd = 0.75) + 
+      geom_line(aes(x, densityB, colour = Species.y), lwd = 0.75) +  
+      geom_area(aes(y = pmin(densityA, densityB)),
+                alpha = 0.3, color = NA) +
+      scale_x_continuous(breaks = c(0, 1.57, 3.0, 4.71, 6.0),
+                         labels = c('Midnight', 'Dawn', 'Noon', 'Dusk', 'Midnight')) +
+      geom_vline(xintercept = pi/2, linetype="dotted") +
+      geom_vline(xintercept = (3*pi)/2, linetype="dotted") +
+      theme_bw() +
+      theme(legend.background = element_rect(fill = "transparent"),
+            legend.key = element_rect(colour = NA, fill = NA)) +
+      ylim(0, y_up) +
+      labs(x = "Time of day", y = "Density", color = paste0("\u0394 = ", dhata, " (", dhatal, " - ", dhatau, ")"), title = paste0(name3, " high")) + 
+      scale_color_manual(labels = c(spp1a, spp2a), values = c("red", "blue"))  
+    plot(overlap_high)
+    
+    plots <- list(overlap_low, overlap_high)
+    return(plots)
+  }
+  ####  Cattle Activity Overlap Plots  ####
+  #'  Keep track of list positions when dhat1 and dhat4 are being combined
+  #'  Dhat1 for sample sizes <50, Dhat4 for sample sizes >50, fig [[1]] = present, fig [[2]] = absent
+  coug_md_overPlot_g <- overlap_pred_prey_plots(pred_prey_overlap[[1]][[1]], name1 = "Cougar", name2 = "Mule deer", name3 = "Habitat complexity", dhat = coug_md_graze_out, y_up = 0.6)
+  (coug_md_graze_overlap_plot <- coug_md_overPlot_g[[2]] + theme(legend.position = c(0.24, 0.92)) + coug_md_overPlot_g[[1]] + theme(legend.position = c(0.24, 0.895)))
+  ggsave(coug_md_graze_overlap_plot, filename = "./Outputs/Temporal Overlap/Figures/Overlap_Plot_coug_md_cattle.tiff", width = 9, height = 6, dpi = 600, units = "in", device='tiff')
   
   
   
