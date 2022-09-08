@@ -39,6 +39,9 @@
         alpha[j] ~ dnorm(mu.alpha, tau.alpha)
       }
       
+      #'  Prior for intercept
+      mu ~ dunif(-10, 10)
+      
       #'  Priors for beta coefficients
       for(k in 1:ncovs){
         beta[k] ~ dunif(-10, 10)
@@ -58,7 +61,7 @@
       for(i in 1:ntbd){
         y[i] ~ dexp(lambda[i])
         lambda[i] <- log(tbd[i])
-        tbd[i] <- alpha[site[i]] + #beta[1]*covs[i, 1] + beta[2]*covs[i, 2] +
+        tbd[i] <- mu + alpha[site[i]] + #beta[1]*covs[i, 1] + beta[2]*covs[i, 2] +
                   #beta[3]*covs[i, 3] + beta[4]*covs[i, 4] + beta[5]*covs[i, 5] +
                   beta[6]*covs[i, 6]
       }
