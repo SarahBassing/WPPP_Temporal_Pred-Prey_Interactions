@@ -183,15 +183,9 @@
   lpfp_wtr_thin <- thin_dat(lpfp_wtr)
   lpfp_sprg_thin <- thin_dat(lpfp_sprg)
   
-  
-  
-  ####  NEED TO GROUP BY CAMERA FOR THIS NEXT FUNCTION!  ####
-  #### I think I've done it but will need to see how the rest of the code works out
-  
-  
   #'  Function to reduce detections to just series of a spp1 detection followed
   #'  by a spp2 detection (e.g., predator then prey, but no other species detected 
-  #'  in between)
+  #'  in between) at each camera site
   spppair_dat <- function(dets, spp1, spp2) {
     #'  Assign same ID to all detection events from the same camera
     dat <- arrange(dets, CameraLocation, DateTime)
@@ -208,6 +202,10 @@
     for (i in 2:nrow(dat)){
       if (dat$Category[i-1] == spp1 & dat$Category[i] == spp2) spp_caps1[i-1] = "Y"
       else spp_caps1[i-1] = "N"
+      #'  Flag situations where last image at a camera site is of a predator - 
+      #'  this confuses time-btwn-detection calculations because script ignores 
+      #'  changes in location when looping through each row
+      if (spp_caps1[i-1] == "Y" & dat$CameraLocation[i-1] != dat$CameraLocation[i]) spp_caps1[i-1] = "FLAG"
     }
     #'  Add "N" to very end of vector so the length matches number of rows in dets
     spp_caps1[nrow(dat)] <- "N"
@@ -218,6 +216,10 @@
     for (i in 2:nrow(dat)){
       if (dat$Category[i-1] == spp1 & dat$Category[i] == spp2) spp_caps2[i] = "Y"
       else spp_caps2[i] = "N"
+      #'  Flag situations where first image at a camera is of a prey - this 
+      #'  confuses time-btwn-detection calculations because script ignores changes 
+      #'  in location when looping through each row
+      if (spp_caps2[i] == "Y" & dat$CameraLocation[i] != dat$CameraLocation[i-1]) spp_caps2[i] = "FLAG"
     }
 
     #'  Identify the species pair for easier filtering later on
@@ -233,7 +235,8 @@
     spp_new2 <- as.factor(spp_caps2)
     spp_pair <- as.factor(spp1spp2)
     capdata <- cbind(as.data.frame(dat), cam, spp_new1, spp_new2, spp_pair) %>%
-      #'  Filter detection events to just situations where spp2 follows spp1
+      #'  Filter detection events to just situations where spp2 follows spp1 at
+      #'  the same camera site (drop any "N"s and "FLAG" rows)
       filter(spp_new1 == "Y" | spp_new2 == "Y") %>%
       #'  Add columns designating predator hunting modes (ambush vs coursing) &  
       #'  trophic level of each predator (apex vs meso). Note, considering
@@ -247,7 +250,8 @@
              TrophicLevel = ifelse(Species == "Black Bear" | Species == "Cougar" | Species == "Wolf", "Apex", "Meso"),
              TrophicLevel = ifelse(grepl("Black Bear", spp_pair), "Apex", TrophicLevel),
              TrophicLevel = ifelse(grepl("Cougar", spp_pair), "Apex", TrophicLevel),
-             TrophicLevel = ifelse(grepl("Wolf", spp_pair), "Apex", TrophicLevel))
+             TrophicLevel = ifelse(grepl("Wolf", spp_pair), "Apex", TrophicLevel),
+             PredatorID = gsub("_.*","", spp_pair))
     return(capdata)
   }
   resp2pred_smr <- spppair_dat(lpfp_smr_thin, spp1 = "Predator", spp2 = "Prey")
@@ -262,9 +266,21 @@
   #'  Data structured so only last image of spp1 and first image of spp2 per
   #'  detection event are included in data frame.
   tbd <- function(detection_data, spp1, unittime) {
+      #' #'  Create empty vector to be filled
+      #' detection_data$TimeSinceLastDet <- c()
+      #' #'  Fill first element of the vector to get it started
+      #' detection_data$TimeSinceLastDet[1] <- 0
+      #' #'  Loop through each row to calculate elapsed time since previous detection
+      #' for (i in 2:nrow(detection_data)){
+      #'   #'  If previous detection was spp1, set time to 0
+      #'   if (detection_data$Category[i-1] == spp1) detection_data$TimeSinceLastDet[i] = 0
+      #'   #'  If current detection is spp2 and follows detection of spp1, calculate
+      #'   #'  the difference in time from previous detection to current detection
+      #'   if (detection_data$Category[i] != spp1 & detection_data$CameraLocation[i] == detection_data$CameraLocation[i-1]) detection_data$TimeSinceLastDet[i] = difftime(detection_data$DateTime[i], detection_data$DateTime[i-1], units = unittime)
+      #' }
     #'  Create empty vector to be filled
     detection_data$TimeSinceLastDet <- c()
-    #'  Fill first element of the vector to get it started 
+    #'  Fill first element of the vector to get it started
     detection_data$TimeSinceLastDet[1] <- 0
     #'  Loop through each row to calculate elapsed time since previous detection
     for (i in 2:nrow(detection_data)){
@@ -275,17 +291,19 @@
       if (detection_data$Category[i] != spp1) detection_data$TimeSinceLastDet[i] = difftime(detection_data$DateTime[i], detection_data$DateTime[i-1], units = unittime)
     }
     #'  Retain only prey observations (don't need the actual predator detections)
-    detection_data <- filter(detection_data, Category == "Prey")
+    # detection_data <- filter(detection_data, Category == "Prey")
     return(detection_data)
   }
   #'  Calculate time between detections for different pairs of species of interest
   #'  spp1 should be the species detected first, unittime is the unit of time 
   #'  to make calculations in (options are: "sec", "min", "hour", "day")
+  #'  Note: there should be NO negative values! If there are negative values this
+  #'  means the script is calculating times between detections across camera sites
   tbd_pred.prey_smr <- tbd(resp2pred_smr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_fall <- tbd(resp2pred_fall, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_wtr <- tbd(resp2pred_wtr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_sprg <- tbd(resp2pred_sprg, spp1 = "Predator", unittime = "min")
-
+  
   #'  Add habitat complexity and other site-level covaraites to each observation
   #'  FYI: Complexity_index1 = TRI_250m * (PercForest*100)
   #'  "Low" risk = Complexity_index1 values < mean(Complexity_index1)
@@ -312,75 +330,36 @@
     relocate(Season, .before = DateTime) %>%
     relocate(TimeSinceLastDet, .after = backgroundRisk)
   
+  #'  Double check there are no negative times-between-detection
+  summary(tbd_pred.prey)
+  
+  #'  SAVE!
+  write.csv(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".csv"))
+  save(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".RData"))
   
   #'  Split data by species pairs of interest
-  unique(tbd_pred.prey_smr$spp_pair)
-  tbd_coug.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_Mule Deer")
-  tbd_coug.elk_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_Elk")
-  tbd_coug.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_White-tailed Deer")
-  tbd_coug.moose_graze <- filter(tbd_pred.prey_smr, spp_pair == "Cougar_Moose")
-  tbd_wolf.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_Mule Deer")
-  tbd_wolf.elk_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_Elk")
-  tbd_wolf.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_White-tailed Deer")
-  tbd_wolf.moose_graze <- filter(tbd_pred.prey_smr, spp_pair == "Wolf_Moose")
-  tbd_bear.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_Mule Deer")
-  tbd_bear.elk_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_Elk")
-  tbd_bear.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_White-tailed Deer")
-  tbd_bear.moose_graze <- filter(tbd_pred.prey_smr, spp_pair == "Black Bear_Moose")
-  tbd_bob.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Bobcat_Mule Deer")
-  tbd_bob.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Bobcat_White-tailed Deer")
-  tbd_coy.md_graze <- filter(tbd_pred.prey_smr, spp_pair == "Coyote_Mule Deer")
-  tbd_coy.wtd_graze <- filter(tbd_pred.prey_smr, spp_pair == "Coyote_White-tailed Deer")
-  
-  unique(tbd_pred.prey_hunt$spp_pair)
-  tbd_coug.md_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Cougar_Mule Deer")
-  tbd_coug.elk_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Cougar_Elk")
-  tbd_coug.wtd_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Cougar_White-tailed Deer")
-  tbd_coug.moose_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Cougar_Moose")
-  tbd_wolf.md_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Wolf_Mule Deer")
-  tbd_wolf.elk_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Wolf_Elk")
-  tbd_wolf.wtd_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Wolf_White-tailed Deer")
-  tbd_wolf.moose_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Wolf_Moose")
-  tbd_bear.md_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Black Bear_Mule Deer")
-  tbd_bear.elk_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Black Bear_Elk")
-  tbd_bear.wtd_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Black Bear_White-tailed Deer")
-  tbd_bear.moose_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Black Bear_Moose")
-  tbd_bob.md_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Bobcat_Mule Deer")
-  tbd_bob.wtd_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Bobcat_White-tailed Deer")
-  tbd_coy.md_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Coyote_Mule Deer")
-  tbd_coy.wtd_hunt <- filter(tbd_pred.prey_hunt, spp_pair == "Coyote_White-tailed Deer")
-  
-  unique(tbd_cattle.pred$spp_pair)
-  tbd_coug.cattle <- filter(tbd_cattle.pred, spp_pair == "Cattle_Cougar")
-  tbd_wolf.cattle <- filter(tbd_cattle.pred, spp_pair == "Cattle_Wolf")
-  tbd_bear.cattle <- filter(tbd_cattle.pred, spp_pair == "Cattle_Black Bear")
-  tbd_bob.cattle <- filter(tbd_cattle.pred, spp_pair == "Cattle_Bobcat")
-  tbd_coy.cattle <- filter(tbd_cattle.pred, spp_pair == "Cattle_Coyote")
-  tbd_lynx.cattle <- filter(tbd_cattle.pred, spp_pair == "Cattle_Lynx")
-  unique(tbd_cattle.prey$spp_pair)
-  tbd_md.cattle <- filter(tbd_cattle.prey, spp_pair == "Cattle_Mule Deer")
-  tbd_elk.cattle <- filter(tbd_cattle.prey, spp_pair == "Cattle_Elk")
-  tbd_wtd.cattle <- filter(tbd_cattle.prey, spp_pair == "Cattle_White-tailed Deer")
-  tbd_moose.cattle <- filter(tbd_cattle.prey, spp_pair == "Cattle_Moose")
-  
-  unique(tbd_hunter.pred$spp_pair)
-  tbd_coug.hunter <- filter(tbd_hunter.pred, spp_pair == "Human_Cougar")
-  tbd_wolf.hunter <- filter(tbd_hunter.pred, spp_pair == "Human_Wolf")
-  tbd_bear.hunter <- filter(tbd_hunter.pred, spp_pair == "Human_Black Bear")
-  tbd_bob.hunter <- filter(tbd_hunter.pred, spp_pair == "Human_Bobcat")
-  tbd_coy.hunter <- filter(tbd_hunter.pred, spp_pair == "Human_Coyote")
-  unique(tbd_hunter.prey$spp_pair)
-  tbd_md.hunter <- filter(tbd_hunter.prey, spp_pair == "Human_Mule Deer")
-  tbd_elk.hunter <- filter(tbd_hunter.prey, spp_pair == "Human_Elk")
-  tbd_wtd.hunter <- filter(tbd_hunter.prey, spp_pair == "Human_White-tailed Deer")
-  tbd_moose.hunter <- filter(tbd_hunter.prey, spp_pair == "Human_Moose")
+  unique(tbd_pred.prey$spp_pair)
+  tbd_coug.md <- filter(tbd_pred.prey, spp_pair == "Cougar_Mule Deer")
+  tbd_coug.elk <- filter(tbd_pred.prey, spp_pair == "Cougar_Elk")
+  tbd_coug.wtd <- filter(tbd_pred.prey, spp_pair == "Cougar_White-tailed Deer")
+  tbd_coug.moose <- filter(tbd_pred.prey, spp_pair == "Cougar_Moose")
+  tbd_wolf.md <- filter(tbd_pred.prey, spp_pair == "Wolf_Mule Deer")
+  tbd_wolf.elk <- filter(tbd_pred.prey, spp_pair == "Wolf_Elk")
+  tbd_wolf.wtd <- filter(tbd_pred.prey, spp_pair == "Wolf_White-tailed Deer")
+  tbd_wolf.moose <- filter(tbd_pred.prey, spp_pair == "Wolf_Moose")
+  tbd_bear.md <- filter(tbd_pred.prey, spp_pair == "Black Bear_Mule Deer")
+  tbd_bear.elk <- filter(tbd_pred.prey, spp_pair == "Black Bear_Elk")
+  tbd_bear.wtd <- filter(tbd_pred.prey, spp_pair == "Black Bear_White-tailed Deer")
+  tbd_bear.moose <- filter(tbd_pred.prey, spp_pair == "Black Bear_Moose")
+  tbd_bob.md <- filter(tbd_pred.prey, spp_pair == "Bobcat_Mule Deer")
+  tbd_bob.wtd <- filter(tbd_pred.prey, spp_pair == "Bobcat_White-tailed Deer")
+  tbd_coy.md <- filter(tbd_pred.prey, spp_pair == "Coyote_Mule Deer")
+  tbd_coy.wtd <- filter(tbd_pred.prey, spp_pair == "Coyote_White-tailed Deer")
   
   
-  ####  NEXT- run some models - get binary covariates pulled together (Y/N for grazing, hunting, public land)
-  ####  Permutation test approach or same analysis but prey-prey and predator-predator?
-  ####  Think about other ways to compare relationships, eg. maybe only care about 
-  ####  tbd for pred and prey, even if something else (other category) is detected
-  ####  btwn them
+  
+  ####  NEXT- run some models 
+  ####  Permutation test approach 
   ####  Do I split out by species combos or just lump all species together (e.g.,
   ####  time between detection of any predator and any prey)?
   
