@@ -266,18 +266,6 @@
   #'  Data structured so only last image of spp1 and first image of spp2 per
   #'  detection event are included in data frame.
   tbd <- function(detection_data, spp1, unittime) {
-      #' #'  Create empty vector to be filled
-      #' detection_data$TimeSinceLastDet <- c()
-      #' #'  Fill first element of the vector to get it started
-      #' detection_data$TimeSinceLastDet[1] <- 0
-      #' #'  Loop through each row to calculate elapsed time since previous detection
-      #' for (i in 2:nrow(detection_data)){
-      #'   #'  If previous detection was spp1, set time to 0
-      #'   if (detection_data$Category[i-1] == spp1) detection_data$TimeSinceLastDet[i] = 0
-      #'   #'  If current detection is spp2 and follows detection of spp1, calculate
-      #'   #'  the difference in time from previous detection to current detection
-      #'   if (detection_data$Category[i] != spp1 & detection_data$CameraLocation[i] == detection_data$CameraLocation[i-1]) detection_data$TimeSinceLastDet[i] = difftime(detection_data$DateTime[i], detection_data$DateTime[i-1], units = unittime)
-      #' }
     #'  Create empty vector to be filled
     detection_data$TimeSinceLastDet <- c()
     #'  Fill first element of the vector to get it started
