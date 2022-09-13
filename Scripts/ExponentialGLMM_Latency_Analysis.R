@@ -12,6 +12,14 @@
   #'  with different predator hunting modes, presence of apex vs mesopredators,
   #'  and presence of ambush vs cursorial predators at a camera site.
   #'  
+  #'  Handy website for Poisson and exponential lambda interpretation:
+  #'  https://towardsdatascience.com/what-is-exponential-distribution-7bdd08590e2a#:~:text=The%20definition%20of%20exponential%20distribution,Poisson%20(X%3D0)
+  #'  The definition of exponential distribution is the probability distribution 
+  #'  of the time *between* the events in a Poisson process.
+  #'  Poisson distribution assumes that events occur independent of one another.
+  #'  y ~ Exp(lambda) --> lambda is the reciprocal (1/λ) of the rate (λ) in a Poisson distribution.
+  #'  lambda is often expressed in the amount of time before an event occurs.
+  #'  
   #'  Time-between-detections data generated in TimeBetweenDetections.R script
   #'  ---------------------------------------------
   
@@ -25,7 +33,11 @@
   #'  Read in data
   load("./Outputs/tbd_pred.prey_2022-09-07.RData") 
   #'  Remove observations involving lynx due to too few lynx detections
-  tbd_pred.prey <- filter(tbd_pred.prey, PredatorID != "Lynx")
+  tbd_pred.prey <- filter(tbd_pred.prey, PredatorID != "Lynx") %>%
+    mutate(tbd_round = round(TimeSinceLastDet, 0),
+           tbd_min = TimeSinceLastDet,
+           tbd_hour = tbd_min/60,
+           tbd_day = tbd_hour/24)
   
   #'  Set up model in BUGS language
   #'  -----------------------------
@@ -127,6 +139,8 @@
 
   #'  Time-between-detections
   tbd <- tbd_md$TimeSinceLastDet
+  tbd <- tbd_md$tbd_hour
+  tbd <- tbd_md$tbd_day
   summary(tbd)
 
   bundled <- list(y = tbd, covs = covs, ncams = ncams, ncovs = ncovs, ntbd = ntbd,
@@ -137,12 +151,12 @@
   #'  Set up initial values
   alpha.init <- log(aggregate(tbd, list(tbd_dat$cams), FUN = mean)[,2])
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))}  #beta = runif(ncovs,-1,1)
-
+  
   #'  Parameters to be monitored
   params <- c("alpha", "beta", "sigma", "lambda", "mu.lambda") # "beta1", "beta2", "beta3"
-
+  
   #'  MCMC settings
-  nc <- 3; ni <- 100000; nb <- 75000; nt <- 100; na <- 10000
+  nc <- 3; ni <- 1000; nb <- 750; nt <- 5; na <- 100
 
   #'  Run model in JAGS
   #'  -----------------
