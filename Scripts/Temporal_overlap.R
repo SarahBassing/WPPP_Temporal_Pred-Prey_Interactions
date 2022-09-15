@@ -218,6 +218,15 @@
   dets_wtr <- rbind(dets18[[3]], dets19[[3]], dets20[[3]])
   dets_sprg <- rbind(dets18[[4]], dets19[[4]], dets20[[4]])
 
+  #'  Save for detection data summary and making data available for publication
+  smr_dets <- mutate(dets_smr, Season = "Summer")
+  fll_dets <- mutate(dets_fall, Season = "Fall")
+  wtr_dets <- mutate(dets_wtr, Season = "Winter")
+  spg_dets <- mutate(dets_sprg, Season = "Spring")
+  seasonal_detections <- as.data.frame(rbind(smr_dets, fll_dets, wtr_dets, spg_dets))
+  
+  write.csv(seasonal_detections, paste0("./Outputs/seasonal_detections_", Sys.Date(), ".csv"))
+  
   #'  ------------------------------------------
   ####  Predator-prey temporal overlap analysis ####
   #'  ------------------------------------------
