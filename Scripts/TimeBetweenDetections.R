@@ -48,6 +48,7 @@
     )
   
   ####  Extract independent detections for wildlife species  ####
+  #'  -------------------------------------------------------
   #'  Create a column identifying whether each image is an "independent" event
   #'  If camera site is diff from previous row then give unique value. If not then...
   #'  If species detected is diff from previous row at same site then give unique value. If not then...
@@ -76,7 +77,6 @@
            Category = ifelse(Species == "Elk" | Species == "Mule Deer" | 
                                      Species == "Moose" | Species == "White-tailed Deer", "Prey", Category)) 
   
- 
   #'  Filter predator data to the last image of each unique detection event
   lastpredator <- capdata[capdata$Category == "Predator",] %>% 
     group_by(caps) %>% 
@@ -292,12 +292,16 @@
   tbd_pred.prey_wtr <- tbd(resp2pred_wtr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_sprg <- tbd(resp2pred_sprg, spp1 = "Predator", unittime = "min")
   
-  #'  Add habitat complexity and other site-level covaraites to each observation
+  
+  ####  Add covariate data to tbd data  ####
+  #'  ----------------------------------
+  #'  Add habitat complexity and other site-level covariates to each observation
   #'  FYI: Complexity_index1 = TRI_250m * (PercForest*100)
-  #'  "Low" risk = Complexity_index1 values < mean(Complexity_index1)
-  #'  "High" risk = Complexity_index1 values => mean(Complexity_index1)
+  #'  "Low" HCI = Complexity_index1 values < mean(Complexity_index1)
+  #'  "High" HCI = Complexity_index1 values => mean(Complexity_index1)
   stations_data <- read.csv("./Data/cam_stations_hab_complex_data.csv") %>%
-    dplyr::select(-"X") 
+    dplyr::select(-"X")
+  colnames(stations_data)[colnames(stations_data) == 'backgroundRisk'] <- 'HCI_level'
   
   #'  Join time-between-detection data with site-level covariates
   tbd_pred.prey_smr <- left_join(tbd_pred.prey_smr, stations_data, by = "CameraLocation") %>%
@@ -309,14 +313,14 @@
   tbd_pred.prey_sprg <- left_join(tbd_pred.prey_sprg, stations_data, by = "CameraLocation") %>%
     mutate(Season = "Spring")
   
-  #'  Merge into one large dataset
+  #'  Merge into one large data set
   tbd_pred.prey <- rbind(tbd_pred.prey_smr, tbd_pred.prey_fall, tbd_pred.prey_wtr, tbd_pred.prey_sprg) %>%
     arrange(CameraLocation, DateTime) %>%
     dplyr::select(-c(File, Category, caps_new, cam, spp_new1, spp_new2)) %>%
     relocate(Year, .before = DateTime) %>%
     relocate(Study_Area, .before = Year) %>%
     relocate(Season, .before = DateTime) %>%
-    relocate(TimeSinceLastDet, .after = backgroundRisk)
+    relocate(TimeSinceLastDet, .after = HCI_level)
   
   #'  Double check there are no negative times-between-detection
   summary(tbd_pred.prey)
