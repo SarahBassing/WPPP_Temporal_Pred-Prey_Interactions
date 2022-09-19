@@ -61,7 +61,7 @@
   stations_data$TRI_250m <- cam_tri
   
   #'  Identity which predators were detected at each camera site per season (e.g., predation risk)
-  #'  Split up megadetection data by season acorss years
+  #'  Split up megadetection data by season across years
   smr <- megadata %>%
     filter(Date > "2018-05-31" & Date < "2018-10-01" | Date > "2019-05-31" & Date < "2019-10-01" | Date > "2020-05-31" & Date < "2020-10-01") 
   fll <- megadata %>%
@@ -110,6 +110,12 @@
   
   #'  Summary stats on background predation risk
   summary(stations_data)
+  hist(stations_data$TRI, breaks = 20)
+  abline(v = median(stations_data$TRI), col = "blue")
+  abline(v = mean(stations_data$TRI), col = "red")
+  hist(stations_data$PercForest, breaks = 20)
+  abline(v = median(stations_data$PercForest), col = "blue")
+  abline(v = mean(stations_data$PercForest), col = "red")
   hist(stations_data$Complexity_index1, breaks = 20)
   abline(v = median(stations_data$Complexity_index1), col = "blue")
   abline(v = mean(stations_data$Complexity_index1), col = "red")
@@ -122,7 +128,10 @@
   #'  Add categorical variable designating level of background risk based on
   #'  habitat complexity index (values < mean HCI is low risk, values => mean HCI 
   #'  is high risk; mean HCI = )
-  stations_data <- mutate(stations_data, backgroundRisk = ifelse(Complexity_index1 < mean(stations_data$Complexity_index1), "Low", "High"))
+  stations_data <- mutate(stations_data, backgroundRisk_HCI = ifelse(Complexity_index1 < mean(stations_data$Complexity_index1), "Low", "High"))
+  stations_data <- mutate(stations_data, backgroundRisk_TRI = ifelse(TRI < mean(stations_data$TRI), "Low", "High"))
+  stations_data <- mutate(stations_data, backgroundRisk_For = ifelse(PercForest < mean(stations_data$PercForest), "Low", "High"))
+  
   #' #'  Save for time-btwn-detection analyses
   # write.csv(stations_data, "./Data/cam_stations_hab_complex_data.csv")
   
@@ -225,14 +234,14 @@
   spg_dets <- mutate(dets_sprg, Season = "Spring")
   seasonal_detections <- as.data.frame(rbind(smr_dets, fll_dets, wtr_dets, spg_dets))
   
-  write.csv(seasonal_detections, paste0("./Outputs/seasonal_detections_", Sys.Date(), ".csv"))
+  # write.csv(seasonal_detections, paste0("./Outputs/seasonal_detections_", Sys.Date(), ".csv"))
   
   #'  ------------------------------------------
   ####  Predator-prey temporal overlap analysis ####
   #'  ------------------------------------------
   #'  Function to estimate temporal overlap between predators (spp1) and prey (spp2)
   #'  at camera sites located in areas with high or low background predation risk.
-  pred_prey_overlap <- function(spp1, spp2, spp3, name1, name2, name3, nboot, dhat) { #i
+  pred_prey_overlap <- function(spp1, spp2, spp3, name1, name2, name3, nboot, dhat, risktype, riskcov) { #i
     #'  Create logical vectors (T/F) indicating whether spp1 & spp2 were detected 
     #'  at the same site and reduce detection events to just those cameras --> These 
     #'  species need to spatially overlap for any temporal overlap to be meaningful
@@ -244,6 +253,9 @@
     spp2_dat <- spp2_dat[spp2_dat$both.present == T,]
     #'  Double check the same number of cameras are included in each
     length(unique(spp1_dat$CameraLocation)); length(unique(spp2_dat$CameraLocation))
+    
+    #'  Generate variable that is representing high vs low risk
+    stations_data$backgroundRisk <- risktype
     
     #'  Create a logical vector (T/F) indicating whether background risk was high 
     #'  or low at each site where spp1 was detected (based on were both were detected)
@@ -284,11 +296,13 @@
     DensityA_low <- saveOverlap_lowrisk[,1:2] %>%
       mutate(PredPrey = "Predator",
              Species = name1,
-             BackgroundRisk = "Low")
+             BackgroundRisk = "Low",
+             RiskType = riskcov)
     DensityB_low <- saveOverlap_lowrisk[,c(1,3)] %>%
       mutate(PredPrey = "Prey",
              Species = name2,
-             BackgroundRisk = "Low")
+             BackgroundRisk = "Low",
+             RiskType = riskcov)
     overlap_lowrisk <- full_join(DensityA_low, DensityB_low, by = c("x", "BackgroundRisk")) 
     
     #'  Overlap when background risk is high
@@ -300,11 +314,13 @@
     DensityA_high <- saveOverlap_highrisk[,1:2] %>%
       mutate(PredPrey = "Predator",
              Species = name1,
-             BackgroundRisk = "High")
+             BackgroundRisk = "High",
+             RiskType = riskcov)
     DensityB_high <- saveOverlap_highrisk[,c(1,3)] %>%
       mutate(PredPrey = "Prey",
              Species = name2,
-             BackgroundRisk = "High")
+             BackgroundRisk = "High",
+             RiskType = riskcov)
     overlap_highrisk <- full_join(DensityA_high, DensityB_high, by = c("x", "BackgroundRisk")) 
     
     #'  Bind into single long data set of density estimates to make custom overlap plots
@@ -366,343 +382,426 @@
     
     return(overlap_list)
   }
-  ####  Predator-Prey Overlap Grazing Season  ####
-  #'  Estimate temporal overlap between predators and prey when cattle are/aren't detected
-  #'  Focusing on only OK study area since big difference in number of cameras 
-  #'  with cattle in NE vs OK, pooling across study areas can bias results
-  nboot <- 10000
-  ####  Cougar - Mule deer  ####
-  coug_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
-                                          spp2 = filter(dets_smr, Species == "Mule Deer"), 
-                                          name1 = "Cougar", name2 = "Mule Deer", 
-                                          nboot = nboot, dhat = "Dhat4")
-  coug_md_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
+  ####  Predator-Prey Overlap  ####
+  #'  Estimate temporal overlap between predators and prey where predation risk
+  #'  is presumably low or high depending on mean TRI or mean percent forest
+  #'  Dhat estimator changes based on smallest sample size in each pairing
+  #'  Dhat1 if n < 50; Dhat4 if n >= 50 (Ridout & Linkie 2009)
+  nboot <- 100 #10000
+  ####  Cougar - Mule deer TRI  ####
+  coug_md_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
+                                        spp2 = filter(dets_smr, Species == "Mule Deer"), 
+                                        name1 = "Cougar", name2 = "Mule Deer", 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coug_md_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
                                         spp2 = filter(dets_fall, Species == "Mule Deer"), 
                                         name1 = "Cougar", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat1")
-  coug_md_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coug_md_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
                                         spp2 = filter(dets_wtr, Species == "Mule Deer"), 
                                         name1 = "Cougar", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat1")
-  #'  Low risk >50 cougars; High risk <50 cougars
-  coug_md_sprg_over1 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coug_md_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
                                         spp2 = filter(dets_sprg, Species == "Mule Deer"), 
                                         name1 = "Cougar", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat1")
-  coug_md_sprg_over4 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
-                                         spp2 = filter(dets_sprg, Species == "Mule Deer"), 
-                                         name1 = "Cougar", name2 = "Mule Deer", 
-                                         nboot = nboot, dhat = "Dhat4")
-  ####  Cougar - Elk  ####
-  coug_elk_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  ####  Cougar - Elk TRI  ####
+  #' Low risk >50 cougars & elk; High risk <50 cougars & elk
+  coug_elk_tri_smr_over1 <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
                                         spp2 = filter(dets_smr, Species == "Elk"), 
                                         name1 = "Cougar", name2 = "Elk", 
-                                        nboot = nboot, dhat = "Dhat4")
-  coug_elk_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coug_elk_tri_smr_over4 <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
+                                         spp2 = filter(dets_smr, Species == "Elk"), 
+                                         name1 = "Cougar", name2 = "Elk", 
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  coug_elk_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
                                          spp2 = filter(dets_fall, Species == "Elk"), 
                                          name1 = "Cougar", name2 = "Elk", 
-                                         nboot = nboot, dhat = "Dhat1")
-  coug_elk_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  coug_elk_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
                                         spp2 = filter(dets_wtr, Species == "Elk"), 
                                         name1 = "Cougar", name2 = "Elk", 
-                                        nboot = nboot, dhat = "Dhat1")
-  coug_elk_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coug_elk_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
                                           spp2 = filter(dets_sprg, Species == "Elk"), 
                                           name1 = "Cougar", name2 = "Elk", 
-                                          nboot = nboot, dhat = "Dhat1")
-  ####  Cougar - Moose  ####
-  coug_moose_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  ####  Cougar - Moose TRI  ####
+  coug_moose_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
                                          spp2 = filter(dets_smr, Species == "Moose"), 
                                          name1 = "Cougar", name2 = "Moose", 
-                                         nboot = nboot, dhat = "Dhat4")
-  coug_moose_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  coug_moose_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
                                           spp2 = filter(dets_fall, Species == "Moose"), 
                                           name1 = "Cougar", name2 = "Moose", 
-                                          nboot = nboot, dhat = "Dhat1")
-  coug_moose_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  coug_moose_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
                                          spp2 = filter(dets_wtr, Species == "Moose"), 
                                          name1 = "Cougar", name2 = "Moose", 
-                                         nboot = nboot, dhat = "Dhat1")
-  coug_moose_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  coug_moose_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
                                            spp2 = filter(dets_sprg, Species == "Moose"), 
                                            name1 = "Cougar", name2 = "Moose", 
-                                           nboot = nboot, dhat = "Dhat1")
-  ####  Cougar - White-tailed deer  ####
-  coug_wtd_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
+                                           nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                           risktype = stations_data$backgroundRisk_TRI)
+  ####  Cougar - White-tailed deer TRI  ####
+  coug_wtd_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
                                            spp2 = filter(dets_smr, Species == "White-tailed Deer"), 
                                            name1 = "Cougar", name2 = "wtd", 
-                                           nboot = nboot, dhat = "Dhat4")
-  #'  Low risk <50 cougars; High risk >50 cougars
-  coug_wtd_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
+                                           nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  #'  Low risk >50 cougars; High risk <50 cougars
+  coug_wtd_tri_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
                                             spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                             name1 = "Cougar", name2 = "wtd", 
-                                            nboot = nboot, dhat = "Dhat1")
-  coug_wtd_fall_over4 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
+                                            nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                           risktype = stations_data$backgroundRisk_TRI)
+  coug_wtd_tri_fall_over4 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Cougar"), 
                                           spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                           name1 = "Cougar", name2 = "wtd", 
-                                          nboot = nboot, dhat = "Dhat4")
+                                          nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
   #'  Low risk >50 cougars; High risk <50 cougars
-  coug_wtd_wtr_over1 <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
+  coug_wtd_tri_wtr_over1 <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
                                            spp2 = filter(dets_wtr, Species == "White-tailed Deer"), 
                                            name1 = "Cougar", name2 = "wtd", 
-                                           nboot = nboot, dhat = "Dhat1")
-  coug_wtd_wtr_over4 <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
+                                           nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  coug_wtd_tri_wtr_over4 <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Cougar"), 
                                          spp2 = filter(dets_wtr, Species == "White-tailed Deer"), 
                                          name1 = "Cougar", name2 = "wtd", 
-                                         nboot = nboot, dhat = "Dhat4")
-  coug_wtd_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  #'  Low risk >50 cougars; High risk < 50 cougars
+  coug_wtd_tri_sprg_over1 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
                                              spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                              name1 = "Cougar", name2 = "wtd", 
-                                             nboot = nboot, dhat = "Dhat1")
+                                             nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                            risktype = stations_data$backgroundRisk_TRI)
+  coug_wtd_tri_sprg_over4 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Cougar"), 
+                                              spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
+                                              name1 = "Cougar", name2 = "wtd", 
+                                              nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                              risktype = stations_data$backgroundRisk_TRI)
   #'  Save cougar-prey overlap results
-  coug_prey_overlap <- list(coug_md_smr_over, coug_md_fall_over, coug_md_wtr_over, coug_md_sprg_over1, coug_md_sprg_over4,
-                            coug_elk_smr_over, coug_elk_fall_over, coug_elk_wtr_over, coug_elk_sprg_over,
-                            coug_moose_smr_over, coug_moose_fall_over, coug_moose_wtr_over, coug_moose_sprg_over,
-                            coug_wtd_smr_over, coug_wtd_fall_over1, coug_wtd_fall_over4, coug_wtd_wtr_over1, coug_wtd_wtr_over4, coug_wtd_sprg_over)
+  coug_prey_tri_overlap <- list(coug_md_tri_smr_over, coug_md_tri_fall_over, coug_md_tri_wtr_over, coug_md_tri_sprg_over,
+                            coug_elk_tri_smr_over1, coug_elk_tri_smr_over4, coug_elk_tri_fall_over, coug_elk_tri_wtr_over, coug_elk_tri_sprg_over,
+                            coug_moose_tri_smr_over, coug_moose_tri_fall_over, coug_moose_tri_wtr_over, coug_moose_tri_sprg_over,
+                            coug_wtd_tri_smr_over, coug_wtd_tri_fall_over1, coug_wtd_tri_fall_over4, coug_wtd_tri_wtr_over1, coug_wtd_tri_wtr_over4, coug_wtd_tri_sprg_over1, coug_wtd_tri_sprg_over4)
   
-  ####  Wolf - Mule deer  ####
-  wolf_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
+  ####  Wolf - Mule deer TRI  ####
+  wolf_md_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
                                         spp2 = filter(dets_smr, Species == "Mule Deer"), 
                                         name1 = "Wolf", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat1")
-  wolf_md_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  wolf_md_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
                                          spp2 = filter(dets_fall, Species == "Mule Deer"), 
                                          name1 = "Wolf", name2 = "Mule Deer", 
-                                         nboot = nboot, dhat = "Dhat1")
-  # wolf_md_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"), 
-  #                                       spp2 = filter(dets_wtr, Species == "Mule Deer"), 
-  #                                       name1 = "Wolf", name2 = "Mule Deer", 
-  #                                       nboot = nboot, dhat = "Dhat1")
-  wolf_md_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"), 
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  wolf_md_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
+                                        spp2 = filter(dets_wtr, Species == "Mule Deer"),
+                                        name1 = "Wolf", name2 = "Mule Deer",
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  wolf_md_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"), 
                                           spp2 = filter(dets_sprg, Species == "Mule Deer"), 
                                           name1 = "Wolf", name2 = "Mule Deer", 
-                                          nboot = nboot, dhat = "Dhat1")
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
   ####  Wolf - Elk  ####
-  wolf_elk_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
+  wolf_elk_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
                                         spp2 = filter(dets_smr, Species == "Elk"), 
                                         name1 = "Wolf", name2 = "Elk", 
-                                        nboot = nboot, dhat = "Dhat1")
-  # wolf_elk_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
-  #                                        spp2 = filter(dets_fall, Species == "Elk"), 
-  #                                        name1 = "Wolf", name2 = "Elk", 
-  #                                        nboot = nboot, dhat = "Dhat1")
-  # wolf_elk_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  # wolf_elk_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"),
+  #                                        spp2 = filter(dets_fall, Species == "Elk"),
+  #                                        name1 = "Wolf", name2 = "Elk",
+  #                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                        risktype = stations_data$backgroundRisk_TRI)
+  # wolf_elk_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
   #                                       spp2 = filter(dets_wtr, Species == "Elk"),
   #                                       name1 = "Wolf", name2 = "Elk",
-  #                                       nboot = nboot, dhat = "Dhat1")
-  # wolf_elk_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"), 
-  #                                        spp2 = filter(dets_sprg, Species == "Elk"), 
-  #                                        name1 = "Wolf", name2 = "Elk", 
-  #                                        nboot = nboot, dhat = "Dhat1")
-  ####  Wolf - Moose  ####
-  wolf_moose_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
+  #                                       nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                       risktype = stations_data$backgroundRisk_TRI)
+  # wolf_elk_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"),
+  #                                        spp2 = filter(dets_sprg, Species == "Elk"),
+  #                                        name1 = "Wolf", name2 = "Elk",
+  #                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                        risktype = stations_data$backgroundRisk_TRI)
+  ####  Wolf - Moose TRI  ####
+  wolf_moose_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
                                         spp2 = filter(dets_smr, Species == "Moose"), 
                                         name1 = "Wolf", name2 = "Moose", 
-                                        nboot = nboot, dhat = "Dhat1")
-  wolf_moose_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  wolf_moose_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
                                          spp2 = filter(dets_fall, Species == "Moose"), 
                                          name1 = "Wolf", name2 = "Moose", 
-                                         nboot = nboot, dhat = "Dhat1")
-  wolf_moose_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  wolf_moose_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
                                         spp2 = filter(dets_wtr, Species == "Moose"),
                                         name1 = "Wolf", name2 = "Moose",
-                                        nboot = nboot, dhat = "Dhat1")
-  # wolf_moose_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"), 
-  #                                        spp2 = filter(dets_sprg, Species == "Moose"), 
-  #                                        name1 = "Wolf", name2 = "Moose", 
-  #                                        nboot = nboot, dhat = "Dhat1")
-  ####  Wolf - White-tailed deer ####
-  wolf_wtd_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  wolf_moose_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"),
+                                         spp2 = filter(dets_sprg, Species == "Moose"),
+                                         name1 = "Wolf", name2 = "Moose",
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  ####  Wolf - White-tailed deer TRI  ####
+  wolf_wtd_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Wolf"), 
                                            spp2 = filter(dets_smr, Species == "White-tailed Deer"), 
                                            name1 = "Wolf", name2 = "White-tailed Deer", 
-                                           nboot = nboot, dhat = "Dhat1")
-  wolf_wtd_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
+                                           nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                           risktype = stations_data$backgroundRisk_TRI)
+  wolf_wtd_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Wolf"), 
                                             spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                             name1 = "Wolf", name2 = "White-tailed Deer", 
-                                            nboot = nboot, dhat = "Dhat1")
-  wolf_wtd_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
+                                            nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                            risktype = stations_data$backgroundRisk_TRI)
+  wolf_wtd_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Wolf"),
                                            spp2 = filter(dets_wtr, Species == "White-tailed Deer"),
                                            name1 = "Wolf", name2 = "White-tailed Deer",
-                                           nboot = nboot, dhat = "Dhat1")
-  # wolf_wtd_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"),
-  #                                        spp2 = filter(dets_sprg, Species == "White-tailed Deer"),
-  #                                        name1 = "Wolf", name2 = "White-tailed Deer",
-  #                                        nboot = nboot, dhat = "Dhat1")
+                                           nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                           risktype = stations_data$backgroundRisk_TRI)
+  wolf_wtd_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Wolf"),
+                                         spp2 = filter(dets_sprg, Species == "White-tailed Deer"),
+                                         name1 = "Wolf", name2 = "White-tailed Deer",
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
   #'  Save wolf-prey overlap results
-  wolf_prey_overlap <- list(wolf_md_smr_over, wolf_md_fall_over, wolf_md_sprg_over,
-                            wolf_elk_smr_over, wolf_moose_smr_over, wolf_moose_fall_over, 
-                            wolf_moose_wtr_over, wolf_wtd_smr_over, wolf_wtd_fall_over, wolf_wtd_wtr_over)
+  wolf_prey_tri_overlap <- list(wolf_md_tri_smr_over, wolf_md_tri_fall_over, wolf_md_tri_wtr_over, wolf_md_tri_sprg_over,
+                            wolf_elk_tri_smr_over, wolf_moose_tri_smr_over, wolf_moose_tri_fall_over, wolf_moose_tri_wtr_over, wolf_moose_tri_sprg_over,
+                            wolf_wtd_tri_smr_over, wolf_wtd_tri_fall_over, wolf_wtd_tri_wtr_over, wolf_wtd_tri_sprg_over)
   
-  ####  Black bear - Mule Deer  ####
-  bear_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
+  ####  Black bear - Mule Deer TRI  ####
+  bear_md_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
                                         spp2 = filter(dets_smr, Species == "Mule Deer"), 
                                         name1 = "Black Bear", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat4")
-  #'  Low risk >50 black bears; High risk <50 black bears
-  bear_md_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  #'  Low risk 50 black bears; High risk <50 black bears
+  bear_md_tri_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
                                          spp2 = filter(dets_fall, Species == "Mule Deer"), 
                                          name1 = "Black Bear", name2 = "Mule Deer", 
-                                         nboot = nboot, dhat = "Dhat1")
-  bear_md_fall_over4 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  bear_md_tri_fall_over4 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
                                          spp2 = filter(dets_fall, Species == "Mule Deer"), 
                                          name1 = "Black Bear", name2 = "Mule Deer", 
-                                         nboot = nboot, dhat = "Dhat4")
-  # bear_md_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  # bear_md_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
   #                                       spp2 = filter(dets_wtr, Species == "Mule Deer"),
   #                                       name1 = "Black Bear", name2 = "Mule Deer",
-  #                                       nboot = nboot, dhat = "Dhat1")
-  bear_md_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
+  #                                       nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                       risktype = stations_data$backgroundRisk_TRI)
+  bear_md_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
                                          spp2 = filter(dets_sprg, Species == "Mule Deer"), 
                                          name1 = "Black Bear", name2 = "Mule Deer", 
-                                         nboot = nboot, dhat = "Dhat4")
-  ####  Black Bear - Elk  ####
-  bear_elk_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  ####  Black Bear - Elk TRI  ####
+  bear_elk_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
                                         spp2 = filter(dets_smr, Species == "Elk"), 
                                         name1 = "Black Bear", name2 = "Elk", 
-                                        nboot = nboot, dhat = "Dhat4")
-  bear_elk_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  bear_elk_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
                                           spp2 = filter(dets_fall, Species == "Elk"), 
                                           name1 = "Black Bear", name2 = "Elk", 
-                                          nboot = nboot, dhat = "Dhat1")
-  # bear_elk_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  # bear_elk_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
   #                                       spp2 = filter(dets_wtr, Species == "Elk"),
   #                                       name1 = "Black Bear", name2 = "Elk",
-  #                                       nboot = nboot, dhat = "Dhat1")
-  bear_elk_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
+  #                                       nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                       risktype = stations_data$backgroundRisk_TRI)
+  bear_elk_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
                                          spp2 = filter(dets_sprg, Species == "Elk"), 
                                          name1 = "Black Bear", name2 = "Elk", 
-                                         nboot = nboot, dhat = "Dhat1")
-  ####  Black bear - Moose  ####
-  bear_moose_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  ####  Black bear - Moose TRI  ####
+  bear_moose_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
                                          spp2 = filter(dets_smr, Species == "Moose"), 
                                          name1 = "Black Bear", name2 = "Moose", 
-                                         nboot = nboot, dhat = "Dhat4")
-  bear_moose_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  bear_moose_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
                                           spp2 = filter(dets_fall, Species == "Moose"), 
                                           name1 = "Black Bear", name2 = "Moose", 
-                                          nboot = nboot, dhat = "Dhat1")
-  # bear_moose_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  # bear_moose_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
   #                                       spp2 = filter(dets_wtr, Species == "Moose"),
   #                                       name1 = "Black Bear", name2 = "Moose",
-  #                                       nboot = nboot, dhat = "Dhat1")
-  bear_moose_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
+  #                                       nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                       risktype = stations_data$backgroundRisk_TRI)
+  bear_moose_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
                                           spp2 = filter(dets_sprg, Species == "Moose"), 
                                           name1 = "Black Bear", name2 = "Moose", 
-                                          nboot = nboot, dhat = "Dhat1")
-  ####  Black bear - White-tailed Deer  ####
-  bear_wtd_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  ####  Black bear - White-tailed Deer TRI  ####
+  bear_wtd_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Black Bear"), 
                                            spp2 = filter(dets_smr, Species == "White-tailed Deer"), 
                                            name1 = "Black Bear", name2 = "wtd", 
-                                           nboot = nboot, dhat = "Dhat4")
-  bear_wtd_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
+                                           nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                           risktype = stations_data$backgroundRisk_TRI)
+  bear_wtd_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Black Bear"), 
                                             spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                             name1 = "Black Bear", name2 = "wtd", 
-                                            nboot = nboot, dhat = "Dhat1")
-  # bear_wtd_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
+                                            nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                            risktype = stations_data$backgroundRisk_TRI)
+  # bear_wtd_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Black Bear"),
   #                                       spp2 = filter(dets_wtr, Species == "White-tailed Deer"),
   #                                       name1 = "Black Bear", name2 = "wtd",
-  #                                       nboot = nboot, dhat = "Dhat1")
+  #                                       nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+  #                                       risktype = stations_data$backgroundRisk_TRI)
   #'  Low risk >50 black bears; High risk <50 black bears
-  bear_wtd_sprg_over1 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
+  bear_wtd_tri_sprg_over1 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
                                             spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                             name1 = "Black Bear", name2 = "wtd", 
-                                            nboot = nboot, dhat = "Dhat1")
-  bear_wtd_sprg_over4 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
+                                            nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                            risktype = stations_data$backgroundRisk_TRI)
+  bear_wtd_tri_sprg_over4 <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Black Bear"), 
                                           spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                           name1 = "Black Bear", name2 = "wtd", 
-                                          nboot = nboot, dhat = "Dhat4")
+                                          nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
   #'  Save black bear-prey overlap results
-  bear_prey_overlap <- list(bear_md_smr_over, bear_md_fall_over1, bear_md_fall_over4, bear_md_sprg_over,
-                            bear_elk_smr_over, bear_elk_fall_over, bear_elk_sprg_over,
-                            bear_moose_smr_over, bear_moose_fall_over, bear_moose_sprg_over,
-                            bear_wtd_smr_over, bear_wtd_fall_over, bear_wtd_sprg_over1, bear_wtd_sprg_over4)
+  bear_prey_tri_overlap <- list(bear_md_tri_smr_over, bear_md_tri_fall_over1, bear_md_tri_fall_over4, bear_md_tri_sprg_over,
+                            bear_elk_tri_smr_over, bear_elk_tri_fall_over, bear_elk_tri_sprg_over,
+                            bear_moose_tri_smr_over, bear_moose_tri_fall_over, bear_moose_tri_sprg_over,
+                            bear_wtd_tri_smr_over, bear_wtd_tri_fall_over, bear_wtd_tri_sprg_over1, bear_wtd_tri_sprg_over4)
   
-  ####  Bobcat - Mule deer  ####
-  bob_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Bobcat"), 
+  ####  Bobcat - Mule deer TRI  ####
+  bob_md_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Bobcat"), 
                                         spp2 = filter(dets_smr, Species == "Mule Deer"), 
                                         name1 = "Bobcat", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat4")
-  bob_md_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  bob_md_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
                                           spp2 = filter(dets_fall, Species == "Mule Deer"), 
                                           name1 = "Bobcat", name2 = "Mule Deer", 
-                                          nboot = nboot, dhat = "Dhat1")
-  # bob_md_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Bobcat"),
-  #                                       spp2 = filter(dets_wtr, Species == "Mule Deer"),
-  #                                       name1 = "Bobcat", name2 = "Mule Deer",
-  #                                       nboot = nboot, dhat = "Dhat1")
-  bob_md_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Bobcat"), 
+                                          nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  bob_md_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Bobcat"),
+                                        spp2 = filter(dets_wtr, Species == "Mule Deer"),
+                                        name1 = "Bobcat", name2 = "Mule Deer",
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  bob_md_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Bobcat"), 
                                          spp2 = filter(dets_sprg, Species == "Mule Deer"), 
                                          name1 = "Bobcat", name2 = "Mule Deer", 
-                                         nboot = nboot, dhat = "Dhat1")
-  ####  Bobcat - White-tailed Deer  ####
-  bob_wtd_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Bobcat"), 
+                                         nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  ####  Bobcat - White-tailed Deer TRI  ####
+  bob_wtd_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Bobcat"), 
                                        spp2 = filter(dets_smr, Species == "White-tailed Deer"), 
                                        name1 = "Bobcat", name2 = "White-tailed Deer", 
-                                       nboot = nboot, dhat = "Dhat4")
-  #'  Low risk <50 bobcat; High risk >50 bobcat
-  bob_wtd_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
+                                       nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                       risktype = stations_data$backgroundRisk_TRI)
+  #'  Low risk >50 bobcat; High risk <50 bobcat
+  bob_wtd_tri_fall_over1 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
                                         spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                         name1 = "Bobcat", name2 = "White-tailed Deer", 
-                                        nboot = nboot, dhat = "Dhat1")
-  bob_wtd_fall_over4 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  bob_wtd_tri_fall_over4 <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Bobcat"), 
                                          spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                          name1 = "Bobcat", name2 = "White-tailed Deer", 
-                                         nboot = nboot, dhat = "Dhat4")
-  bob_wtd_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Bobcat"),
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
+  #'  Low risk >50 bobcat; High risk <50 bobcat
+  bob_wtd_tri_wtr_over1 <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Bobcat"),
                                         spp2 = filter(dets_wtr, Species == "White-tailed Deer"),
                                         name1 = "Bobcat", name2 = "White-tailed Deer",
-                                        nboot = nboot, dhat = "Dhat1")
-  bob_wtd_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Bobcat"), 
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  bob_wtd_tri_wtr_over4 <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Bobcat"),
+                                            spp2 = filter(dets_wtr, Species == "White-tailed Deer"),
+                                            name1 = "Bobcat", name2 = "White-tailed Deer",
+                                            nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                            risktype = stations_data$backgroundRisk_TRI)
+  bob_wtd_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Bobcat"), 
                                         spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                         name1 = "Bobcat", name2 = "White-tailed Deer", 
-                                        nboot = nboot, dhat = "Dhat1")
+                                        nboot = nboot, dhat = "Dhat1", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
   #'  Save bobcat-prey overlap results
-  bob_prey_overlap <- list(bob_md_smr_over, bob_md_fall_over, bob_md_sprg_over,
-                           bob_wtd_smr_over, bob_wtd_fall_over1, bob_wtd_fall_over4,
-                           bob_wtd_wtr_over, bob_wtd_sprg_over)
+  bob_prey_tri_overlap <- list(bob_md_tri_smr_over, bob_md_tri_fall_over, bob_md_tri_wtr_over, bob_md_tri_sprg_over,
+                           bob_wtd_tri_smr_over, bob_wtd_tri_fall_over1, bob_wtd_tri_fall_over4,
+                           bob_wtd_tri_wtr_over1, bob_wtd_tri_wtr_over4, bob_wtd_tri_sprg_over)
   
-  ####  Coyote - Mule deer  ####
-  coy_md_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Coyote"), 
+  ####  Coyote - Mule deer TRI  ####
+  coy_md_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Coyote"), 
                                        spp2 = filter(dets_smr, Species == "Mule Deer"), 
                                        name1 = "Coyote", name2 = "Mule Deer", 
-                                       nboot = nboot, dhat = "Dhat4")
-  coy_md_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Coyote"), 
+                                       nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                       risktype = stations_data$backgroundRisk_TRI)
+  coy_md_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Coyote"), 
                                         spp2 = filter(dets_fall, Species == "Mule Deer"), 
                                         name1 = "Coyote", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat4")
-  coy_md_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Coyote"),
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coy_md_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Coyote"),
                                         spp2 = filter(dets_wtr, Species == "Mule Deer"),
                                         name1 = "Coyote", name2 = "Mule Deer",
-                                        nboot = nboot, dhat = "Dhat4")
-  coy_md_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Coyote"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coy_md_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Coyote"), 
                                         spp2 = filter(dets_sprg, Species == "Mule Deer"), 
                                         name1 = "Coyote", name2 = "Mule Deer", 
-                                        nboot = nboot, dhat = "Dhat4")
-  ####  Coyote - White-tailed Deer  ####
-  coy_wtd_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Coyote"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  ####  Coyote - White-tailed Deer TRI  ####
+  coy_wtd_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Coyote"), 
                                         spp2 = filter(dets_smr, Species == "White-tailed Deer"), 
                                         name1 = "Coyote", name2 = "White-tailed Deer", 
-                                        nboot = nboot, dhat = "Dhat4")
-  coy_wtd_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Coyote"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coy_wtd_tri_fall_over <- pred_prey_overlap(spp1 = filter(dets_fall, Species == "Coyote"), 
                                           spp2 = filter(dets_fall, Species == "White-tailed Deer"), 
                                           name1 = "Coyote", name2 = "White-tailed Deer", 
-                                          nboot = nboot, dhat = "Dhat4")
-  coy_wtd_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Coyote"),
+                                          nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                          risktype = stations_data$backgroundRisk_TRI)
+  coy_wtd_tri_wtr_over <- pred_prey_overlap(spp1 = filter(dets_wtr, Species == "Coyote"),
                                         spp2 = filter(dets_wtr, Species == "White-tailed Deer"),
                                         name1 = "Coyote", name2 = "White-tailed Deer",
-                                        nboot = nboot, dhat = "Dhat4")
-  coy_wtd_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Coyote"), 
+                                        nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                        risktype = stations_data$backgroundRisk_TRI)
+  coy_wtd_tri_sprg_over <- pred_prey_overlap(spp1 = filter(dets_sprg, Species == "Coyote"), 
                                          spp2 = filter(dets_sprg, Species == "White-tailed Deer"), 
                                          name1 = "Coyote", name2 = "White-tailed Deer", 
-                                         nboot = nboot, dhat = "Dhat4")
+                                         nboot = nboot, dhat = "Dhat4", riskcov = "TRI",
+                                         risktype = stations_data$backgroundRisk_TRI)
   #'  Save coyote-prey overlap results
-  coy_prey_overlap <- list(coy_md_smr_over, coy_md_fall_over, coy_md_wtr_over, coy_md_sprg_over,
-                           coy_wtd_smr_over, coy_wtd_fall_over, coy_wtd_wtr_over, coy_wtd_sprg_over)
+  coy_prey_tri_overlap <- list(coy_md_tri_smr_over, coy_md_tri_fall_over, coy_md_tri_wtr_over, coy_md_tri_sprg_over,
+                           coy_wtd_tri_smr_over, coy_wtd_tri_fall_over, coy_wtd_tri_wtr_over, coy_wtd_tri_sprg_over)
   
   #'  Save this monster --> list of lists!
-  pred_prey_overlap <- list(coug_prey_overlap, wolf_prey_overlap, bear_prey_overlap, bob_prey_overlap, coy_prey_overlap)
+  pred_prey_tri_overlap <- list(coug_prey_tri_overlap, wolf_prey_tri_overlap, bear_prey_tri_overlap, bob_prey_tri_overlap, coy_prey_tri_overlap)
   
-  save(pred_prey_overlap, file = paste0("./Outputs/Temporal Overlap/PredPrey_HCI_Overlap_", Sys.Date(), ".RData"))
+  save(pred_prey_tri_overlap, file = paste0("./Outputs/Temporal Overlap/PredPrey_TRI_Overlap_", Sys.Date(), ".RData"))
   
   
   #'  --------------------------------------------
