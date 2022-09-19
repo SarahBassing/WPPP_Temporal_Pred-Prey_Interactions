@@ -373,7 +373,7 @@
   #'  is presumably low or high depending on mean TRI
   #'  Dhat estimator changes based on smallest sample size in each pairing
   #'  Dhat1 if n < 50; Dhat4 if n >= 50 (Ridout & Linkie 2009)
-  nboot <- 100 #10000
+  nboot <- 10000
   
   ####  Cougar - Mule deer TRI  ####
   coug_md_tri_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
@@ -796,7 +796,7 @@
   #'  is presumably low or high depending on mean percent forest
   #'  Dhat estimator changes based on smallest sample size in each pairing
   #'  Dhat1 if n < 50; Dhat4 if n >= 50 (Ridout & Linkie 2009)
-  nboot <- 100 #10000
+  nboot <- 10000
   
   ####  Cougar - Mule deer % Forest  ####
   coug_md_for_smr_over <- pred_prey_overlap(spp1 = filter(dets_smr, Species == "Cougar"), 
