@@ -550,7 +550,7 @@
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_smr_coeff_plot
   
-  pred_prey_for_fall_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Fall",], aes(x = predator, y = Dhat, group = Perc_Forest_level)) +
+  pred_prey_for_fall_coeff_plot <- ggplot(pred_prey_for_overlap_tbl[pred_prey_for_overlap_tbl$season == "Fall",], aes(x = predator, y = Dhat, group = Perc_Forest_level)) +
     geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
@@ -563,7 +563,7 @@
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_fall_coeff_plot
   
-  pred_prey_for_wtr_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Winter",], aes(x = predator, y = Dhat, group = Perc_Forest_level)) +
+  pred_prey_for_wtr_coeff_plot <- ggplot(pred_prey_for_overlap_tbl[pred_prey_for_overlap_tbl$season == "Winter",], aes(x = predator, y = Dhat, group = Perc_Forest_level)) +
     geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
@@ -576,7 +576,7 @@
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_wtr_coeff_plot
   
-  pred_prey_for_sprg_coeff_plot <- ggplot(pred_prey_overlap_tbl[pred_prey_overlap_tbl$season == "Spring",], aes(x = predator, y = Dhat, group = Perc_Forest_level)) +
+  pred_prey_for_sprg_coeff_plot <- ggplot(pred_prey_for_overlap_tbl[pred_prey_for_overlap_tbl$season == "Spring",], aes(x = predator, y = Dhat, group = Perc_Forest_level)) +
     geom_errorbar(aes(ymin = l95, ymax = u95, col = predator), width = 0.3, position = position_dodge(width = 0.4)) +
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
