@@ -77,33 +77,34 @@
            Category = ifelse(Species == "Elk" | Species == "Mule Deer" | 
                                      Species == "Moose" | Species == "White-tailed Deer", "Prey", Category)) 
   
-  #'  Filter predator data to the last image of each unique detection event
-  lastpredator <- capdata[capdata$Category == "Predator",] %>% 
-    group_by(caps) %>% 
-    slice_tail() %>%
-    ungroup()
-  lastother <- capdata[capdata$Category == "Other",] %>% 
-    group_by(caps) %>% 
-    slice_tail() %>%
-    ungroup()
-  
-  #'  Filter predator, prey, and other data to the first image from each unique detection event
+  #'  Filter data to the first image from each unique detection event
   firstprey <- capdata[capdata$Category == "Prey",] %>%
     group_by(caps) %>%
     slice(1L) %>%
-    ungroup()
-  # firstpredator <- capdata[capdata$Category == "Predator",] %>%
-  #   group_by(caps) %>%
-  #   slice(1L) %>%
-  #   ungroup()
-  # firstother <- capdata[capdata$Category == "Other",] %>%
-  #   group_by(caps) %>%
-  #   slice(1L) %>%
-  #   ungroup()
+    ungroup() %>%
+    mutate(Det_type = "first")
+  
+  #'  Filter data to the last image of each unique detection event
+  lastpredator <- capdata[capdata$Category == "Predator",] %>% 
+    group_by(caps) %>% 
+    slice_tail() %>%
+    ungroup() %>%
+    mutate(Det_type = "last")
+  lastprey <- capdata[capdata$Category == "Prey",] %>%
+    group_by(caps) %>%
+    slice_tail() %>%
+    ungroup() %>%
+    mutate(Det_type = "last")
+  lastother <- capdata[capdata$Category == "Other",] %>% 
+    group_by(caps) %>% 
+    slice_tail() %>%
+    ungroup() %>%
+    mutate(Det_type = "last")
   
   #'  Merge data based on last image of each predator/other detection and first 
   #'  image of each prey detection
   lastPred_firstPrey <- rbind(lastpredator, firstprey, lastother)
+  back2back_prey <- rbind(lastprey, firstprey)
 
   #'  Merge and filter to specific date ranges of interest
   #'  Want to include detections of ALL specie and humans to account for non-focal
@@ -114,22 +115,22 @@
     summer <- dets %>%
       filter(Date > paste0(yr, "-05-31")) %>%
       filter(Date < paste0(yr, "-10-01")) %>%
-      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category") %>%
+      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category", "caps", "Det_type") %>%
       arrange(CameraLocation, DateTime)
     fall <- dets %>%
       filter(Date > paste0(yr, "-09-30")) %>%
       filter(Date < paste0(yr, "-12-01")) %>%
-      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category") %>%
+      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category", "caps", "Det_type") %>%
       arrange(CameraLocation, DateTime)
     winter <- dets %>%
       filter(Date > paste0(yr, "-11-30")) %>%
       filter(Date < paste0(yr+1, "-04-01")) %>%
-      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category") %>%
+      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category", "caps", "Det_type") %>%
       arrange(CameraLocation, DateTime)
     spring <- dets %>%
       filter(Date > paste0(yr+1, "-03-29")) %>%
       filter(Date < paste0(yr+1, "-06-01")) %>%
-      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category") %>%
+      dplyr::select("File", "CameraLocation", "DateTime", "Date", "Time", "Species", "Category", "caps", "Det_type") %>%
       arrange(CameraLocation, DateTime)
     det_list <- list(summer, fall, winter, spring)
     return(det_list)
@@ -139,18 +140,30 @@
   lastfirst19 <- seasonal_filter(lastPred_firstPrey, yr = 2019)
   lastfirst20 <- seasonal_filter(lastPred_firstPrey, yr = 2020)
   
+  back2back18 <- seasonal_filter(back2back_prey, yr = 2018)
+  back2back19 <- seasonal_filter(back2back_prey, yr = 2019)
+  back2back20 <- seasonal_filter(back2back_prey, yr = 2020)
+  
   #'  Join all detection data per season, across years
   lpfp_smr <- rbind(lastfirst18[[1]], lastfirst19[[1]], lastfirst20[[1]])
   lpfp_fall <- rbind(lastfirst18[[2]], lastfirst19[[2]], lastfirst20[[2]])
   lpfp_wtr <- rbind(lastfirst18[[3]], lastfirst19[[3]], lastfirst20[[3]])
   lpfp_sprg <- rbind(lastfirst18[[4]], lastfirst19[[4]], lastfirst20[[4]])
   
+  b2b_smr <- rbind(back2back18[[1]], back2back19[[1]], back2back20[[1]])
+  b2b_fall <- rbind(back2back18[[2]], back2back19[[2]], back2back20[[2]])
+  b2b_wtr <- rbind(back2back18[[3]], back2back19[[3]], back2back20[[3]])
+  b2b_sprg <- rbind(back2back18[[4]], back2back19[[4]], back2back20[[4]])
+  
+  ####  Filter predator-prey detection data  ####
+  #'  ----------------------------------------
   #'  Group multiple detection events of same category (but of different species) 
   #'  when they occur sequentially, then reduce to a single observation (e.g., 
   #'  we only care about the LAST of the last predator detections in a series of 
   #'  predator detections).
   thin_dat <- function(dets) {
-    dat <- arrange(dets, CameraLocation, DateTime)
+    dat <- arrange(dets, CameraLocation, DateTime) %>%
+      dplyr::select(-c(caps, Det_type))
     caps_new <- c()
     caps_new[1] <- 1
     for (i in 2:nrow(dat)){
@@ -259,9 +272,8 @@
   resp2pred_wtr <- spppair_dat(lpfp_wtr_thin, spp1 = "Predator", spp2 = "Prey")
   resp2pred_sprg <- spppair_dat(lpfp_sprg_thin, spp1 = "Predator", spp2 = "Prey")
   
-  
-  ####  Calculate times between detection events  ####
-  #'  --------------------------------------------
+  ####  Calculate times between detection events of predator-prey  ####
+  #'  -------------------------------------------------------------
   #'  Function to calculate time between detection events of two focal species
   #'  Data structured so only last image of spp1 and first image of spp2 per
   #'  detection event are included in data frame.
@@ -292,6 +304,57 @@
   tbd_pred.prey_wtr <- tbd(resp2pred_wtr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_sprg <- tbd(resp2pred_sprg, spp1 = "Predator", unittime = "min")
   
+  ####  Calculate times between detection events of conspecifics  ####
+  #'  ------------------------------------------------------------
+  #'  Function to calculate time between detection events of conspecifics
+  #'  Data structured so only first and last image per detection event are included.
+  tbd <- function(dat, unittime) {
+    #'  Group multiple detection events of same species when they occur sequentially
+    #'  at same camera site
+    dat <- arrange(dat, CameraLocation, DateTime, File)
+    caps_new <- c()
+    caps_new[1] <- 1
+    for (i in 2:nrow(dat)){
+      if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps_new[i] = i
+      else(if (dat$Species[i-1] != dat$Species[i]) caps_new[i] = i
+           else caps_new[i] = caps_new[i-1])
+    }
+    #'  Add new column to larger data set
+    caps_new <- as.factor(caps_new)
+    detection_data <- cbind(as.data.frame(dat), caps_new)
+    
+    #'  Create empty vector to be filled
+    detection_data$TimeSinceLastDet <- c()
+    #'  Fill first element of the vector to get it started
+    detection_data$TimeSinceLastDet[1] <- 0
+    #'  Loop through each row to calculate elapsed time since previous detection
+    for (i in 2:nrow(detection_data)){
+      #'  If previous detection was different species, set time to 0
+      if (detection_data$Species[i-1] != detection_data$Species[i]) detection_data$TimeSinceLastDet[i] = 0
+      #'  If previous detection is same species as current detection, calculate
+      #'  the difference in time from previous detection to current detection
+      if (detection_data$Species[i-1] == detection_data$Species[i]) detection_data$TimeSinceLastDet[i] = difftime(detection_data$DateTime[i], detection_data$DateTime[i-1], units = unittime)
+      #'  If previous detection was from a different camera site, set to 0
+      if (detection_data$CameraLocation[i-1] != detection_data$CameraLocation[i]) detection_data$TimeSinceLastDet[i] = 0
+    }
+    #'  Retain only Det_type = first from each cap event (don't want the tbd from
+    #'  the first to last image of the same detection event, only the tbd from
+    #'  the last image of a detection to the first image of the next detection)
+    detection_data <- filter(detection_data, Det_type == "first") %>%
+      #'  Filter out times = 0 (first detection at a camera site)
+      filter(TimeSinceLastDet > 0) %>%
+      dplyr::select(-c(caps, Det_type, caps_new))
+    return(detection_data)
+  }
+  #'  Calculate time between detections for different pairs of species of interest
+  #'  spp1 should be the species detected first, unittime is the unit of time 
+  #'  to make calculations in (options are: "sec", "min", "hour", "day")
+  #'  Note: there should be NO negative values! If there are negative values this
+  #'  means the script is calculating times between detections across camera sites
+  tbd_conspif_smr <- tbd(b2b_smr, unittime = "min")
+  tbd_conspif_fall <- tbd(b2b_fall, unittime = "min")
+  tbd_conspif_wtr <- tbd(b2b_wtr, unittime = "min")
+  tbd_conspif_sprg <- tbd(b2b_sprg, unittime = "min")
   
   ####  Add covariate data to tbd data  ####
   #'  ----------------------------------
@@ -301,7 +364,6 @@
   #'  "High" HCI = Complexity_index1 values => mean(Complexity_index1)
   stations_data <- read.csv("./Data/cam_stations_hab_complex_data.csv") %>%
     dplyr::select(-"X")
-  colnames(stations_data)[colnames(stations_data) == 'backgroundRisk'] <- 'HCI_level'
   
   #'  Join time-between-detection data with site-level covariates
   tbd_pred.prey_smr <- left_join(tbd_pred.prey_smr, stations_data, by = "CameraLocation") %>%
@@ -313,6 +375,15 @@
   tbd_pred.prey_sprg <- left_join(tbd_pred.prey_sprg, stations_data, by = "CameraLocation") %>%
     mutate(Season = "Spring")
   
+  tbd_conspif_smr <- left_join(tbd_conspif_smr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Summer")
+  tbd_conspif_fall <- left_join(tbd_conspif_fall, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Fall")
+  tbd_conspif_wtr <- left_join(tbd_conspif_wtr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Winter")
+  tbd_conspif_sprg <- left_join(tbd_conspif_sprg, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Spring")
+  
   #'  Merge into one large data set
   tbd_pred.prey <- rbind(tbd_pred.prey_smr, tbd_pred.prey_fall, tbd_pred.prey_wtr, tbd_pred.prey_sprg) %>%
     arrange(CameraLocation, DateTime) %>%
@@ -320,40 +391,29 @@
     relocate(Year, .before = DateTime) %>%
     relocate(Study_Area, .before = Year) %>%
     relocate(Season, .before = DateTime) %>%
-    relocate(TimeSinceLastDet, .after = HCI_level)
+    relocate(TimeSinceLastDet, .after = backgroundRisk_For)
+  
+  tbd_conspif <- rbind(tbd_conspif_smr, tbd_conspif_fall, tbd_conspif_wtr, tbd_conspif_sprg) %>%
+    arrange(CameraLocation, DateTime) %>%
+    dplyr::select(-c(File, Category)) %>%
+    relocate(Year, .before = DateTime) %>%
+    relocate(Study_Area, .before = Year) %>%
+    relocate(Season, .before = DateTime) %>%
+    relocate(TimeSinceLastDet, .after = backgroundRisk_For)
   
   #'  Double check there are no negative times-between-detection
-  summary(tbd_pred.prey)
+  summary(tbd_pred.prey$TimeSinceLastDet)
+  summary(tbd_conspif$TimeSinceLastDet)
   
   #'  SAVE!
   write.csv(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".csv"))
   save(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".RData"))
   
-  #'  Split data by species pairs of interest
-  unique(tbd_pred.prey$spp_pair)
-  tbd_coug.md <- filter(tbd_pred.prey, spp_pair == "Cougar_Mule Deer")
-  tbd_coug.elk <- filter(tbd_pred.prey, spp_pair == "Cougar_Elk")
-  tbd_coug.wtd <- filter(tbd_pred.prey, spp_pair == "Cougar_White-tailed Deer")
-  tbd_coug.moose <- filter(tbd_pred.prey, spp_pair == "Cougar_Moose")
-  tbd_wolf.md <- filter(tbd_pred.prey, spp_pair == "Wolf_Mule Deer")
-  tbd_wolf.elk <- filter(tbd_pred.prey, spp_pair == "Wolf_Elk")
-  tbd_wolf.wtd <- filter(tbd_pred.prey, spp_pair == "Wolf_White-tailed Deer")
-  tbd_wolf.moose <- filter(tbd_pred.prey, spp_pair == "Wolf_Moose")
-  tbd_bear.md <- filter(tbd_pred.prey, spp_pair == "Black Bear_Mule Deer")
-  tbd_bear.elk <- filter(tbd_pred.prey, spp_pair == "Black Bear_Elk")
-  tbd_bear.wtd <- filter(tbd_pred.prey, spp_pair == "Black Bear_White-tailed Deer")
-  tbd_bear.moose <- filter(tbd_pred.prey, spp_pair == "Black Bear_Moose")
-  tbd_bob.md <- filter(tbd_pred.prey, spp_pair == "Bobcat_Mule Deer")
-  tbd_bob.wtd <- filter(tbd_pred.prey, spp_pair == "Bobcat_White-tailed Deer")
-  tbd_coy.md <- filter(tbd_pred.prey, spp_pair == "Coyote_Mule Deer")
-  tbd_coy.wtd <- filter(tbd_pred.prey, spp_pair == "Coyote_White-tailed Deer")
+  write.csv(tbd_conspif, file = paste0("./Outputs/tbd_conspif_", Sys.Date(), ".csv"))
+  save(tbd_conspif, file = paste0("./Outputs/tbd_conspif_", Sys.Date(), ".RData"))
+
   
   
-  
-  ####  NEXT- run some models 
-  ####  Permutation test approach 
-  ####  Do I split out by species combos or just lump all species together (e.g.,
-  ####  time between detection of any predator and any prey)?
   
   
   
