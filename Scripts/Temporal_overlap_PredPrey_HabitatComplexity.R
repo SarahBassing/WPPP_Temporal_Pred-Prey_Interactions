@@ -52,7 +52,8 @@
     )
   stations_data <- read.csv("./Data/cam_stations_data.csv") %>%
     dplyr::select(c("CameraLocation", "Year", "Study_Area", "Elev", "Slope", "TRI", 
-                    "PercForest", "PercForestMix2", "Canopy_Cov", "Latitude", "Longitude")) %>%
+                    "PercForest", "PercForestMix2", "Canopy_Cov", "Monitoring",
+                    "Latitude", "Longitude")) %>%
     mutate(Canopy_Cov = ifelse(is.na(Canopy_Cov), 22, Canopy_Cov)) # fill in missing values based on mean canopy cover (22%)
   
   #'  Make camera coordinates spatial
