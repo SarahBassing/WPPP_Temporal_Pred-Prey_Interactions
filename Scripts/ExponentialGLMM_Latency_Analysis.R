@@ -31,7 +31,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_pred.prey_2022-09-19.RData") #2022-09-07 2022-09-13
+  load("./Outputs/tbd_pred.prey_2022-09-20.RData") #2022-09-07 2022-09-13
   #'  Remove observations involving lynx due to too few lynx detections
   tbd_pred.prey <- tbd_pred.prey %>%
     filter(PredatorID != "Lynx") %>%
