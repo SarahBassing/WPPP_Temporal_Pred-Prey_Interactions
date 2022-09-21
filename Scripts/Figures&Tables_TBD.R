@@ -110,7 +110,7 @@
            Parameter = ifelse(Parameter == "beta13", "Season: Winter", Parameter),
            Parameter = ifelse(Parameter == "beta14", "Season: Spring", Parameter)) %>%
     filter(Estimate != 0)
-  md.out <- md.out[1:10,]
+  md.out <- md.out[1:6,]
   elk.out <- coefs(tbd.elk, spp = "Elk") %>%
     mutate(Parameter = ifelse(Parameter == "alpha0", "Intercept", Parameter),
            Parameter = ifelse(Parameter == "beta1", "Terrain ruggendess", Parameter),
@@ -120,7 +120,7 @@
            Parameter = ifelse(Parameter == "beta13", "Season: Winter", Parameter),
            Parameter = ifelse(Parameter == "beta14", "Season: Spring", Parameter)) %>%
     filter(Estimate != 0)
-  elk.out <- elk.out[1:10,]
+  elk.out <- elk.out[1:6,]
   moose.out <- coefs(tbd.moose, spp = "Moose") %>%
     mutate(Parameter = ifelse(Parameter == "alpha0", "Intercept", Parameter),
            Parameter = ifelse(Parameter == "beta1", "Terrain ruggendess", Parameter),
@@ -130,7 +130,7 @@
            Parameter = ifelse(Parameter == "beta13", "Season: Winter", Parameter),
            Parameter = ifelse(Parameter == "beta14", "Season: Spring", Parameter)) %>%
     filter(Estimate != 0)
-  moose.out <- moose.out[1:10,]
+  moose.out <- moose.out[1:6,]
   wtd.out <- coefs(tbd.wtd, spp = "White-tailed deer") %>%
     mutate(Parameter = ifelse(Parameter == "alpha0", "Intercept", Parameter),
            Parameter = ifelse(Parameter == "beta1", "Terrain ruggendess", Parameter),
@@ -140,7 +140,7 @@
            Parameter = ifelse(Parameter == "beta13", "Season: Winter", Parameter),
            Parameter = ifelse(Parameter == "beta14", "Season: Spring", Parameter)) %>%
     filter(Estimate != 0)
-  wtd.out <- wtd.out[1:10,]
+  wtd.out <- wtd.out[1:6,]
   
   conspecific.out <- rbind(elk.out, moose.out, md.out, wtd.out)
   # write.csv(conspecific.out, "./Outputs/TimeBtwnDetections/tbd.conspecific_results_table.csv")
