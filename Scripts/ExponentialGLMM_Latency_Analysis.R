@@ -86,7 +86,7 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 50000; nb <- 10000; nt <- 5; na <- 2000
+  nc <- 3; ni <- 5000; nb <- 1000; nt <- 5; na <- 200
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -152,7 +152,7 @@
   #'  -----------------------------------
   #####  Predator - MULE DEER Analysis  ####
   #'  -----------------------------------
-  #'  Source JAGS model 1
+  #'  Source JAGS model
   #'  Make sure inits and parameters being monitored match up with sourced model
   #'  Make sure model parameterization matches order of covariates in bundled data
   source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat.R")
@@ -162,8 +162,11 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "mu.mu") #"beta3", "beta4", 
-    
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd") #"beta3", "beta4", 
+  
+  #######  HOW DO I REPORT THE RANDOM EFFECT?  #########
+  #######  SHOULD I DO SOME KIND OF GoF TEST?  #########  
+  
   #'  Run model
   start.time <- Sys.time()
   tbd.pred.md <- jags(md_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_habitat.txt',
@@ -178,7 +181,7 @@
   #'  -----------------------------
   #####  Predator - ELK Analysis  ####
   #'  -----------------------------
-  #'  Source JAGS model 2
+  #'  Source JAGS model
   #'  NOTE: NO bobcat or wolf observations in this model (consider dropping coyote too)
   #'  PredID 1 = black bear, PredID2 = cougar, PredID3 = coyote
   #'  Dropping interactions owing to relatively small sample size
@@ -190,7 +193,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "mu.mu")  #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd")  #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
@@ -218,7 +221,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "mu.mu")  #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd")  #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
@@ -244,7 +247,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd") #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
@@ -255,6 +258,13 @@
   print(tbd.pred.wtd)
   mcmcplot(tbd.pred.wtd$samples)
   save(tbd.pred.wtd, file = "./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_habitat.RData")
+  
+  
+  
+  
+  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT???  ####
+  
+  
   
   
  
@@ -420,6 +430,6 @@
 
   
   
-  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT  ####
+
   
   
