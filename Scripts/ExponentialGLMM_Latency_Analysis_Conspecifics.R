@@ -136,13 +136,13 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
   tbd.md <- jags(md_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_habitat.txt',
-                      inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
-                      n.adapt = na, parallel = TRUE)
+                 inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                 n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.md)
   mcmcplot(tbd.md$samples)
@@ -160,13 +160,13 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
   tbd.elk <- jags(elk_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_habitat.txt',
-                 inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
-                 n.adapt = na, parallel = TRUE)
+                  inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                  n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.elk)
   mcmcplot(tbd.elk$samples)
@@ -184,13 +184,13 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
   tbd.moose <- jags(moose_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_habitat.txt',
-                  inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
-                  n.adapt = na, parallel = TRUE)
+                    inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                    n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.moose)
   mcmcplot(tbd.moose$samples)
@@ -210,13 +210,13 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
   tbd.wtd <- jags(wtd_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_habitat.txt',
-                 inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
-                 n.adapt = na, parallel = TRUE)
+                  inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                  n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.wtd)
   mcmcplot(tbd.wtd$samples)
@@ -224,6 +224,7 @@
   
   
   
- 
-  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT  ####
+  
+  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT????  ####
+  
   
