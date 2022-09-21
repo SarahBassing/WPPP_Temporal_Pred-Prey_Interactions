@@ -80,6 +80,29 @@
             #'  ------------------
             #'  mu.mu = mean number of minutes between events
             mu.mu <- mean(mu[])
+            #'  Mean tbd per month, predator, and camera site
+            for(j in 1:ncams){
+              for(hh in 1:4){
+                for(jj in 1:5){
+                  tbd[j, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] +
+                  beta[1]*0 + beta[2]*0 + alpha[ncams])
+                }
+              }
+            }
+            #'  Mean tbd per month and predator
+            for(hh in 1:4){
+              for(jj in 1:5){
+                mean.tbd[hh, jj] <- mean(tbd[, hh, jj])
+              }
+            }
+            #'  Mean tbd per month
+            for(hh in 1:4){
+              season.tbd[hh] <- mean(mean.tbd[hh,])
+            }
+            #'  Mean tbd per predator
+            for(jj in 1:5){
+              pred.tbd[jj] <- mean(mean.tbd[,jj])
+            }
         
             }
             ")
