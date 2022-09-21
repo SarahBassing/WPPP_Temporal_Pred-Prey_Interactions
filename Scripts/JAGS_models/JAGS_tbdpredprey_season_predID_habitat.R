@@ -78,8 +78,6 @@
             
             #'  Derived parameters
             #'  ------------------
-            #'  mu.mu = mean number of minutes between events
-            mu.mu <- mean(mu[])
             #'  Mean tbd per month, predator, and camera site
             for(j in 1:ncams){
               for(hh in 1:4){
@@ -103,6 +101,8 @@
             for(jj in 1:5){
               pred.tbd[jj] <- mean(mean.tbd[,jj])
             }
+            #' Mean number of minutes between events
+            mu.tbd <- mean(season.tbd[])
         
             }
             ")
