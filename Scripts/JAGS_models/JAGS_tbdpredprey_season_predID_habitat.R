@@ -79,30 +79,52 @@
             #'  Derived parameters
             #'  ------------------
             #'  Mean tbd per month, predator, and camera site
-            for(j in 1:ncams){
-              for(hh in 1:4){
-                for(jj in 1:5){
-                  tbd[j, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] +
-                  beta[1]*0 + beta[2]*0 + alpha[ncams])
-                }
-              }
-            }
-            #'  Mean tbd per month and predator
+            # for(j in 1:ncams){
+            #   for(hh in 1:4){
+            #     for(jj in 1:5){
+            #       tbd[j, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] +
+            #       beta[1]*0 + beta[2]*0 + alpha[ncams])
+            #     }
+            #   }
+            # }
+      #'  Mean tbd per month, predator, and camera site
             for(hh in 1:4){
               for(jj in 1:5){
-                mean.tbd[hh, jj] <- mean(tbd[, hh, jj])
+                tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] +
+                beta[1]*0 + beta[2]*0)
               }
             }
-            #'  Mean tbd per month
+
+            #' #'  Mean tbd per month and predator
+            #' for(hh in 1:4){
+            #'   for(jj in 1:5){
+            #'     mean.tbd[hh, jj] <- mean(tbd[, hh, jj])
+            #'   }
+            #' }
+            #' #'  Mean tbd per season assuming all predators are equal sample size
+            #' for(hh in 1:4){
+            #'   season.tbd[hh] <- mean(mean.tbd[hh,])
+            #' }
+      
+      #'  Mean tbd per season accounts for sample size in all the seasons
             for(hh in 1:4){
-              season.tbd[hh] <- mean(mean.tbd[hh,])
+              season.tbd[hh] <- mean(tbd[hh,])
             }
-            #'  Mean tbd per predator
+      
+            #' #'  Mean tbd per predator assuming all seasons are equal sample size
+            #' for(jj in 1:5){
+            #'   pred.tbd[jj] <- mean(mean.tbd[,jj])
+            #' }
+      
+      #'  Mean tbd per predator accounts for sample size in all the predators
             for(jj in 1:5){
-              pred.tbd[jj] <- mean(mean.tbd[,jj])
+              pred.tbd[jj] <- mean(tbd[,jj])
             }
-            #' Mean number of minutes between events
-            mu.tbd <- mean(season.tbd[])
+            #' #' Mean number of minutes between events across any season - currently skewed by whichever season has larger smaple size
+            #' mu.tbd <- mean(season.tbd[])
+      
+      mu.tbd <- mean(tbd[,])
+      mu.mu <- mean(mu[])
         
             }
             ")
