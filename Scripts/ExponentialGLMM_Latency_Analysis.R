@@ -102,7 +102,7 @@
                                        TRI, TRI_250m, PercForest, Species, spp_pair)) %>%
       mutate(cams = as.numeric(factor(CameraLocation), levels = CameraLocation), # must be 1 - 313 (not 0 - 312) if using nested indexing for random effect
              Season = as.numeric(factor(Season, levels = c("Summer", "Fall", "Winter", "Spring"))), # levels must be 1-4 (not 0-3) for nested indexing
-             PredatorID = as.numeric(factor(PredatorID)), # levels must be 1-5 for nested indexing
+             PredatorID = as.numeric(factor(PredatorID, levels = c("Bobcat", "Coyote", "Black Bear", "Cougar", "Wolf"))), # levels must be 1-5 for nested indexing
              Complexity_index1 = scale(Complexity_index1),
              TRI = scale(TRI),
              PercForest = scale(PercForest),
@@ -147,7 +147,7 @@
   tbd_moose_shorter <- tbd_moose_short %>% filter(PredatorID != "Bobcat") %>%
     filter(PredatorID != "Coyote")
   moose_bundled <- bundle_dat(tbd_moose_shorter)
-  
+  all_bundled <- bundle_dat(tbd_all_short)
   
   #'  -----------------------------------
   #####  Predator - MULE DEER Analysis  ####
@@ -162,7 +162,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
   
   #######  HOW DO I REPORT THE RANDOM EFFECT?  #########
   #######  SHOULD I DO SOME KIND OF GoF TEST?  #########  
@@ -258,6 +258,32 @@
   print(tbd.pred.wtd)
   mcmcplot(tbd.pred.wtd$samples)
   save(tbd.pred.wtd, file = "./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_habitat.RData")
+  
+  
+  #'  -----------------------------------
+  #####  Predator - ALL PREY Analysis  ####
+  #'  -----------------------------------
+  #'  Source JAGS model
+  #'  Make sure inits and parameters being monitored match up with sourced model
+  #'  Make sure model parameterization matches order of covariates in bundled data
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(all_bundled$y, list(all_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.pred.all <- jags(all_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_habitat.txt',
+                      inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                      n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.pred.all)
+  mcmcplot(tbd.pred.all$samples)
+  save(tbd.pred.all, file = "./Outputs/TimeBtwnDetections/tbd.pred.all-season_predID_habitat.RData")
   
   
   
