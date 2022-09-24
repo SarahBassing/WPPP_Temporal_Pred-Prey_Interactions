@@ -21,7 +21,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_conspif_2022-09-20.RData") 
+  load("./Outputs/tbd_conspif_2022-09-23.RData") 
   #'  Remove observations involving lynx due to too few lynx detections
   tbd_conspif <- tbd_conspif %>%
     #'  Change units of time
@@ -76,7 +76,7 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 50000; nb <- 10000; nt <- 5; na <- 2000
+  nc <- 3; ni <- 5000; nb <- 1000; nt <- 5; na <- 200
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -136,7 +136,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -160,7 +160,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -184,7 +184,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -210,7 +210,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -225,6 +225,6 @@
   
   
   
-  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT????  ####
+  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT  ####
   
   
