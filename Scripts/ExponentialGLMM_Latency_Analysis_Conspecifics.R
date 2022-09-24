@@ -76,7 +76,7 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 5000; nb <- 1000; nt <- 5; na <- 200
+  nc <- 3; ni <- 75000; nb <- 30000; nt <- 5; na <- 5000
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -121,7 +121,7 @@
   elk_con_bundled <- bundle_dat(tbd_elk_con_short)
   moose_con_bundled <- bundle_dat(tbd_moose_con_short)
   wtd_con_bundled <- bundle_dat(tbd_wtd_con_short)
-  
+  all_con_bundled <- bundle_dat(tbd_all_con_short)
   
   #'  ------------------------
   #####  MULE DEER Analysis  ####
@@ -201,8 +201,6 @@
   #####  WHITE-TAILED DEER Analysis  ####
   #'  --------------------------------
   #'  Source JAGS model
-  #'  Make sure inits and parameters being monitored match up with sourced model
-  #'  Make sure model parameterization matches order of covariates in bundled data
   source("./Scripts/JAGS_models/JAGS_tbdconspecific_season_habitat.R")
   
   #'  Set up initial values
@@ -223,7 +221,28 @@
   save(tbd.wtd, file = "./Outputs/TimeBtwnDetections/tbd.wtd-season_habitat.RData")
   
   
+  #'  ---------------------------------------
+  #####  Predator - ALL UNGULATES Analysis  ####
+  #'  ---------------------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdconspecific_season_habitat.R")
   
+  #'  Set up initial values
+  alpha.init <- log(aggregate(all_con_bundled$y, list(all_con_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "mu.tbd", "mu.mu") 
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.con.all <- jags(all_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_habitat.txt',
+                       inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                       n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.con.all)
+  mcmcplot(tbd.con.all$samples)
+  save(tbd.con.all, file = "./Outputs/TimeBtwnDetections/tbd.con.all-season_habitat.RData")
   
   ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT  ####
   
