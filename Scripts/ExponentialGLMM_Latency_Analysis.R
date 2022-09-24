@@ -86,7 +86,7 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 5000; nb <- 1000; nt <- 5; na <- 200
+  nc <- 3; ni <- 75000; nb <- 30000; nt <- 5; na <- 5000
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -107,7 +107,7 @@
              Complexity_index1 = scale(Complexity_index1),
              TRI = scale(TRI),
              PercForest = scale(PercForest),
-             Monitoring = ifelse(Monitoring == "Trail", 1, 2),
+             Monitoring = ifelse(Monitoring == "Trail", 0, 1),
              TRI_level = ifelse(backgroundRisk_TRI == "Low", 0, 1),
              PercFor_level = ifelse(backgroundRisk_For == "Low", 0, 1))
     print(summary(tbd_dat))
@@ -143,15 +143,6 @@
   tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf")
   elk_bundled <- bundle_dat(tbd_elk_shorter)
   moose_bundled <- bundle_dat(tbd_moose_short)
-  #' #'  Remove single wolf-elk observation and bobcat observations since not a main 
-  #' #'  predator of elk (keeping coyotes b/c prey on neonates)
-  #' tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf") %>%
-  #'   filter(PredatorID != "Bobcat")
-  #' elk_bundled <- bundle_dat(tbd_elk_shorter)
-  #' #'  Remove bobcat and coyote observations - not main predators of moose
-  #' tbd_moose_shorter <- tbd_moose_short %>% filter(PredatorID != "Bobcat") %>%
-  #'   filter(PredatorID != "Coyote")
-  #' moose_bundled <- bundle_dat(tbd_moose_shorter)
   all_bundled <- bundle_dat(tbd_all_short)
   
   #'  -----------------------------------
@@ -184,10 +175,7 @@
   #####  Predator - ELK Analysis  ####
   #'  -----------------------------
   #'  Source JAGS model
-  #'  NOTE: NO bobcat or wolf observations in this model (consider dropping coyote too)
-  #'  PredID 1 = black bear, PredID2 = cougar, PredID3 = coyote
-  #'  Dropping interactions owing to relatively small sample size
-  #'  Changes parameterization of JAGS model - source slightly different model
+  #'  NOTE: NO wolf observations in this model so slightly different version of model
   source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat_nowolf.R")
   
   #'  Set up initial values
@@ -195,7 +183,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")  #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -212,10 +200,6 @@
   #####  Predator - MOOSE Analysis  ####
   #'  -------------------------------
   #'  Source JAGS model
-  #'  NOTE: NO bobcat or coyote observations in this model
-  #'  PredID 1 = black bear, PredID2 = cougar, PredID3 = wolf
-  #'  Dropping interactions owing to relatively small sample size
-  #'  Changes parameterization of JAGS model - source slightly different model
   source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat.R")
   
   #'  Set up initial values
@@ -223,7 +207,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")  #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")   
   
   #'  Run model
   start.time <- Sys.time()
@@ -240,8 +224,6 @@
   #####  Predator - WHITE-TAILED DEER Analysis  ####
   #'  -------------------------------------------
   #'  Source JAGS model
-  #'  Make sure inits and parameters being monitored match up with sourced model
-  #'  Make sure model parameterization matches order of covariates in bundled data
   source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat.R")
   
   #'  Set up initial values
@@ -249,7 +231,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")
   
   #'  Run model
   start.time <- Sys.time()
@@ -266,8 +248,6 @@
   #####  Predator - ALL PREY Analysis  ####
   #'  -----------------------------------
   #'  Source JAGS model
-  #'  Make sure inits and parameters being monitored match up with sourced model
-  #'  Make sure model parameterization matches order of covariates in bundled data
   source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat.R")
   
   #'  Set up initial values
@@ -275,7 +255,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -293,168 +273,7 @@
   ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT - X^2 test  ####
   
   
-  
-  
- 
-  #' #####  Set up model in BUGS language  ####
-  #' #'  -----------------------------------
-  #' cat(file = './Outputs/TimeBtwnDetections/tbd_season_predID_HCI.txt', "
-  #'     model{
-  #'     
-  #'     #'  Define priors
-  #'     #'  -------------
-  #'     #'  Prior for intercept
-  #'     alpha0 ~ dnorm(0, 0.001)
-  #'     
-  #'     #' #'  Prior for beta coefficient (habitat complexity index)
-  #'     #' beta ~ dnorm(0, 0.01)  # dunif(-10, 10)
-  #'     
-  #'     #'  Priors for categorical beta coefficients
-  #'     #'  Season
-  #'     beta1[1] <- 0
-  #'     for(hh in 2:4){
-  #'       beta1[hh] ~ dnorm(0, 0.01)  # dunif(-10,10)
-  #'     }
-  #'     #'  Predator species ID
-  #'     beta2[1] <- 0
-  #'     for(jj in 2:5){
-  #'       beta2[jj] ~ dnorm(0, 0.01)  # dunif(-10,10)
-  #'     }
-  #'     
-  #'     #'  Interaction for TRI * predator species ID
-  #'     beta3[1] <- 0
-  #'     for(jj in 2:5){
-  #'       beta3[jj] ~ dnorm(0, 0.01)  # dunif(-10,10)
-  #'     }
-  #'     
-  #'     #'  Interaction for PercForest * predator species ID
-  #'     beta4[1] <- 0
-  #'     for(jj in 2:5){
-  #'       beta4[jj] ~ dnorm(0, 0.01)  # dunif(-10,10)
-  #'     }
-  #'     
-  #'     #'  Prior for random effect for each camera location
-  #'     for(j in 1:ncams){
-  #'       alpha[j] ~ dnorm(0, tau.alpha) # mu.alpha for mean if no intercept (alpha0)
-  #'     } 
-  #'     
-  #'     #'  Priors for TRI and PercForest
-  #'     for(k in 1:2){  #ncovs
-  #'       beta[k] ~ dnorm(0, 0.0001)
-  #'       # beta[k] ~ dunif(-10, 10)
-  #'     }
-  #'     
-  #'     #'  Hyperpriors for random effect
-  #'     #'  -----------------------------
-  #'     #'  Precision = 1/variance
-  #'     # mu.alpha ~ dnorm(0, 0.001)
-  #'     sigma ~ dunif(0, 10)   # sigma ~ dgamma(0.001, 0.001)  # gamma(shape, rate)
-  #'     tau.alpha <- pow(sigma, -2) 
-  #'     
-  #'     #'  Define likelihood
-  #'     #'  -----------------
-  #'     for(i in 1:ntbd){
-  #'       y[i] ~ dexp(lambda[i])   
-  #'       #y[i] ~ dgamma(1, lambda[i]) # different parameterization, same result
-  #' 
-  #'       lambda[i] <- 1/mu[i]
-  #'     
-  #'       log(mu[i]) <- alpha0 + beta[1]*covs[i, 5] + beta[2]*covs[i, 6] + beta1[covs[i,1]] + beta2[covs[i,2]] + beta3[covs[i,2]]*covs[i, 5] + beta4[covs[i,2]]*covs[i, 6] + alpha[site[i]]
-  #'       #log(mu[i]) <- alpha0 + beta[1]*covs[i, 5] + beta[2]*covs[i, 6] + beta1[covs[i,1]] + beta2[covs[i,2]] + alpha[site[i]]
-  #'       #log(mu[i]) <- alpha0 + beta*covs[i, 4] + beta1[covs[i,1]] + beta2[covs[i,2]] + alpha[site[i]]
-  #'       #log(mu[i]) <- alpha0 + beta*covs[i, 3] + beta1[covs[i,1]] + beta2[covs[i,2]] + beta3[covs[i,2]]*covs[i, 5] + alpha[site[i]]
-  #'     }
-  #'     
-  #'     #'  Derived parameters
-  #'     #'  ------------------
-  #'     #'  mu.mu = mean number of minutes between events
-  #'     mu.mu <- mean(mu[])
-  #' 
-  #'     }
-  #'     ")
-  #'     
-  #'     
-  #' #'  Define and bundle data
-  #' tbd_pp <- tbd_md_short
-  #' #'  Number of time-btwn-detection observations
-  #' ntbd <- nrow(tbd_pp)
-  #' #'  Number of unique camera locations
-  #' ncams <- length(unique(tbd_pp$CameraLocation))
-  #' #'  Format covariate data
-  #' tbd_dat <- dplyr::select(tbd_pp, c(tbd_min, tbd_hour, tbd_day, CameraLocation,
-  #'                                    Season, PredatorID, HuntingMode, TrophicLevel,
-  #'                                    Complexity_index1, backgroundRisk_HCI,
-  #'                                    backgroundRisk_TRI, backgroundRisk_For,
-  #'                                    TRI, TRI_250m, PercForest, Species, spp_pair)) %>%
-  #'   mutate(cams = as.numeric(factor(CameraLocation), levels = CameraLocation), # must be 1 - 313 (not 0 - 312) if using nested indexing for random effect
-  #'          Season = as.numeric(factor(Season, levels = c("Summer", "Fall", "Winter", "Spring"))), # levels must be 1-4 (not 0-3) for nested indexing
-  #'          PredatorID = as.numeric(factor(PredatorID, levels = c("Black Bear", "Bobcat", "Cougar", "Coyote", "Wolf"))), # levels must be 1-5 for nested indexing
-  #'          HCI_level = ifelse(backgroundRisk_HCI == "Low", 0, 1),
-  #'          Complexity_index1 = scale(Complexity_index1),
-  #'          TRI = scale(TRI),
-  #'          PercForest = scale(PercForest))
-  #' 
-  #' summary(tbd_dat)
-  #' head(tbd_dat)
-  #' #'  Covariate matrix for JAGS
-  #' covs <- matrix(NA, ncol = 6, nrow = ntbd)
-  #' covs[,1] <- tbd_dat$Season
-  #' covs[,2] <- tbd_dat$PredatorID
-  #' covs[,3] <- tbd_dat$HCI_level
-  #' covs[,4] <- tbd_dat$Complexity_index1
-  #' covs[,5] <- tbd_dat$TRI
-  #' covs[,6] <- tbd_dat$PercForest
-  #' head(covs)
-  #' #'  Number of covariates
-  #' ncovs <- ncol(covs)
-  #' 
-  #' #'  Time-between-detections
-  #' tbd <- tbd_pp$tbd_min
-  #' # tbd <- tbd_pp$tbd_hour
-  #' # tbd <- tbd_pp$tbd_day
-  #' summary(tbd)
-  #' hist(tbd)
-  #' 
-  #' bundled <- list(y = tbd, covs = covs, ncams = ncams, ncovs = ncovs, ntbd = ntbd,
-  #'                 site = tbd_dat$cams)
-  #' 
-  #' #####  Initial values, monitor parameters and specify MCMC settings  ####
-  #' #'  -----------------------------------------------------------------
-  #' #'  Set up initial values
-  #' alpha.init <- log(aggregate(tbd, list(tbd_dat$cams), FUN = mean)[,2])
-  #' inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))}  #beta = runif(ncovs,-1,1)
-  #' #why does it not need inits for alpha0, beta1, beta2, etc.???
-  #' 
-  #' #'  Parameters to be monitored
-  #' params <- c("mu.mu", "alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma") # 
-  #' 
-  #' #'  MCMC settings
-  #' nc <- 3; ni <- 50000; nb <- 10000; nt <- 5; na <- 2000
-  #' 
-  #' #'  Run model in JAGS
-  #' #'  -----------------
-  #' #'  Set up initial values
-  #' alpha.init <- log(aggregate(tbd, list(tbd_dat$cams), FUN = mean)[,2])
-  #' inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))}  #beta = runif(ncovs,-1,1)
-  #' 
-  #' #'  Parameters to be monitored
-  #' params <- c("mu.mu", "alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma") # 
-  #' 
-  #' #'  Source JAGS model
-  #' source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_X_habitat.R")
-  #' 
-  #' #'  Run model
-  #' start.time <- Sys.time()
-  #' tbd.mod <- jags(bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_X_habitat.txt',
-  #'                 inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
-  #'                 n.adapt = na, parallel = TRUE)
-  #' end.time <- Sys.time(); (run.time <- end.time - start.time)
-  #' print(tbd.mod)
-  #' mcmcplot(tbd.mod$samples)
-  #' # tbd.mod$mean
-  #' # tbd.mod$summary
-  #' # which(tbd.mod$summary[,"Rhat"] > 1.1)
-  #' # save(tbd.mod, file="./Outputs/TimeBtwnDetections/tbd_global.Rdata")
+
 
   
   
