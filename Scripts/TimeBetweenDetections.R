@@ -22,7 +22,7 @@
   megadata <- read.csv("./Data/full_camdata18-21_2022-08-19.csv") %>%
     dplyr::select("File", "DateTime", "Date", "Time", "CameraLocation", 
                   "Camera_Lat", "Camera_Long", "Animal", "Human", "Vehicle", 
-                  "Species", "HumanActivity", "Count", "Land_Mgnt", "Land_Owner") %>%
+                  "Species", "HumanActivity", "Count", "Monitoring") %>%
     filter(!grepl("Moultrie", CameraLocation)) %>%
     #  Need to have something in the Species column for each detection
     mutate(
@@ -30,16 +30,20 @@
       Species = ifelse(Vehicle == "TRUE" | Vehicle == "true", "Vehicle", Species),
       Species = ifelse(Species == "", "NA", Species),
       HumanActivity = ifelse(HumanActivity == "", "NA", HumanActivity),
-      #'  Identify if cameras were on public (1) or private (0) land
-      Public1 = ifelse(Land_Mgnt != "Private", 1, 0),
-      #'  Even though timberland is private, it's generally open to public recreation
-      #'  so considering it public for these purposes
-      Public1 = ifelse(Land_Mgnt == "Private" & Land_Owner == "Private timber", 1, Public1)
+      Monitoring = ifelse(Monitoring == "Closed road", "Dirt road", Monitoring),
+      Monitoring = ifelse(Monitoring == "Decommissioned road", "Dirt road", Monitoring),
+      Monitoring = ifelse(Monitoring == "Game trail", "Trail", Monitoring)#,
+      #' #'  Identify if cameras were on public (1) or private (0) land
+      #' Public1 = ifelse(Land_Mgnt != "Private", 1, 0),
+      #' #'  Even though timberland is private, it's generally open to public recreation
+      #' #'  so considering it public for these purposes
+      #' Public1 = ifelse(Land_Mgnt == "Private" & Land_Owner == "Private timber", 1, Public1)
     ) %>%
     #  Remove rows where no detection occurred but snuck into this data set somehow
     filter(!(Animal == "FALSE" & Human == "FALSE" & Vehicle == "FALSE") | (Animal == "false" & Human == "false" & Vehicle == "false")) %>%
     #'  Remove observations that are still NA
     filter(!is.na(Species)) %>%
+    #'  Format date and time data
     mutate(
       DateTime = as.POSIXct(DateTime,
                             format="%Y-%m-%d %H:%M:%S",tz="America/Los_Angeles"),
@@ -69,7 +73,8 @@
   #'  Add new column to larger data set
   capdata <- cbind(as.data.frame(dat), caps)
   
-  #'  Add column identifying predators, prey, cattle, hunters, and other
+  #'  Add column identifying predators, prey, and other (includes humans, cattle, 
+  #'  other wildlife species not listed below)
   capdata <- capdata %>%
     mutate(Category = ifelse(Species == "Bobcat" | Species == "Black Bear" | 
                                      Species == "Cougar" | Species == "Coyote" | 
