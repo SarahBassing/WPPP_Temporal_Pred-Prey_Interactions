@@ -6,13 +6,12 @@
   #'  ================================
   #'  Model sourced in ExponentialGLMM_Latency_Analysis.R
   #'  
-  #'  Test the effects of season, predator ID, terrain ruggedness, percent forest,
-  #'  and interactions between terrain, forest and predator ID on the latency
-  #'  between detections of predators followed by ungulate prey at camera sites.
-  #'  tbd ~ season + predatorID + TRI + PercForest + (predatorID*TRI) + (predatorID*PercForest)
-  #'  Note: two predators removed from list of predatorID, beta2, beta3, & beta4 
-  #'  only have 3 categories each now. Dropping interactions as well owing to 
-  #'  relatively small sample sizes.
+  #'  Test the effects of season, predator ID, terrain ruggedness & percent forest 
+  #'  on the latency between detections of predators followed by ungulate prey 
+  #'  at camera sites. Same as JAGS_tbdpredprey_season_predID_habitat model but
+  #'  wolves (beta2[5]) excluded from analysis owing to too few wolf-ungulate 
+  #'  observations so only 4 predatorID categories in this parameterization.
+  #'  tbd ~ season + predatorID + TRI + PercForest
   #'  ================================
   
   cat(file = './Outputs/TimeBtwnDetections/tbd_season_predID_habitat_nowolf.txt', "
@@ -87,7 +86,6 @@
             #' Mean number of minutes between events
             mu.tbd <- mean(tbd[,])
             mu.mu <- mean(mu[])
-        
       
           }
           ")
