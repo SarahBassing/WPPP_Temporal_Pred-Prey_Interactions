@@ -66,10 +66,10 @@
   pred.moose.out <- coefs(tbd.pred.moose, spp = "Moose")
   pred.elk.out <- coefs(tbd.pred.elk, spp = "Elk")
   
-  con.md.out <- coefs_conspif(tbd.con.md, spp = "Mule deer") 
-  con.wtd.out <- coefs_conspif(tbd.con.wtd, spp = "White-tailed deer") 
-  con.moose.out <- coefs_conspif(tbd.con.moose, spp = "Moose")
-  con.elk.out <- coefs_conspif(tbd.con.elk, spp = "Elk") 
+  con.md.out <- coefs(tbd.md, spp = "Mule deer") 
+  con.wtd.out <- coefs(tbd.wtd, spp = "White-tailed deer") 
+  con.moose.out <- coefs(tbd.moose, spp = "Moose")
+  con.elk.out <- coefs(tbd.elk, spp = "Elk") 
   
   #'  Save coefficient estimates only
   pred.md.coef.out <- pred.md.out[1:10,1:4]
@@ -90,8 +90,8 @@
   
   #'  Save mean time-between-detection results only
   pred.md.mutbd.out <- pred.md.out[12:21,1:4]
-  pred.wtd.mutbd.out <- pred.wtd.out[11:21,1:4]
-  pred.moose.mutbd.out <- pred.moose.out[11:21,1:4]
+  pred.wtd.mutbd.out <- pred.wtd.out[12:21,1:4]
+  pred.moose.mutbd.out <- pred.moose.out[12:21,1:4]
   pred.elk.mutbd.out <- pred.elk.out[11:19,1:4]
   
   con.md.mutbd.out <- con.md.out[8:12,1:4]
