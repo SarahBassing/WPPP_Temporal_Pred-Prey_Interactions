@@ -69,19 +69,28 @@
               
               #'  Derived parameters
               #'  ------------------
-              #'  Mean tbd per month and camera site
-              for(j in 1:ncams){
-                for(hh in 1:4){
-                    tbd[j, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + 
-                                      beta[2]*0 + alpha[ncams])
-                }
-              }
-              #'  Mean tbd per month
+              #'  Mean tbd per season at mean TRI & PercForest
               for(hh in 1:4){
-                  season.tbd[hh] <- mean(tbd[, hh])
-              }
+                  tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0)
+              } 
+      
               #' Mean number of minutes between events
-              mu.tbd <- mean(season.tbd[])
+              mu.tbd <- mean(tbd[])
+              mu.mu <- mean(mu[])        
+      
+              #' #'  Mean tbd per month and camera site
+              #' for(j in 1:ncams){
+              #'   for(hh in 1:4){
+              #'       tbd[j, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + 
+              #'                         beta[2]*0 + alpha[ncams])
+              #'   }
+              #' }
+              #' #'  Mean tbd per month
+              #' for(hh in 1:4){
+              #'     season.tbd[hh] <- mean(tbd[, hh])
+              #' }
+              #' #' Mean number of minutes between events
+              #' mu.tbd <- mean(season.tbd[])
         
           
               }
