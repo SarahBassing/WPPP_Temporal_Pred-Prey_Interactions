@@ -31,7 +31,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_pred.prey_2022-09-20.RData") 
+  load("./Outputs/tbd_pred.prey_2022-09-23.RData") #2022-09-20
   #'  Remove observations involving lynx due to too few lynx detections
   tbd_pred.prey <- tbd_pred.prey %>%
     filter(PredatorID != "Lynx") %>%
@@ -96,17 +96,18 @@
     ncams <- length(unique(dat$CameraLocation))
     #'  Format covariate data
     tbd_dat <- dplyr::select(dat, c(tbd_min, tbd_hour, tbd_day, CameraLocation, 
-                                       Season, PredatorID, HuntingMode, TrophicLevel,
-                                       Complexity_index1, backgroundRisk_HCI,
-                                       backgroundRisk_TRI, backgroundRisk_For, 
-                                       TRI, TRI_250m, PercForest, Species, spp_pair)) %>%
+                                    Season, PredatorID, HuntingMode, TrophicLevel,
+                                    Complexity_index1, backgroundRisk_HCI,
+                                    backgroundRisk_TRI, backgroundRisk_For, 
+                                    TRI, TRI_250m, PercForest, Monitoring, 
+                                    Species, spp_pair)) %>%
       mutate(cams = as.numeric(factor(CameraLocation), levels = CameraLocation), # must be 1 - 313 (not 0 - 312) if using nested indexing for random effect
              Season = as.numeric(factor(Season, levels = c("Summer", "Fall", "Winter", "Spring"))), # levels must be 1-4 (not 0-3) for nested indexing
              PredatorID = as.numeric(factor(PredatorID, levels = c("Bobcat", "Coyote", "Black Bear", "Cougar", "Wolf"))), # levels must be 1-5 for nested indexing
              Complexity_index1 = scale(Complexity_index1),
              TRI = scale(TRI),
              PercForest = scale(PercForest),
-             HCI_level = ifelse(backgroundRisk_HCI == "Low", 0, 1),
+             Monitoring = ifelse(Monitoring == "Trail", 1, 2),
              TRI_level = ifelse(backgroundRisk_TRI == "Low", 0, 1),
              PercFor_level = ifelse(backgroundRisk_For == "Low", 0, 1))
     print(summary(tbd_dat))
@@ -119,7 +120,7 @@
     covs[,3] <- tbd_dat$Complexity_index1
     covs[,4] <- tbd_dat$TRI
     covs[,5] <- tbd_dat$PercForest
-    covs[,6] <- tbd_dat$HCI_level
+    covs[,6] <- tbd_dat$Monitoring
     covs[,7] <- tbd_dat$TRI_level
     covs[,8] <- tbd_dat$PercFor_level
     head(covs)
@@ -138,15 +139,19 @@
   }
   md_bundled <- bundle_dat(tbd_md_short)
   wtd_bundled <- bundle_dat(tbd_wtd_short)
-  #'  Remove single wolf-elk observation and bobcat observations since not a main 
-  #'  predator of elk (keeping coyotes b/c prey on neonates)
-  tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf") %>%
-    filter(PredatorID != "Bobcat")
+  #'  Remove single wolf-elk observation
+  tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf")
   elk_bundled <- bundle_dat(tbd_elk_shorter)
-  #'  Remove bobcat and coyote observations - not main predators of moose
-  tbd_moose_shorter <- tbd_moose_short %>% filter(PredatorID != "Bobcat") %>%
-    filter(PredatorID != "Coyote")
-  moose_bundled <- bundle_dat(tbd_moose_shorter)
+  moose_bundled <- bundle_dat(tbd_moose_short)
+  #' #'  Remove single wolf-elk observation and bobcat observations since not a main 
+  #' #'  predator of elk (keeping coyotes b/c prey on neonates)
+  #' tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf") %>%
+  #'   filter(PredatorID != "Bobcat")
+  #' elk_bundled <- bundle_dat(tbd_elk_shorter)
+  #' #'  Remove bobcat and coyote observations - not main predators of moose
+  #' tbd_moose_shorter <- tbd_moose_short %>% filter(PredatorID != "Bobcat") %>%
+  #'   filter(PredatorID != "Coyote")
+  #' moose_bundled <- bundle_dat(tbd_moose_shorter)
   all_bundled <- bundle_dat(tbd_all_short)
   
   #'  -----------------------------------
@@ -163,9 +168,6 @@
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
-  
-  #######  HOW DO I REPORT THE RANDOM EFFECT?  #########
-  #######  SHOULD I DO SOME KIND OF GoF TEST?  #########  
   
   #'  Run model
   start.time <- Sys.time()
@@ -186,18 +188,18 @@
   #'  PredID 1 = black bear, PredID2 = cougar, PredID3 = coyote
   #'  Dropping interactions owing to relatively small sample size
   #'  Changes parameterization of JAGS model - source slightly different model
-  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat_3pred.R")
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat_nowolf.R")
   
   #'  Set up initial values
   alpha.init <- log(aggregate(elk_bundled$y, list(elk_bundled$site), FUN = mean)[,2])
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd")  #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")  #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
-  tbd.pred.elk <- jags(elk_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_habitat_3pred.txt',
+  tbd.pred.elk <- jags(elk_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_habitat_nowolf.txt',
                   inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
@@ -214,18 +216,18 @@
   #'  PredID 1 = black bear, PredID2 = cougar, PredID3 = wolf
   #'  Dropping interactions owing to relatively small sample size
   #'  Changes parameterization of JAGS model - source slightly different model
-  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat_3pred.R")
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_habitat.R")
   
   #'  Set up initial values
   alpha.init <- log(aggregate(moose_bundled$y, list(moose_bundled$site), FUN = mean)[,2])
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd")  #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")  #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
-  tbd.pred.moose <- jags(moose_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_habitat_3pred.txt',
+  tbd.pred.moose <- jags(moose_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_habitat.txt',
                   inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
@@ -247,7 +249,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
   
   #'  Run model
   start.time <- Sys.time()
@@ -288,7 +290,7 @@
   
   
   
-  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT???  ####
+  ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT - X^2 test  ####
   
   
   
