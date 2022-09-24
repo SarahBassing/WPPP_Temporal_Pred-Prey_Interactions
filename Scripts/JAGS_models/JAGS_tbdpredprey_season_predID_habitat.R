@@ -1,5 +1,5 @@
   #'  ================================
-  #'  Predator-Prey Latency Model 3
+  #'  Predator-Prey Latency Model 1
   #'  Washington Predator-Prey Project
   #'  Sarah B. Bassing
   #'  Sept. 2022
@@ -10,7 +10,6 @@
   #'  and interactions between terrain, forest and predator ID on the latency
   #'  between detections of predators followed by ungulate prey at camera sites.
   #'  tbd ~ season + predatorID + TRI + PercForest
-  #'  Note: no interactions in this model
   #'  ================================
   
   cat(file = './Outputs/TimeBtwnDetections/tbd_season_predID_habitat.txt', "
