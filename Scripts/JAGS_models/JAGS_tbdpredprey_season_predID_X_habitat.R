@@ -77,8 +77,76 @@
         
         #'  Derived parameters
         #'  ------------------
-        #'  mu.mu = mean number of minutes between events
+        #'  Mean tbd per season & predator at mean TRI & PercForest
+        for(hh in 1:4){
+          for(jj in 1:5){
+            tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 +
+                               beta3[jj]*0 + beta4[jj]*0)
+          }
+        }
+        
+        #'  Mean tbd per season 
+        for(hh in 1:4){
+          season.tbd[hh] <- mean(tbd[hh,])
+        }
+      
+        #'  Mean tbd per predator 
+        for(jj in 1:5){
+          pred.tbd[jj] <- mean(tbd[,jj])
+        }
+      
+        #' Mean number of minutes between events
+        mu.tbd <- mean(tbd[,])
         mu.mu <- mean(mu[])
     
+      
+        #'  Mean tbd per season & predator across range of TRI values
+        for(i in 1:100){
+          for(hh in 1:4){
+            for(jj in 1:5){
+              tri.tbd[i, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*newcovs[i,1] + 
+                                 beta[2]*0 + beta3[jj]*newcovs[i,1] + beta4[jj]*0)
+            }
+          }
+        }
+        
+        #'  Mean tbd per predator across range of TRI values
+        for(i in 1:100){
+          for(jj in 1:5){
+            pred.tbd.tri[i,jj] <- mean(tri.tbd[i,,jj])
+          }
+        }
+      
+        #'  Mean tbd per season & predator across range of % forest values
+        for(i in 1:100){
+          for(hh in 1:4){
+            for(jj in 1:5){
+              for.tbd[i, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + 
+                                        beta[2]*newcovs[i,2] + beta3[jj]*0 + 
+                                        beta4[jj]*beta[2]*newcovs[i,2])
+            }
+          }
+        }
+        
+        #'  Mean tbd per predator across range of % forest values
+        for(i in 1:100){
+          for(jj in 1:5){
+            pred.tbd.for[i,jj] <- mean(for.tbd[i,,jj])
+          }
+        }
+      
+        #' #'  Mean tbd per predator over range of TRI values
+        #' for(jj in 1:5){
+        #'   pred.tbd.tri[jj] <- mean(tri.tbd[,,jj])
+        #' }
+        #' 
+        #' #' Mean number of minutes between events over range of TRI values
+        #' mu.tbd.tri <- mean(tri.tbd[,,])
+        
+      
         }
         ")
+  
+  
+  
+  
