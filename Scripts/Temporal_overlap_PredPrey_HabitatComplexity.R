@@ -228,7 +228,7 @@
   #'  ------------------------------------------
   #'  Function to estimate temporal overlap between predators (spp1) and prey (spp2)
   #'  at camera sites located in areas with high or low background predation risk.
-  pred_prey_overlap <- function(spp1, spp2, spp3, name1, name2, name3, nboot, dhat, risktype, riskcov) { #i
+  pred_prey_overlap <- function(spp1, spp2, spp3, name1, name2, name3, nboot, dhat, risktype, riskcov) {
     #'  Create logical vectors (T/F) indicating whether spp1 & spp2 were detected 
     #'  at the same site and reduce detection events to just those cameras --> These 
     #'  species need to spatially overlap for any temporal overlap to be meaningful
@@ -341,8 +341,8 @@
     #'  Using bootCIlogit instead of bootCI so that bias corrections are done on
     #'  the logit scale, then backtransformed. Without this, 95% CIs can fall
     #'  outside (0, 1) interval. See Overlap vignette for more details.
-    lowrisk_CI <- bootCIlogit(dhats_spp1.spp2_low, spp12.lowrisk.boot) #[i]
-    highrisk_CI <- bootCIlogit(dhats_spp1.spp2_high, spp12.highrisk.boot) #[i]
+    lowrisk_CI <- bootCIlogit(dhats_spp1.spp2_low, spp12.lowrisk.boot) 
+    highrisk_CI <- bootCIlogit(dhats_spp1.spp2_high, spp12.highrisk.boot) 
     
     #'  Print results
     #'  Effect of low background risk
