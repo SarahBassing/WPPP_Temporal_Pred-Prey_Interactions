@@ -70,6 +70,20 @@
                 tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0)
               }
             } 
+      
+            #'  Mean tbd per season & predator at LOW TRI & PercForest
+            for(hh in 1:4){
+              for(jj in 1:5){
+                lowHC.tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*-1 + beta[2]*-1)
+              }
+            } 
+      
+            #'  Mean tbd per season & predator at HIGH TRI & PercForest
+            for(hh in 1:4){
+              for(jj in 1:5){
+                hiHC.tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*1 + beta[2]*1)
+              }
+            } 
              
       
             #'  Mean tbd per season 
@@ -80,6 +94,16 @@
             #'  Mean tbd per predator 
             for(jj in 1:5){
               pred.tbd[jj] <- mean(tbd[,jj])
+            }
+      
+            #'  Mean tbd per predator (LOW habitat complexity)
+            for(jj in 1:5){
+              pred.tbd.lowHC[jj] <- mean(lowHC.tbd[,jj])
+            }
+            
+            #'  Mean tbd per predator (HIGH habitat complexity)
+            for(jj in 1:5){
+              pred.tbd.hiHC[jj] <- mean(hiHC.tbd[,jj])
             }
       
             #' Mean number of minutes between events
