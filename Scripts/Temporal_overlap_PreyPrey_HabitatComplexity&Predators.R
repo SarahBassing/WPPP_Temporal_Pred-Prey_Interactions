@@ -318,7 +318,7 @@
     mutate(across(c(16:39), ~ ifelse(. == 0, "Low", "High")))
   
   #'  Assign number of bootstraps
-  nboot <- 100
+  nboot <- 10000
   
   ####  Mule deer  ####
   #'  Summer activity
