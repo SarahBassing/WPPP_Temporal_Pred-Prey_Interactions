@@ -232,7 +232,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "mu.tbd", "mu.mu") 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "mu.tbd", "mu.tbd.lowHC", "mu.tbd.hiHC") 
   
   #'  Run model
   start.time <- Sys.time()
