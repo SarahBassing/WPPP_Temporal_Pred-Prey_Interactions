@@ -45,13 +45,13 @@
             alpha[j] ~ dnorm(0, tau.alpha) 
           } 
           
-          
           #'  Hyperpriors for random effect
           #'  -----------------------------
           #'  Precision = 1/variance
           sigma ~ dunif(0, 10)   
           tau.alpha <- pow(sigma, -2) 
-          
+    
+      
           #'  Define likelihood
           #'  -----------------
           for(i in 1:ntbd){
@@ -63,29 +63,63 @@
                           beta[1]*covs[i, 4] + beta[2]*covs[i, 5] + alpha[site[i]]
           }
           
+      
           #'  Derived parameters
           #'  ------------------
           #'  Mean tbd per season & predator at mean TRI & PercForest
+          for(hh in 1:4){
+            for(jj in 1:4){
+              tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0)
+            }
+          } 
+             
+          #'  Mean tbd per season 
+          for(hh in 1:4){
+            season.tbd[hh] <- mean(tbd[hh,])
+          }
+      
+          #'  Mean tbd per predator 
+          for(jj in 1:4){
+            pred.tbd[jj] <- mean(tbd[,jj])
+          }
+      
+          #' Mean number of minutes between events
+          mu.tbd <- mean(tbd[,])
+          mu.mu <- mean(mu[])
+      
+          #'  Mean tbd per season & predator across range of TRI values
+          for(i in 1:100){
             for(hh in 1:4){
               for(jj in 1:4){
-                tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0)
+                tri.tbd[i, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + 
+                                          beta[1]*newcovs[i,1] + beta[2]*0)
               }
-            } 
-             
-      
-            #'  Mean tbd per season 
-            for(hh in 1:4){
-              season.tbd[hh] <- mean(tbd[hh,])
             }
-      
-            #'  Mean tbd per predator 
+          }
+        
+          #'  Mean tbd per predator across range of TRI values
+          for(i in 1:100){
             for(jj in 1:4){
-              pred.tbd[jj] <- mean(tbd[,jj])
+              pred.tbd.tri[i,jj] <- mean(tri.tbd[i,,jj])
             }
+          }
       
-            #' Mean number of minutes between events
-            mu.tbd <- mean(tbd[,])
-            mu.mu <- mean(mu[])
+          #'  Mean tbd per season & predator across range of % forest values
+          for(i in 1:100){
+            for(hh in 1:4){
+              for(jj in 1:4){
+                for.tbd[i, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + 
+                                          beta[1]*0 + beta[2]*newcovs[i,2])
+                } 
+              }
+            }
+        
+          #'  Mean tbd per predator across range of % forest values
+          for(i in 1:100){
+            for(jj in 1:4){
+              pred.tbd.for[i,jj] <- mean(for.tbd[i,,jj])
+            }
+          }
       
           }
           ")
