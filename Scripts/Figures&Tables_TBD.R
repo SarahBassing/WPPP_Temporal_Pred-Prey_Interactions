@@ -11,7 +11,9 @@
   rm(list = ls())
   
   library(ggplot2)
+  library(stringr)
   library(tidyverse)
+  library(khroma)
   
   #'  Load model results
   load("./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_habitat.RData")
@@ -83,29 +85,123 @@
   con.elk.coef.out <- con.elk.out[1:6,1:4]
   
   pred.prey.coef.out <- rbind(pred.elk.coef.out, pred.moose.coef.out, pred.md.coef.out, pred.wtd.coef.out)
-  write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/tbd.pred.prey_coef_table.csv")
+  write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
   
   conspif.coef.out <- rbind(con.elk.coef.out, con.moose.coef.out, con.md.coef.out, con.wtd.coef.out)
-  write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/tbd.conspecific_coef_table.csv")
+  write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_coef_table.csv")
   
   #'  Save mean time-between-detection results only
-  pred.md.mutbd.out <- pred.md.out[12:21,1:4]
-  pred.wtd.mutbd.out <- pred.wtd.out[12:21,1:4]
-  pred.moose.mutbd.out <- pred.moose.out[12:21,1:4]
-  pred.elk.mutbd.out <- pred.elk.out[11:19,1:4]
+  pred.md.mutbd.out <- pred.md.out[12:21,1:6]
+  pred.wtd.mutbd.out <- pred.wtd.out[12:21,1:6]
+  pred.moose.mutbd.out <- pred.moose.out[12:21,1:6]
+  pred.elk.mutbd.out <- pred.elk.out[11:19,1:6]
   
-  con.md.mutbd.out <- con.md.out[8:12,1:4]
-  con.wtd.mutbd.out <- con.wtd.out[8:12,1:4]
-  con.moose.mutbd.out <- con.moose.out[8:12,1:4]
-  con.elk.mutbd.out <- con.elk.out[8:12,1:4]
+  con.md.mutbd.out <- con.md.out[8:12,1:6]
+  con.wtd.mutbd.out <- con.wtd.out[8:12,1:6]
+  con.moose.mutbd.out <- con.moose.out[8:12,1:6]
+  con.elk.mutbd.out <- con.elk.out[8:12,1:6]
   
-  pred.prey.mu.tbd.out <- rbind(pred.elk.mutbd.out, pred.moose.mutbd.out, pred.md.mutbd.out, pred.wtd.mutbd.out)
-  write.csv(pred.prey.mu.tbd.out, "./Outputs/TimeBtwnDetections/tbd.pred.prey_meanTBD_table.csv")
+  pred.prey.mu.tbd.out <- rbind(pred.elk.mutbd.out, pred.moose.mutbd.out, pred.md.mutbd.out, pred.wtd.mutbd.out) 
+  pred.prey.mu.tbd.tbl <- dplyr::select(pred.prey.mu.tbd.out, -c("lci", "uci"))
+  write.csv(pred.prey.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_meanTBD_table.csv")
   
   conspif.mu.tbd.out <- rbind(con.elk.mutbd.out, con.moose.mutbd.out, con.md.mutbd.out, con.wtd.mutbd.out)
-  write.csv(conspif.mu.tbd.out, "./Outputs/TimeBtwnDetections/tbd.conspecific_meanTBD_table.csv")
+  conspif.mu.tbd.tbl <- dplyr::select(conspif.mu.tbd.out, -c("lci", "uci"))
+  write.csv(conspif.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_meanTBD_table.csv")
   
   
   ####  Plot mean TBD  ####
+  #'  ------------------
+  #'  Effect of predator species vs conspecific on tbd
+  #'  Filter to means of interest
+  mean_conspif <- conspif.mu.tbd.out[conspif.mu.tbd.out$Parameter == "Mean TBD",] %>%
+    dplyr::select(-c("95% CI")) %>%
+    #'  Rename Parameters so they are species-specific
+    # mutate(Parameter = paste0(Parameter, ": ", Species))
+    # mutate(Parameter = paste0(Parameter, ": Conspecific"))
+    mutate(Parameter = "Conspecific")
+  mean_bob <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Bobcat",]
+  mean_coy <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Coyote",]
+  mean_bear <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Black bear",]
+  mean_coug <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Cougar",]
+  mean_wolf <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Wolf",]
+  mean_pred <- rbind(mean_bob, mean_coy, mean_bear, mean_coug, mean_wolf) %>%
+    dplyr::select(-c("95% CI")) %>%
+    #'  Reduce parameter name to just the interacting species
+    mutate(Parameter = gsub("Mean TBD: *", "", Parameter))
+  mean_TBD <- rbind(mean_conspif, mean_pred) %>%
+    arrange(Species, Estimate) %>%
+    mutate(Species = factor(Species, levels = c("Elk", "Moose", "Mule deer", "White-tailed deer")),
+           Parameter = factor(Parameter, levels = c("Conspecific", "Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")),
+           Estimate = as.numeric(Estimate),
+           lci = as.numeric(lci),
+           uci = as.numeric(uci))
+
+  #'  Choose colorblind-friendly scheme
+  bright <- colour("bright")
+  bright(6)
+  
+  mean_tbd_plot <- ggplot(mean_TBD, aes(x = Parameter, y = Estimate, group = Species)) +
+    geom_errorbar(aes(ymin = lci, ymax = uci, color = Parameter), width = 0, position = position_dodge(width = 0.4)) +
+    geom_point(stat = 'identity', aes(col = Parameter), size = 2.5, position = position_dodge(width = 0.4)) +
+    scale_colour_bright() +
+    theme_bw() +
+    ylim(0,9000) +
+    facet_wrap(~Species, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    xlab("Species detected prior to ungulate detection") +
+    ylab("Mean number of minutes between detections") +
+    ggtitle("Mean time between detections of interacting species")
+  mean_tbd_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_PredatorID_plot.tiff", mean_tbd_plot, 
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
+  
+  #'  Effect of predator species vs conspecific on tbd
+  #'  Filter to means of interest
+  season_conspif <- conspif.mu.tbd.out[conspif.mu.tbd.out$Parameter != "Mean TBD",] %>%
+    dplyr::select(-c("95% CI")) %>%
+    #'  Rename Parameters so they are species-specific
+    mutate(Season = gsub("Mean TBD: *", "", Parameter), 
+           Parameter = "Conspecific") %>%
+    rename(Interacting_spp = Parameter)
+  mean_smr <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Summer",]
+  mean_fall <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Fall",]
+  mean_wtr <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Winter",]
+  mean_sprg <- pred.prey.mu.tbd.out[pred.prey.mu.tbd.out$Parameter == "Mean TBD: Spring",]
+  season_pred <- rbind(mean_smr, mean_fall, mean_wtr, mean_sprg) %>%
+    dplyr::select(-c("95% CI")) %>%
+    #'  Reduce parameter name to just the interacting species
+    mutate(Season = gsub("Mean TBD: *", "", Parameter),
+           Parameter = "Predator") %>%
+    rename(Interacting_spp = Parameter) 
+  season_TBD <- rbind(season_conspif, season_pred) %>%
+    arrange(Species, Season, Estimate) %>%
+    mutate(Species = factor(Species, levels = c("Elk", "Moose", "Mule deer", "White-tailed deer")),
+           Interacting_spp = factor(Interacting_spp, levels = c("Conspecific", "Predator")),
+           Season = factor(Season, levels = c("Summer", "Fall", "Winter", "Spring")),
+           Estimate = as.numeric(Estimate),
+           lci = as.numeric(lci),
+           uci = as.numeric(uci))
+ 
+  season_tbd_plot <- ggplot(season_TBD, aes(x = Season, y = Estimate, group = Interacting_spp)) +
+    geom_errorbar(aes(ymin = lci, ymax = uci, color = Interacting_spp), width = 0.2, position = position_dodge(0.4)) +
+    geom_point(stat = 'identity', aes(col = Interacting_spp), size = 2.5, position = position_dodge(0.4)) +
+    scale_colour_bright() +
+    theme_bw() +
+    ylim(0,11000) +
+    facet_wrap(~Species, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    labs(color = "Interacting species") +
+    # xlab("Species detected prior to ungulate detection") +
+    ylab("Mean number of minutes between detections") +
+    ggtitle("Seasonal mean time between detections of interacting species")
+  season_tbd_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot, 
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
+  
   
   
