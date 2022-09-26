@@ -74,8 +74,20 @@
                   season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0)
               } 
       
+              #'  Mean tbd per season at mean LOW TRI & PercForest
+              for(hh in 1:4){
+                  lowHC.season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*-1 + beta[2]*-1)
+              } 
+      
+              #'  Mean tbd per season at mean HIGH TRI & PercForest
+              for(hh in 1:4){
+                  hiHC.season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*1 + beta[2]*1)
+              } 
+      
               #' Mean number of minutes between events
               mu.tbd <- mean(season.tbd[])
+              mu.tbd.lowHC <- mean(lowHC.season.tbd[]) (LOW habitat complexity)
+              mu.tbd.hiHC <- mean(hiHC.season.tbd[])  (High habitat compleixty)
               mu.mu <- mean(mu[])        
       
               #' #'  Mean tbd per month and camera site
