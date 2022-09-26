@@ -16,10 +16,10 @@
   library(khroma)
   
   #'  Load model results
-  load("./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_X_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.pred.elk-season_predID_habitat.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_habitat.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_X_habitat.RData")
   
   load("./Outputs/TimeBtwnDetections/tbd.md-season_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.elk-season_habitat.RData")
@@ -29,7 +29,7 @@
   #'  Pull out and rename coefficient estimates 
   coefs <- function(mod_out, spp) {
     Species <- spp
-    Estimate <- round(unlist(mod_out$mean), 2)
+    Estimate <- unlist(mod_out$mean)
     lci <- round(unlist(mod_out$q2.5), 2)
     uci <- round(unlist(mod_out$q97.5), 2)
     CI <- paste(" ",lci, "-", uci)
@@ -50,6 +50,16 @@
              Parameter = ifelse(Parameter == "beta23", "Predator: Black bear", Parameter),
              Parameter = ifelse(Parameter == "beta24", "Predator: Cougar", Parameter),
              Parameter = ifelse(Parameter == "beta25", "Predator: Wolf", Parameter),
+             Parameter = ifelse(Parameter == "beta31", "Predator: Bobcat TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta32", "Predator: Coyote TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta33", "Predator: Black bear TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta34", "Predator: Cougar TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta35", "Predator: Wolf TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta41", "Predator: Bobcat Forest", Parameter),
+             Parameter = ifelse(Parameter == "beta42", "Predator: Coyote Forest", Parameter),
+             Parameter = ifelse(Parameter == "beta43", "Predator: Black bear Forest", Parameter),
+             Parameter = ifelse(Parameter == "beta44", "Predator: Cougar Forest", Parameter),
+             Parameter = ifelse(Parameter == "beta45", "Predator: Wolf Forest", Parameter),
              Parameter = ifelse(Parameter == "mu.tbd", "Mean TBD", Parameter),
              Parameter = ifelse(Parameter == "season.tbd1", "Mean TBD: Summer", Parameter),
              Parameter = ifelse(Parameter == "season.tbd2", "Mean TBD: Fall", Parameter),
@@ -60,13 +70,16 @@
              Parameter = ifelse(Parameter == "pred.tbd3", "Mean TBD: Black bear", Parameter),
              Parameter = ifelse(Parameter == "pred.tbd4", "Mean TBD: Cougar", Parameter),
              Parameter = ifelse(Parameter == "pred.tbd5", "Mean TBD: Wolf", Parameter)) %>%
-      filter(Estimate != 0)
+      filter(Estimate != 0) %>%
+      mutate(Estimate = round(as.numeric(Estimate), 2),
+             lci = as.numeric(lci),
+             uci = as.numeric(uci))
     return(renamed)
   }
-  pred.md.out <- coefs(tbd.pred.md, spp = "Mule deer") 
-  pred.wtd.out <- coefs(tbd.pred.wtd, spp = "White-tailed deer") 
-  pred.moose.out <- coefs(tbd.pred.moose, spp = "Moose")
+  pred.md.out <- coefs(tbd.pred.md, spp = "Mule deer")
   pred.elk.out <- coefs(tbd.pred.elk, spp = "Elk")
+  pred.moose.out <- coefs(tbd.pred.moose, spp = "Moose")
+  pred.wtd.out <- coefs(tbd.pred.wtd, spp = "White-tailed deer") 
   
   con.md.out <- coefs(tbd.md, spp = "Mule deer") 
   con.wtd.out <- coefs(tbd.wtd, spp = "White-tailed deer") 
@@ -74,15 +87,15 @@
   con.elk.out <- coefs(tbd.elk, spp = "Elk") 
   
   #'  Save coefficient estimates only
-  pred.md.coef.out <- pred.md.out[1:10,1:4]
-  pred.wtd.coef.out <- pred.wtd.out[1:10,1:4]
-  pred.moose.coef.out <- pred.moose.out[1:10,1:4]
+  pred.md.coef.out <- pred.md.out[1:18,1:4]
   pred.elk.coef.out <- pred.elk.out[1:9,1:4]
+  pred.moose.coef.out <- pred.moose.out[1:18,1:4]
+  pred.wtd.coef.out <- pred.wtd.out[1:18,1:4]
   
   con.md.coef.out <- con.md.out[1:6,1:4]
-  con.wtd.coef.out <- con.wtd.out[1:6,1:4]
+  con.elk.coef.out <- con.elk.out[1:6,1:4]  
   con.moose.coef.out <- con.moose.out[1:6,1:4]
-  con.elk.coef.out <- con.elk.out[1:6,1:4]
+  con.wtd.coef.out <- con.wtd.out[1:6,1:4]
   
   pred.prey.coef.out <- rbind(pred.elk.coef.out, pred.moose.coef.out, pred.md.coef.out, pred.wtd.coef.out)
   write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
@@ -91,10 +104,10 @@
   write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_coef_table.csv")
   
   #'  Save mean time-between-detection results only
-  pred.md.mutbd.out <- pred.md.out[12:21,1:6]
-  pred.wtd.mutbd.out <- pred.wtd.out[12:21,1:6]
-  pred.moose.mutbd.out <- pred.moose.out[12:21,1:6]
+  pred.md.mutbd.out <- pred.md.out[20:29,1:6]
   pred.elk.mutbd.out <- pred.elk.out[11:19,1:6]
+  pred.moose.mutbd.out <- pred.moose.out[20:29,1:6]
+  pred.wtd.mutbd.out <- pred.wtd.out[20:29,1:6]
   
   con.md.mutbd.out <- con.md.out[8:12,1:6]
   con.wtd.mutbd.out <- con.wtd.out[8:12,1:6]
@@ -146,7 +159,7 @@
     geom_point(stat = 'identity', aes(col = Parameter), size = 2.5, position = position_dodge(width = 0.4)) +
     scale_colour_bright() +
     theme_bw() +
-    ylim(0,9000) +
+    ylim(0,10000) +
     facet_wrap(~Species, scales = "free_y") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     xlab("Species detected prior to ungulate detection") +
@@ -190,7 +203,7 @@
     geom_point(stat = 'identity', aes(col = Interacting_spp), size = 2.5, position = position_dodge(0.4)) +
     scale_colour_bright() +
     theme_bw() +
-    ylim(0,11000) +
+    ylim(0,12500) +
     facet_wrap(~Species, scales = "free_y") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     labs(color = "Interacting species") +
@@ -200,6 +213,105 @@
   season_tbd_plot
   ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot, 
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  #' #'  Load tbd data with covariates
+  #' load("./Outputs/tbd_pred.prey_2022-09-23.RData")
+  #' #'  Generate range of TRI and % Forest values to plot across
+  #' #'  Generate range of TRI & % Forest covariate values to predict across based 
+  #' #'  on range of values across all camera sites
+  #' scaledTRI <- scale(tbd_pred.prey$TRI); scaledFor <- scale(tbd_pred.prey$PercForest)
+  #' print(minmax_tri <- range(scaledTRI)); print(minmax_for <- range(scaledFor))
+  #' newTRI <- seq(from = minmax_tri[1], to = minmax_tri[2], length.out = 100)
+  #' newFor <- seq(from = minmax_for[1], to = minmax_for[2], length.out = 100)
+  #' newcovs <- as.data.frame(cbind(newTRI, newFor)) %>%
+  #'   mutate(backTRI = (newTRI * attr(scaledTRI, 'scaled:scale')) + attr(scaledTRI, 'scaled:center'),
+  #'          backFor = (newFor * attr(scaledFor, 'scaled:scale')) + attr(scaledFor, 'scaled:center'))
+
+  #'  Grab scaled TRI and % Forest from bundled data so specific to each analysis
+  md_newcovs <- md_bundled[[7]]
+  elk_newcovs <- elk_bundled[[7]]
+  moose_newcovs <- moose_bundled[[7]]
+  wtd_newcovs <- wtd_bundled[[7]]
+
+  #'  Function to append scaled covariate data to each predicted TBD value
+  predicted_dat <- function(newcovs, pred.out) {
+    #'  Scaled TRI & % Forest
+    newTRI <- newcovs[,1]
+    newFor <- newcovs[,2]
+    
+    #'  Predator-specific mean TBD values predicted across scaled TRI values
+    tbd_bob_tri <- cbind(pred.out[30:129,], newTRI) %>% mutate(Predator = "Bobcat")
+    tbd_coy_tri <- cbind(pred.out[130:229,], newTRI) %>% mutate(Predator = "Coyote")
+    tbd_bear_tri <- cbind(pred.out[230:329,], newTRI) %>% mutate(Predator = "Black bear")
+    tbd_coug_tri <- cbind(pred.out[330:429,], newTRI) %>% mutate(Predator = "Cougar")
+    tbd_wolf_tri <- cbind(pred.out[430:529,], newTRI) %>% mutate(Predator = "Wolf")
+    tbd_tri <- rbind(tbd_bob_tri, tbd_coy_tri, tbd_bear_tri, tbd_coug_tri, tbd_wolf_tri)
+    
+    #'  Predator-specific mean TBD predicted across scaled % forest values
+    tbd_bob_for <- cbind(pred.out[530:629,], newFor) %>% mutate(Predator = "Bobcat")
+    tbd_coy_for <- cbind(pred.out[630:729,], newFor) %>% mutate(Predator = "Coyote")
+    tbd_bear_for <- cbind(pred.out[730:829,], newFor) %>% mutate(Predator = "Black bear")
+    tbd_coug_for <- cbind(pred.out[830:929,], newFor) %>% mutate(Predator = "Cougar")
+    tbd_wolf_for <- cbind(pred.out[930:1029,], newFor) %>% mutate(Predator = "Wolf")
+    tbd_for <- rbind(tbd_bob_for, tbd_coy_for, tbd_bear_for, tbd_coug_for, tbd_wolf_for)
+    
+    tbd_list <- list(tbd_tri, tbd_for)
+    return(tbd_list)
+  }
+  predicted_pred.md <- predicted_dat(md_newcovs, pred.md.out)
+  predicted_pred.moose <- predicted_dat(moose_newcovs, pred.moose.out)
+  predicted_pred.wtd <- predicted_dat(wtd_newcovs, pred.wtd.out)
+  
+  #'  Append scaled covariate data to predicted ELK TBD values (different b/c no wolves or interactions)
+  #'  Scaled TRI & % Forest
+  predicted_elk <- function(newcovs, pred.out) {
+    newTRI <- newcovs[,1]
+    newFor <- newcovs[,2]
+    
+    #'  Predator-specific mean TBD values predicted across scaled TRI values
+    tbd_bob_tri <- cbind(pred.out[20:119,], newTRI) %>% mutate(Predator = "Bobcat")
+    tbd_coy_tri <- cbind(pred.out[120:219,], newTRI) %>% mutate(Predator = "Coyote")
+    tbd_bear_tri <- cbind(pred.out[220:319,], newTRI) %>% mutate(Predator = "Black bear")
+    tbd_coug_tri <- cbind(pred.out[320:419,], newTRI) %>% mutate(Predator = "Cougar")
+    tbd_tri <- rbind(tbd_bob_tri, tbd_coy_tri, tbd_bear_tri, tbd_coug_tri)
+    
+    #'  Predator-specific mean TBD predicted across scaled % forest values
+    tbd_bob_for <- cbind(pred.out[420:519,], newFor) %>% mutate(Predator = "Bobcat")
+    tbd_coy_for <- cbind(pred.out[520:619,], newFor) %>% mutate(Predator = "Coyote")
+    tbd_bear_for <- cbind(pred.out[620:719,], newFor) %>% mutate(Predator = "Black bear")
+    tbd_coug_for <- cbind(pred.out[720:819,], newFor) %>% mutate(Predator = "Cougar")
+    tbd_for <- rbind(tbd_bob_for, tbd_coy_for, tbd_bear_for, tbd_coug_for)
+    
+    tbd_list <- list(tbd_tri, tbd_for)
+    return(tbd_list)
+  }
+  predicted_pred.elk <- predicted_elk(elk_newcovs, pred.elk.out)
+  
+  predicted_pred.all <- rbind(predicted_pred.md, predicted_pred.elk, predicted_pred.moose, predicted_pred.wtd)
+  
+  #'  Plot effect of TRI on ungulate TBD
+  md_TRI_plot <- ggplot(predicted_pred.md[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    # scale_fill_manual(values=c("#40B0A6", "#E66100")) + #, "#5D3A9B"
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    #theme(legend.position="bottom") +
+    # xlim(-1.5, 2.5) +
+    xlab("Scaled terrain ruggedness") +
+    ylab("Mean time-between-detections") 
+  md_TRI_plot
+  
+  
+  
+  
+  
+  
+  
   
   
   
