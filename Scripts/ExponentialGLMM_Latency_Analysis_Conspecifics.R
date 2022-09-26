@@ -76,7 +76,8 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 75000; nb <- 30000; nt <- 5; na <- 5000
+  nc <- 3; ni <- 100000; nb <- 75000; nt <- 10; na <- 20000
+  # nc <- 3; ni <- 75000; nb <- 20000; nt <- 10; na <- 10000
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -105,6 +106,12 @@
     covs[,4] <- tbd_dat$Complexity_index1
     print(head(covs))
     
+    #'  Generate range of continuous covariate values to predict across
+    print(minmax_tri <- range(covs[,2])); print(minmax_for <- range(covs[,3]))
+    newTRI <- seq(from = minmax_tri[1], to = minmax_tri[2], length.out = 100)
+    newFor <- seq(from = minmax_for[1], to = minmax_for[2], length.out = 100)
+    newcovs <- as.matrix(cbind(newTRI, newFor))
+    
     #'  Number of covariates
     ncovs <- ncol(covs)
     
@@ -114,7 +121,7 @@
     hist(tbd)
     
     bundled <- list(y = tbd, covs = covs, ncams = ncams, ncovs = ncovs, ntbd = ntbd,
-                    site = tbd_dat$cams)
+                    site = tbd_dat$cams, newcovs = newcovs)
     return(bundled)
   }
   md_con_bundled <- bundle_dat(tbd_md_con_short)
@@ -136,7 +143,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu")  
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", 
+              "con.tbd.tri", "con.tbd.for")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -160,7 +168,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu")  
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", 
+              "con.tbd.tri", "con.tbd.for")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -184,7 +193,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu") 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", 
+              "con.tbd.tri", "con.tbd.for") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -208,7 +218,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", "mu.mu")  
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd", 
+              "con.tbd.tri", "con.tbd.for")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -232,7 +243,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "mu.tbd", "mu.tbd.lowHC", "mu.tbd.hiHC") 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "mu.tbd", 
+              "con.tbd.tri", "con.tbd.for") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -244,6 +256,7 @@
   mcmcplot(tbd.con.all$samples)
   save(tbd.con.all, file = "./Outputs/TimeBtwnDetections/tbd.con.all-season_habitat.RData")
   
+
   ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT  ####
   
   
