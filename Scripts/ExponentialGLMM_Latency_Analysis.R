@@ -86,7 +86,7 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 75000; nb <- 30000; nt <- 5; na <- 5000
+  nc <- 3; ni <- 50000; nb <- 30000; nt <- 10; na <- 5000
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -125,6 +125,12 @@
     covs[,8] <- tbd_dat$PercFor_level
     head(covs)
     
+    #'  Generate range of continuous covariate values to predict across
+    print(minmax_tri <- range(covs[,4])); print(minmax_for <- range(covs[,5]))
+    newTRI <- seq(from = minmax_tri[1], to = minmax_tri[2], length.out = 100)
+    newFor <- seq(from = minmax_for[1], to = minmax_for[2], length.out = 100)
+    newcovs <- as.matrix(cbind(newTRI, newFor))
+    
     #'  Number of covariates
     ncovs <- ncol(covs)
     
@@ -134,7 +140,7 @@
     hist(tbd)
     
     bundled <- list(y = tbd, covs = covs, ncams = ncams, ncovs = ncovs, ntbd = ntbd,
-                    site = tbd_dat$cams)
+                    site = tbd_dat$cams, newcovs = newcovs)
     return(bundled)
   }
   md_bundled <- bundle_dat(tbd_md_short)
@@ -144,6 +150,11 @@
   elk_bundled <- bundle_dat(tbd_elk_shorter)
   moose_bundled <- bundle_dat(tbd_moose_short)
   all_bundled <- bundle_dat(tbd_all_short)
+  
+  
+  #'  ==========================
+  ####  No Interaction Models  ####
+  #'  ==========================
   
   #'  -----------------------------------
   #####  Predator - MULE DEER Analysis  ####
@@ -158,7 +169,7 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") #"beta3", "beta4", 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.lowHC", "pred.tbd.hiHC") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -269,14 +280,115 @@
   
   
   
+  #'  ========================================
+  ####  Predator-Habitat Interaction Models  ####
+  #'  ========================================
+  
+  #'  -----------------------------------
+  #####  Predator - MULE DEER Analysis  ####
+  #'  -----------------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_X_habitat.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(md_bundled$y, list(md_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
+              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for") 
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.pred.md <- jags(md_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_X_habitat.txt',
+                      inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                      n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.pred.md)
+  mcmcplot(tbd.pred.md$samples)
+  save(tbd.pred.md, file = "./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_X_habitat.RData")
+  
+  
+  #'  -----------------------------
+  #####  Predator - ELK Analysis  ####
+  #'  -----------------------------
+  #'  Source JAGS model
+  #'  NOTE: NO wolf observations in this model so slightly different version of model
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_X_habitat_nowolf.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(elk_bundled$y, list(elk_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
+              "season.tbd", "pred.tbd", "mu.tbd")#, "pred.tbd.tri", "pred.tbd.for")  
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.pred.elk <- jags(elk_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_X_habitat_nowolf.txt',
+                       inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                       n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.pred.elk)
+  mcmcplot(tbd.pred.elk$samples)
+  save(tbd.pred.elk, file = "./Outputs/TimeBtwnDetections/tbd.pred.elk-season_predID_X_habitat.RData")
+  
+  
+  #'  -------------------------------
+  #####  Predator - MOOSE Analysis  ####
+  #'  -------------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_X_habitat.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(moose_bundled$y, list(moose_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
+              "season.tbd", "pred.tbd", "mu.tbd")#, "pred.tbd.tri", "pred.tbd.for")   
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.pred.moose <- jags(moose_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_X_habitat.txt',
+                         inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                         n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.pred.moose)
+  mcmcplot(tbd.pred.moose$samples)  # sigma looks a little unhappy
+  save(tbd.pred.moose, file = "./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData")
+  
+  
+  #'  -------------------------------------------
+  #####  Predator - WHITE-TAILED DEER Analysis  ####
+  #'  -------------------------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdpredprey_season_predID_X_habitat.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(wtd_bundled$y, list(wtd_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
+              "season.tbd", "pred.tbd", "mu.tbd")#, "pred.tbd.tri", "pred.tbd.for")
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.pred.wtd <- jags(wtd_bundled, params, './Outputs/TimeBtwnDetections/tbd_season_predID_X_habitat.txt',
+                       inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                       n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.pred.wtd)
+  mcmcplot(tbd.pred.wtd$samples)
+  save(tbd.pred.wtd, file = "./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_X_habitat.RData")
+  
+  
+  
+
   
   ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT - X^2 test  ####
   
-  
-
-
-  
-  
-
   
   
