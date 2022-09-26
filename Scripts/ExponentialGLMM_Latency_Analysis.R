@@ -86,7 +86,8 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 50000; nb <- 30000; nt <- 10; na <- 5000
+  nc <- 3; ni <- 100000; nb <- 75000; nt <- 10; na <- 20000
+  # nc <- 3; ni <- 75000; nb <- 20000; nt <- 10; na <- 10000
   
   #'  Function to define and bundle data
   bundle_dat <- function(dat) {
@@ -169,7 +170,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.lowHC", "pred.tbd.hiHC") 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", 
+              "mu.tbd", "pred.tbd.tri", "pred.tbd.for") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -178,7 +180,7 @@
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.md)
-  mcmcplot(tbd.pred.md$samples)
+  mcmcplot(tbd.pred.md$samples[,1:34])
   save(tbd.pred.md, file = "./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_habitat.RData")
   
   
@@ -194,7 +196,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")  
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", 
+              "mu.tbd", "pred.tbd.tri", "pred.tbd.for")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -203,7 +206,7 @@
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.elk)
-  mcmcplot(tbd.pred.elk$samples)
+  mcmcplot(tbd.pred.elk$samples[,1:34])  #'  SIGMA & DEVIANCE not converging well with 75000 interations, better with 100,000 iterations but n.eff relatively low for some parameters
   save(tbd.pred.elk, file = "./Outputs/TimeBtwnDetections/tbd.pred.elk-season_predID_habitat.RData")
   
   
@@ -218,7 +221,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")   
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", 
+              "mu.tbd", "pred.tbd.tri", "pred.tbd.for")   
   
   #'  Run model
   start.time <- Sys.time()
@@ -227,7 +231,7 @@
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.moose)
-  mcmcplot(tbd.pred.moose$samples)  # sigma looks a little unhappy
+  mcmcplot(tbd.pred.moose$samples[,1:34])  #'  SIGMA & DEVIANCE not converging well with 75000 interations
   save(tbd.pred.moose, file = "./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_habitat.RData")
   
   
@@ -242,7 +246,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu")
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", 
+              "mu.tbd", "pred.tbd.tri", "pred.tbd.for")
   
   #'  Run model
   start.time <- Sys.time()
@@ -251,7 +256,7 @@
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.wtd)
-  mcmcplot(tbd.pred.wtd$samples)
+  mcmcplot(tbd.pred.wtd$samples[,1:34])
   save(tbd.pred.wtd, file = "./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_habitat.RData")
   
   
@@ -266,7 +271,8 @@
   inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", "mu.tbd", "mu.mu") 
+  params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", 
+              "mu.tbd", "pred.tbd.tri", "pred.tbd.for") 
   
   #'  Run model
   start.time <- Sys.time()
@@ -275,7 +281,7 @@
                       n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.all)
-  mcmcplot(tbd.pred.all$samples)
+  mcmcplot(tbd.pred.all$samples[,1:34])
   save(tbd.pred.all, file = "./Outputs/TimeBtwnDetections/tbd.pred.all-season_predID_habitat.RData")
   
   
@@ -305,7 +311,7 @@
                       n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.md)
-  mcmcplot(tbd.pred.md$samples)
+  mcmcplot(tbd.pred.md$samples[,1:34])
   save(tbd.pred.md, file = "./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_X_habitat.RData")
   
   
@@ -322,7 +328,7 @@
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd")#, "pred.tbd.tri", "pred.tbd.for")  
+              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for")  
   
   #'  Run model
   start.time <- Sys.time()
@@ -331,7 +337,7 @@
                        n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.elk)
-  mcmcplot(tbd.pred.elk$samples)
+  mcmcplot(tbd.pred.elk$samples[,1:34])  # Rhat & traceplots indicate model isn't converging well even with 150,000 iterations - revert to model w/o interactions
   save(tbd.pred.elk, file = "./Outputs/TimeBtwnDetections/tbd.pred.elk-season_predID_X_habitat.RData")
   
   
@@ -347,7 +353,7 @@
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd")#, "pred.tbd.tri", "pred.tbd.for")   
+              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for")   
   
   #'  Run model
   start.time <- Sys.time()
@@ -356,7 +362,7 @@
                          n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.moose)
-  mcmcplot(tbd.pred.moose$samples)  # sigma looks a little unhappy
+  mcmcplot(tbd.pred.moose$samples[,1:34])  #'  Rhat & traceplots look good compared to model w/o interactions - use this one
   save(tbd.pred.moose, file = "./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData")
   
   
@@ -372,7 +378,7 @@
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd")#, "pred.tbd.tri", "pred.tbd.for")
+              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for")
   
   #'  Run model
   start.time <- Sys.time()
@@ -381,12 +387,10 @@
                        n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.wtd)
-  mcmcplot(tbd.pred.wtd$samples)
+  mcmcplot(tbd.pred.wtd$samples[,1:34])
   save(tbd.pred.wtd, file = "./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_X_habitat.RData")
   
   
-  
-
   
   ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT - X^2 test  ####
   
