@@ -64,29 +64,29 @@
               #' Mean number of minutes between events
               mu.tbd <- mean(season.tbd[])
       
-              #' #'  Mean tbd per season across range of TRI values
-              #' for(i in 1:100){
-              #'   for(hh in 1:4){
-              #'     tri.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*newcovs[i,1] + beta[2]*0)
-              #'   }
-              #' } 
-              #' 
-              #' #'  Mean tbd per season across range of % Forest values
-              #' for(i in 1:100){
-              #'   for(hh in 1:4){
-              #'     for.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*newcovs[i,2])
-              #'   }
-              #' } 
-              #' 
-              #' #' Mean number of minutes between events across range of TRI values
-              #' for(i in 1:100){
-              #'   con.tbd.tri[i] <- mean(tri.tbd[i,])
-              #' }
-              #' 
-              #' #' Mean number of minutes between events across range of % Forest values
-              #' for(i in 1:100){
-              #'   con.tbd.for[i] <- mean(for.tbd[i,])
-              #' } 
+              #'  Mean tbd per season across range of TRI values
+              for(i in 1:100){
+                for(hh in 1:4){
+                  tri.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*newcovs[i,1] + beta[2]*0)
+                }
+              }
+
+              #'  Mean tbd per season across range of % Forest values
+              for(i in 1:100){
+                for(hh in 1:4){
+                  for.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*newcovs[i,2])
+                }
+              }
+
+              #' Mean number of minutes between events across range of TRI values
+              for(i in 1:100){
+                con.tbd.tri[i] <- mean(tri.tbd[i,])
+              }
+
+              #' Mean number of minutes between events across range of % Forest values
+              for(i in 1:100){
+                con.tbd.for[i] <- mean(for.tbd[i,])
+              }
                 
               }
               ")
