@@ -313,30 +313,34 @@
   predicted_con.moose <- predicted_dat_con(con.moose_newcovs, con.moose.out, conspif = "Moose")
   predicted_con.wtd <- predicted_dat_con(con.wtd_newcovs, con.wtd.out, conspif = "White-tailed deer")
   
-  #'  Merge all together
-  moose_for <- rbind(predicted_pred.moose[[2]], predicted_con.moose[[2]]) %>%
-    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
-  
-  predicted_tri <- rbind(predicted_pred.md[[1]], predicted_pred.elk[[1]], predicted_pred.moose[[1]], predicted_pred.wtd[[1]],
-                              predicted_con.md[[1]], predicted_con.elk[[1]], predicted_con.moose[[1]], predicted_con.wtd[[1]]) %>%
-    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
-  predicted_for <- rbind(predicted_pred.md[[2]], predicted_pred.elk[[2]], predicted_pred.moose[[2]], predicted_pred.wtd[[2]],
-                              predicted_con.md[[2]], predicted_con.elk[[2]], predicted_con.moose[[2]], predicted_con.wtd[[2]]) %>%
-    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
-  predicted_pred <- list(predicted_tri, predicted_for)
+  #' #'  Merge all together
+  #' predicted_md <- mapply(rbind, predicted_pred.md, predicted_con.md, SIMPLIFY = FALSE) 
+  #' predicted_elk <- mapply(rbind, predicted_pred.elk, predicted_con.elk, SIMPLIFY = FALSE) 
+  #' predicted_moose <- mapply(rbind, predicted_pred.moose, predicted_con.moose, SIMPLIFY = FALSE) 
+  #' predicted_wtd <- mapply(rbind, predicted_pred.wtd, predicted_con.wtd, SIMPLIFY = FALSE) 
+  #' 
+  # predicted_tri <- rbind(predicted_pred.md[[1]], predicted_pred.elk[[1]], predicted_pred.moose[[1]], predicted_pred.wtd[[1]],
+  #                             predicted_con.md[[1]], predicted_con.elk[[1]], predicted_con.moose[[1]], predicted_con.wtd[[1]]) %>%
+  #   mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
+  # predicted_for <- rbind(predicted_pred.md[[2]], predicted_pred.elk[[2]], predicted_pred.moose[[2]], predicted_pred.wtd[[2]],
+  #                             predicted_con.md[[2]], predicted_con.elk[[2]], predicted_con.moose[[2]], predicted_con.wtd[[2]]) %>%
+  #   mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
+  # predicted_pred <- list(predicted_tri, predicted_for)
   
   #'  ---------------------------------------------------
   ####  Plot interaction between predators and habitat  ####
   #'  ---------------------------------------------------
   #'  Mule deer
-  md_TRI_plot <- ggplot(predicted_pred.md[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
-    # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
+  md_TRI_plot <- ggplot(NULL, aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(data  = predicted_pred.md[[1]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
-    # scale_fill_manual(values=c("#40B0A6", "#E66100")) + #, "#5D3A9B"
-    #'  Get rid of lines and gray background
-    theme_bw() +
+    geom_ribbon(data = predicted_pred.md[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.md[[1]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.md[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
+    # scale_color_manual(values=c("red", "blue", "green", "yellow", "orange", "black")) + 
+    # scale_fill_manual(values=c("red", "blue", "green", "yellow", "orange", "black")) + 
+    #'  Get rid of lines and gray backgroundtheme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
     #theme(legend.position="bottom") +
@@ -348,15 +352,18 @@
   ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_md_TRI_plot.tiff", md_TRI_plot,
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
-  md_For_plot <- ggplot(predicted_pred.md[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  md_For_plot <- ggplot(NULL, aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.md[[2]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.md[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.md[[2]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.md[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    # coord_cartesian(ylim = c(0, 10000)) +
+    coord_cartesian(ylim = c(0, 10000), xlim = c(-.5, 2.5)) +
     xlab("Scaled percent forested habitat") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of forested habitat and predators on mule deer latency")
@@ -366,15 +373,18 @@
   
   
   #'  Elk
-  elk_TRI_plot <- ggplot(predicted_pred.elk[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  elk_TRI_plot <- ggplot(NULL, aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.elk[[1]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.elk[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.elk[[1]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.elk[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    coord_cartesian(ylim = c(0, 40000)) +
+    coord_cartesian(ylim = c(0, 25000), xlim = c(-1.5, 3.5)) +
     xlab("Scaled terrain ruggedness") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of terrain ruggedness and predators on elk latency")
@@ -382,15 +392,18 @@
   ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_elk_TRI_plot.tiff", elk_TRI_plot,
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
-  elk_For_plot <- ggplot(predicted_pred.elk[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  elk_For_plot <- ggplot(NULL, aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.elk[[2]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.elk[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.elk[[2]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.elk[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    # coord_cartesian(ylim = c(0, 10000)) +
+    coord_cartesian(ylim = c(0, 10000), xlim = c(-.5, 2.5)) +
     xlab("Scaled percent forest habitat") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of forested habitat and predators on elk latency")
@@ -399,15 +412,18 @@
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   #'  Moose
-  moose_TRI_plot <- ggplot(predicted_pred.moose[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  moose_TRI_plot <- ggplot(NULL, aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.moose[[1]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.moose[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.moose[[1]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.moose[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    coord_cartesian(ylim = c(0, 40000)) +
+    coord_cartesian(ylim = c(0, 25000), xlim = c(-1.5, 2.5)) +
     xlab("Scaled terrain ruggedness") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of terrain ruggedness and predators on moose latency")
@@ -416,15 +432,18 @@
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
-  moose_For_plot <- ggplot(predicted_pred.moose[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  moose_For_plot <- ggplot(NULL, aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.moose[[2]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.moose[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.moose[[2]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.moose[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    coord_cartesian(ylim = c(0, 40000)) +
+    coord_cartesian(ylim = c(0, 30000), xlim = c(-.5, 2.5)) +
     xlab("Scaled percent forest habitat") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of forested habitat and predators on moose latency")
@@ -434,15 +453,18 @@
   
   
   #'  White-tailed deer
-  wtd_TRI_plot <- ggplot(predicted_pred.wtd[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  wtd_TRI_plot <- ggplot(NULL, aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.wtd[[1]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.wtd[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.wtd[[1]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.wtd[[1]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    coord_cartesian(ylim = c(0, 10000)) +
+    coord_cartesian(ylim = c(0, 15000), xlim = c(-1.5, 3)) +
     xlab("Scaled terrain ruggedness") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of terrain ruggedness and predators on white-tailed deer latency")
@@ -451,14 +473,18 @@
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
-  wtd_For_plot <- ggplot(predicted_pred.wtd[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
+  wtd_For_plot <- ggplot(NULL, aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(data = predicted_pred.wtd[[2]], size = 0.75) +
     #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    geom_ribbon(data = predicted_pred.wtd[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Add conspecific data to plot
+    geom_line(data = predicted_con.wtd[[2]], size = 0.75, lty = "dashed", col = "black") +
+    geom_ribbon(data = predicted_con.wtd[[2]], aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA, fill = "black") +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
+    coord_cartesian(xlim = c(-0.5, 2.5)) +
     xlab("Scaled percent forest habitat") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of forested habitat and predators on white-tailed deer latency")
@@ -467,44 +493,6 @@
          units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
-  
-  ggplot(moose_for, aes(x = newFor, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
-    # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
-    #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
-    # scale_fill_manual(values=c("#40B0A6", "#E66100")) + #, "#5D3A9B"
-    #'  Get rid of lines and gray background
-    theme_bw() +
-    theme(panel.border = element_blank()) +
-    theme(axis.line = element_line(color = 'black')) +
-    #theme(legend.position="bottom") +
-    coord_cartesian(ylim = c(0, 40000), xlim = c(-0.5, 2.5)) +
-    xlab("Scaled Percent Forested Habitat") +
-    ylab("Mean time-between-detections") +
-    ggtitle("Effect of forested habitat and predators on moose latency")
-  
-  
-  
-  ggplot(predicted_con.md[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
-    geom_line(size = 0.75) +
-    # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
-    #'  Add confidence intervals
-    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
-    # scale_fill_manual(values=c("#40B0A6", "#E66100")) + #, "#5D3A9B"
-    #'  Get rid of lines and gray background
-    theme_bw() +
-    theme(panel.border = element_blank()) +
-    theme(axis.line = element_line(color = 'black')) +
-    #theme(legend.position="bottom") +
-    coord_cartesian(ylim = c(0, 10000)) +
-    xlab("Scaled terrain ruggedness") +
-    ylab("Mean time-between-detections") +
-    ggtitle("Effect of terrain ruggedness and predators on mule deer latency")
-  
-  
-  
-  
-  
+ 
   
   
