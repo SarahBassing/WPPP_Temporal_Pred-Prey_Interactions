@@ -30,18 +30,6 @@
               for(hh in 2:4){
                 beta1[hh] ~ dnorm(0, 0.01)  
               }
-            
-              #' #'  Interaction for TRI * season
-              #' beta2[1] <- 0
-              #' for(jj in 2:4){
-              #'   beta3[jj] ~ dnorm(0, 0.01)
-              #' }
-              #' 
-              #' #'  Interaction for PercForest * season
-              #' beta3[1] <- 0
-              #' for(jj in 2:4){
-              #'   beta4[jj] ~ dnorm(0, 0.01)
-              #' }
               
               #'  Prior for random effect for each camera location
               for(j in 1:ncams){
@@ -63,7 +51,6 @@
                 lambda[i] <- 1/mu[i]
               
                 log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta[1]*covs[i, 2] + beta[2]*covs[i, 3] + 
-                              # beta2[covs[i,1]]*covs[i, 2] + beta3[covs[i,1]]*covs[i, 3] + 
                               alpha[site[i]]
               }
               
@@ -74,49 +61,32 @@
                   season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0)
               } 
       
-              #'  Mean tbd per season across range of TRI values
-              for(i in 1:100){
-                for(hh in 1:4){
-                  tri.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*newcovs[i,1] + beta[2]*0)
-                }
-              } 
-      
-              #'  Mean tbd per season across range of % Forest values
-              for(i in 1:100){
-                for(hh in 1:4){
-                  for.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*newcovs[i,2])
-                }
-              } 
-      
               #' Mean number of minutes between events
               mu.tbd <- mean(season.tbd[])
-              
-              #' Mean number of minutes between events across range of TRI values
-              for(i in 1:100){
-                con.tbd.tri[i] <- mean(tri.tbd[i,])
-              }
-              
-              #' Mean number of minutes between events across range of % Forest values
-              for(i in 1:100){
-                con.tbd.for[i] <- mean(for.tbd[i,])
-              } 
-                
       
-      
-              #' #'  Mean tbd per month and camera site
-              #' for(j in 1:ncams){
+              #' #'  Mean tbd per season across range of TRI values
+              #' for(i in 1:100){
               #'   for(hh in 1:4){
-              #'       tbd[j, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + 
-              #'                         beta[2]*0 + alpha[ncams])
+              #'     tri.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*newcovs[i,1] + beta[2]*0)
               #'   }
+              #' } 
+              #' 
+              #' #'  Mean tbd per season across range of % Forest values
+              #' for(i in 1:100){
+              #'   for(hh in 1:4){
+              #'     for.tbd[i, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*newcovs[i,2])
+              #'   }
+              #' } 
+              #' 
+              #' #' Mean number of minutes between events across range of TRI values
+              #' for(i in 1:100){
+              #'   con.tbd.tri[i] <- mean(tri.tbd[i,])
               #' }
-              #' #'  Mean tbd per month
-              #' for(hh in 1:4){
-              #'     season.tbd[hh] <- mean(tbd[, hh])
-              #' }
-              #' #' Mean number of minutes between events
-              #' mu.tbd <- mean(season.tbd[])
-        
-          
+              #' 
+              #' #' Mean number of minutes between events across range of % Forest values
+              #' for(i in 1:100){
+              #'   con.tbd.for[i] <- mean(for.tbd[i,])
+              #' } 
+                
               }
               ")
