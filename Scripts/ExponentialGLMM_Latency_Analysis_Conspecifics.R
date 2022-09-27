@@ -72,6 +72,7 @@
   tbd_wtd_con_short <- tbd_summary(tbd_wtd_con, spp = "white-tailed deer", quant = 0.97)
   
   tbd_all_con_short <- rbind(tbd_md_con_short, tbd_elk_con_short, tbd_moose_con_short, tbd_wtd_con_short)
+  write.csv(tbd_all_con_short, "./Outputs/tbd_conspif_NoOutliers.csv")
   
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
@@ -129,6 +130,13 @@
   moose_con_bundled <- bundle_dat(tbd_moose_con_short)
   wtd_con_bundled <- bundle_dat(tbd_wtd_con_short)
   all_con_bundled <- bundle_dat(tbd_all_con_short)
+  
+  #'  Save for making figures
+  con_md_bundled <- md_con_bundled; save(con_md_bundled, file = "./Data/con_md_bundled.RData")
+  con_elk_bundled <- md_con_bundled; save(con_elk_bundled, file = "./Data/con_elk_bundled.RData")
+  con_moose_bundled <- md_con_bundled; save(con_moose_bundled, file = "./Data/con_moose_bundled.RData")
+  con_wtd_bundled <- md_con_bundled; save(con_wtd_bundled, file = "./Data/con_wtd_bundled.RData")
+  
   
   #'  ------------------------
   #####  MULE DEER Analysis  ####
