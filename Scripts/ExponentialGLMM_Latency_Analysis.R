@@ -82,6 +82,7 @@
   tbd_wtd_short <- tbd_summary(tbd_wtd, spp = "white-tailed deer", quant = 0.97)
   
   tbd_all_short <- rbind(tbd_md_short, tbd_elk_short, tbd_moose_short, tbd_wtd_short)
+  write.csv(tbd_all_short, "./Outputs/tbd_pred.prey_NoOutliers.csv")
   
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
