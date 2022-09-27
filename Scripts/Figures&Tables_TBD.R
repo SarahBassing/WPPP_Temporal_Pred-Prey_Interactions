@@ -98,10 +98,10 @@
   con.wtd.coef.out <- con.wtd.out[1:6,1:4]
   
   pred.prey.coef.out <- rbind(pred.elk.coef.out, pred.moose.coef.out, pred.md.coef.out, pred.wtd.coef.out)
-  write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
+  # write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
   
   conspif.coef.out <- rbind(con.elk.coef.out, con.moose.coef.out, con.md.coef.out, con.wtd.coef.out)
-  write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_coef_table.csv")
+  # write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_coef_table.csv")
   
   #'  Save mean time-between-detection results only
   pred.md.mutbd.out <- pred.md.out[20:29,1:6]
@@ -116,11 +116,11 @@
   
   pred.prey.mu.tbd.out <- rbind(pred.elk.mutbd.out, pred.moose.mutbd.out, pred.md.mutbd.out, pred.wtd.mutbd.out) 
   pred.prey.mu.tbd.tbl <- dplyr::select(pred.prey.mu.tbd.out, -c("lci", "uci"))
-  write.csv(pred.prey.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_meanTBD_table.csv")
+  # write.csv(pred.prey.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_meanTBD_table.csv")
   
   conspif.mu.tbd.out <- rbind(con.elk.mutbd.out, con.moose.mutbd.out, con.md.mutbd.out, con.wtd.mutbd.out)
   conspif.mu.tbd.tbl <- dplyr::select(conspif.mu.tbd.out, -c("lci", "uci"))
-  write.csv(conspif.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_meanTBD_table.csv")
+  # write.csv(conspif.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_meanTBD_table.csv")
   
   
   ####  Plot mean TBD  ####
@@ -166,8 +166,8 @@
     ylab("Mean number of minutes between detections") +
     ggtitle("Mean time between detections of interacting species")
   mean_tbd_plot
-  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_PredatorID_plot.tiff", mean_tbd_plot, 
-         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_PredatorID_plot.tiff", mean_tbd_plot, 
+  #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
   
@@ -211,8 +211,8 @@
     ylab("Mean number of minutes between detections") +
     ggtitle("Seasonal mean time between detections of interacting species")
   season_tbd_plot
-  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot, 
-         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot, 
+  #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   #' #'  Load tbd data with covariates
   #' load("./Outputs/tbd_pred.prey_2022-09-23.RData")
@@ -228,10 +228,10 @@
   #'          backFor = (newFor * attr(scaledFor, 'scaled:scale')) + attr(scaledFor, 'scaled:center'))
 
   #'  Grab scaled TRI and % Forest from bundled data so specific to each analysis
-  md_newcovs <- md_bundled[[7]]
-  elk_newcovs <- elk_bundled[[7]]
-  moose_newcovs <- moose_bundled[[7]]
-  wtd_newcovs <- wtd_bundled[[7]]
+  load("./Data/pred_md_bundled.RData"); pred.md_newcovs <- pred_md_bundled[[7]]
+  load("./Data/pred_elk_bundled.RData"); pred.elk_newcovs <- pred_elk_bundled[[7]]
+  load("./Data/pred_moose_bundled.RData"); pred.moose_newcovs <- pred_moose_bundled[[7]]
+  load("./Data/pred_wtd_bundled.RData"); pred.wtd_newcovs <- pred_wtd_bundled[[7]]
 
   #'  Function to append scaled covariate data to each predicted TBD value
   predicted_dat <- function(newcovs, pred.out) {
@@ -258,9 +258,9 @@
     tbd_list <- list(tbd_tri, tbd_for)
     return(tbd_list)
   }
-  predicted_pred.md <- predicted_dat(md_newcovs, pred.md.out)
-  predicted_pred.moose <- predicted_dat(moose_newcovs, pred.moose.out)
-  predicted_pred.wtd <- predicted_dat(wtd_newcovs, pred.wtd.out)
+  predicted_pred.md <- predicted_dat(pred.md_newcovs, pred.md.out)
+  predicted_pred.moose <- predicted_dat(pred.moose_newcovs, pred.moose.out)
+  predicted_pred.wtd <- predicted_dat(pred.wtd_newcovs, pred.wtd.out)
   
   #'  Append scaled covariate data to predicted ELK TBD values (different b/c no wolves or interactions)
   #'  Scaled TRI & % Forest
@@ -285,11 +285,19 @@
     tbd_list <- list(tbd_tri, tbd_for)
     return(tbd_list)
   }
-  predicted_pred.elk <- predicted_elk(elk_newcovs, pred.elk.out)
+  predicted_pred.elk <- predicted_elk(pred.elk_newcovs, pred.elk.out)
   
-  predicted_pred.all <- rbind(predicted_pred.md, predicted_pred.elk, predicted_pred.moose, predicted_pred.wtd)
+  #'  Merge all together
+  predicted_pred.tri <- rbind(predicted_pred.md[[1]], predicted_pred.elk[[1]], predicted_pred.moose[[1]], predicted_pred.wtd[[1]]) %>%
+    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")))
+  predicted_pred.for <- rbind(predicted_pred.md[[2]], predicted_pred.elk[[2]], predicted_pred.moose[[2]], predicted_pred.wtd[[2]]) %>%
+    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")))
+  predicted_pred <- list(predicted_pred.tri, predicted_pred.for)
   
-  #'  Plot effect of TRI on ungulate TBD
+  #'  ---------------------------------------------------
+  ####  Plot interaction between predators and habitat  ####
+  #'  ---------------------------------------------------
+  #'  Mule deer
   md_TRI_plot <- ggplot(predicted_pred.md[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
     geom_line(size = 0.75) +
     # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
@@ -301,10 +309,131 @@
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
     #theme(legend.position="bottom") +
-    # xlim(-1.5, 2.5) +
+    coord_cartesian(ylim = c(0, 10000)) +
     xlab("Scaled terrain ruggedness") +
-    ylab("Mean time-between-detections") 
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of terrain ruggedness and predators on mule deer latency")
   md_TRI_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_md_TRI_plot.tiff", md_TRI_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  md_For_plot <- ggplot(predicted_pred.md[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    # coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled percent forested habitat") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of forested habitat and predators on mule deer latency")
+  md_For_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_md_PercForest_plot.tiff", md_For_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
+  #'  Elk
+  elk_TRI_plot <- ggplot(predicted_pred.elk[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    # coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled terrain ruggedness") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of terrain ruggedness and predators on elk latency")
+  elk_TRI_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_elk_TRI_plot.tiff", elk_TRI_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  elk_For_plot <- ggplot(predicted_pred.elk[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    # coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled percent forest habitat") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of forested habitat and predators on elk latency")
+  elk_For_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_elk_PercForest_plot.tiff", elk_For_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  #'  Moose
+  moose_TRI_plot <- ggplot(predicted_pred.moose[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    # coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled terrain ruggedness") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of terrain ruggedness and predators on moose latency")
+  moose_TRI_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_moose_TRI_plot.tiff", moose_TRI_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
+  moose_For_plot <- ggplot(predicted_pred.moose[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    # coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled percent forest habitat") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of forested habitat and predators on moose latency")
+  moose_For_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_moose_PercForest_plot.tiff", moose_For_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
+  #'  White-tailed deer
+  wtd_TRI_plot <- ggplot(predicted_pred.wtd[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled terrain ruggedness") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of terrain ruggedness and predators on white-tailed deer latency")
+  wtd_TRI_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_wtd_TRI_plot.tiff", wtd_TRI_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
+  wtd_For_plot <- ggplot(predicted_pred.wtd[[2]], aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    xlab("Scaled percent forest habitat") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of forested habitat and predators on white-tailed deer latency")
+  wtd_For_plot
+  ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_wtd_PercForest_plot.tiff", wtd_For_plot,
+         units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
   
