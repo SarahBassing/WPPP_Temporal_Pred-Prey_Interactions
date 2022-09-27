@@ -232,8 +232,13 @@
   load("./Data/pred_elk_bundled.RData"); pred.elk_newcovs <- pred_elk_bundled[[7]]
   load("./Data/pred_moose_bundled.RData"); pred.moose_newcovs <- pred_moose_bundled[[7]]
   load("./Data/pred_wtd_bundled.RData"); pred.wtd_newcovs <- pred_wtd_bundled[[7]]
+  
+  load("./Data/con_md_bundled.RData"); con.md_newcovs <- con_md_bundled[[7]]
+  load("./Data/con_elk_bundled.RData"); con.elk_newcovs <- con_elk_bundled[[7]]
+  load("./Data/con_moose_bundled.RData"); con.moose_newcovs <- con_moose_bundled[[7]]
+  load("./Data/con_wtd_bundled.RData"); con.wtd_newcovs <- con_wtd_bundled[[7]]
 
-  #'  Function to append scaled covariate data to each predicted TBD value
+  #'  Append scaled covariate data to each predicted TBD value - PREDATOR-PREY ANALYSIS
   predicted_dat <- function(newcovs, pred.out) {
     #'  Scaled TRI & % Forest
     newTRI <- newcovs[,1]
@@ -262,7 +267,8 @@
   predicted_pred.moose <- predicted_dat(pred.moose_newcovs, pred.moose.out)
   predicted_pred.wtd <- predicted_dat(pred.wtd_newcovs, pred.wtd.out)
   
-  #'  Append scaled covariate data to predicted ELK TBD values (different b/c no wolves or interactions)
+  #'  Append scaled covariate data to predicted ELK TBD values - PREDATOR-PREY ANALYSIS
+  #'  Note: different b/c no wolves or interactions in this model
   #'  Scaled TRI & % Forest
   predicted_elk <- function(newcovs, pred.out) {
     newTRI <- newcovs[,1]
@@ -287,12 +293,37 @@
   }
   predicted_pred.elk <- predicted_elk(pred.elk_newcovs, pred.elk.out)
   
+  #'  Append scaled covariate data to each predicted TBD value - CONSPECIFIC ANALYSIS
+  predicted_dat_con <- function(newcovs, con.out, conspif) {
+    #'  Scaled TRI & % Forest
+    newTRI <- newcovs[,1]
+    newFor <- newcovs[,2]
+    
+    #'  Predator-specific mean TBD values predicted across scaled TRI values
+    tbd_tri <- cbind(con.out[13:112,], newTRI) %>% mutate(Predator = conspif)
+    
+    #'  Predator-specific mean TBD predicted across scaled % forest values
+    tbd_for <- cbind(con.out[113:212,], newFor) %>% mutate(Predator = conspif)
+    
+    tbd_list <- list(tbd_tri, tbd_for)
+    return(tbd_list)
+  }
+  predicted_con.md <- predicted_dat_con(con.md_newcovs, con.md.out, conspif = "Mule deer")
+  predicted_con.elk <- predicted_dat_con(con.elk_newcovs, con.elk.out, conspif = "Elk")
+  predicted_con.moose <- predicted_dat_con(con.moose_newcovs, con.moose.out, conspif = "Moose")
+  predicted_con.wtd <- predicted_dat_con(con.wtd_newcovs, con.wtd.out, conspif = "White-tailed deer")
+  
   #'  Merge all together
-  predicted_pred.tri <- rbind(predicted_pred.md[[1]], predicted_pred.elk[[1]], predicted_pred.moose[[1]], predicted_pred.wtd[[1]]) %>%
-    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")))
-  predicted_pred.for <- rbind(predicted_pred.md[[2]], predicted_pred.elk[[2]], predicted_pred.moose[[2]], predicted_pred.wtd[[2]]) %>%
-    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")))
-  predicted_pred <- list(predicted_pred.tri, predicted_pred.for)
+  moose_for <- rbind(predicted_pred.moose[[2]], predicted_con.moose[[2]]) %>%
+    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
+  
+  predicted_tri <- rbind(predicted_pred.md[[1]], predicted_pred.elk[[1]], predicted_pred.moose[[1]], predicted_pred.wtd[[1]],
+                              predicted_con.md[[1]], predicted_con.elk[[1]], predicted_con.moose[[1]], predicted_con.wtd[[1]]) %>%
+    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
+  predicted_for <- rbind(predicted_pred.md[[2]], predicted_pred.elk[[2]], predicted_pred.moose[[2]], predicted_pred.wtd[[2]],
+                              predicted_con.md[[2]], predicted_con.elk[[2]], predicted_con.moose[[2]], predicted_con.wtd[[2]]) %>%
+    mutate(Predator = factor(Predator, levels = c("Bobcat", "Coyote", "Black bear", "Cougar", "Wolf", "Mule deer", "Elk", "Moose", "White-tailed deer")))
+  predicted_pred <- list(predicted_tri, predicted_for)
   
   #'  ---------------------------------------------------
   ####  Plot interaction between predators and habitat  ####
@@ -343,7 +374,7 @@
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    # coord_cartesian(ylim = c(0, 10000)) +
+    coord_cartesian(ylim = c(0, 40000)) +
     xlab("Scaled terrain ruggedness") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of terrain ruggedness and predators on elk latency")
@@ -376,7 +407,7 @@
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    # coord_cartesian(ylim = c(0, 10000)) +
+    coord_cartesian(ylim = c(0, 40000)) +
     xlab("Scaled terrain ruggedness") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of terrain ruggedness and predators on moose latency")
@@ -393,7 +424,7 @@
     theme_bw() +
     theme(panel.border = element_blank()) +
     theme(axis.line = element_line(color = 'black')) +
-    # coord_cartesian(ylim = c(0, 10000)) +
+    coord_cartesian(ylim = c(0, 40000)) +
     xlab("Scaled percent forest habitat") +
     ylab("Mean time-between-detections") +
     ggtitle("Effect of forested habitat and predators on moose latency")
@@ -437,8 +468,39 @@
   
   
   
+  ggplot(moose_for, aes(x = newFor, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    # scale_fill_manual(values=c("#40B0A6", "#E66100")) + #, "#5D3A9B"
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    #theme(legend.position="bottom") +
+    coord_cartesian(ylim = c(0, 40000), xlim = c(-0.5, 2.5)) +
+    xlab("Scaled Percent Forested Habitat") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of forested habitat and predators on moose latency")
   
   
+  
+  ggplot(predicted_con.md[[1]], aes(x = newTRI, y = Estimate, colour = Predator)) + 
+    geom_line(size = 0.75) +
+    # scale_color_manual(values=c("#40B0A6", "#E66100")) +  #, "#5D3A9B"
+    #'  Add confidence intervals
+    geom_ribbon(aes(ymin = lci, ymax = uci, fill = Predator), alpha = 0.3, colour = NA) +
+    # scale_fill_manual(values=c("#40B0A6", "#E66100")) + #, "#5D3A9B"
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    theme(axis.line = element_line(color = 'black')) +
+    #theme(legend.position="bottom") +
+    coord_cartesian(ylim = c(0, 10000)) +
+    xlab("Scaled terrain ruggedness") +
+    ylab("Mean time-between-detections") +
+    ggtitle("Effect of terrain ruggedness and predators on mule deer latency")
   
   
   
