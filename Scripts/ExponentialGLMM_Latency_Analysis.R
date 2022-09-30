@@ -82,24 +82,17 @@
   tbd_wtd_short <- tbd_summary(tbd_wtd, spp = "white-tailed deer", quant = 0.97)
   
   tbd_all_short <- rbind(tbd_md_short, tbd_elk_short, tbd_moose_short, tbd_wtd_short)
-  write.csv(tbd_all_short, "./Outputs/tbd_pred.prey_NoOutliers.csv")
+  # write.csv(tbd_all_short, "./Outputs/tbd_pred.prey_NoOutliers.csv")
   
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
   nc <- 3; ni <- 100000; nb <- 75000; nt <- 10; na <- 20000
   # nc <- 3; ni <- 75000; nb <- 20000; nt <- 10; na <- 10000
-  
-  #' #'  Generate range of TRI & % Forest covariate values to predict across based 
-  #' #'  on range of values across all camera sites
-  #' scaledTRI <- scale(tbd_pred.prey$TRI); scaledFor <- scale(tbd_pred.prey$PercForest)
-  #' print(minmax_tri <- range(scaledTRI)); print(minmax_for <- range(scaledFor))
-  #' newTRI <- seq(from = minmax_tri[1], to = minmax_tri[2], length.out = 100)
-  #' newFor <- seq(from = minmax_for[1], to = minmax_for[2], length.out = 100)
-  #' newcovs <- as.data.frame(cbind(newTRI, newFor)) 
+  # nc <- 3; ni <- 7500; nb <- 2000; nt <- 10; na <- 1000
 
   #'  Function to define and bundle data
-  bundle_dat <- function(dat) { #, newcovs
+  bundle_dat <- function(dat) { 
     #'  Number of time-btwn-detection observations
     ntbd <- nrow(dat)
     #'  Number of unique camera locations
@@ -153,7 +146,7 @@
                     site = tbd_dat$cams, newcovs = newcovs)
     return(bundled)
   }
-  md_bundled <- bundle_dat(tbd_md_short) #, newcovs = newcovs
+  md_bundled <- bundle_dat(tbd_md_short) 
   wtd_bundled <- bundle_dat(tbd_wtd_short)
   #'  Remove single wolf-elk observation
   tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf")
