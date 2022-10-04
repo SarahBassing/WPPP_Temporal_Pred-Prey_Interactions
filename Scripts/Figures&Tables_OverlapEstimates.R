@@ -317,9 +317,9 @@
   # write.csv(pred_prey_for_out_tbl, file = paste0("./Outputs/Temporal Overlap/pred-prey_PercForest_overlap_tbl_", Sys.Date(), ".csv"))
   
   
-  #'  -------------------------------
-  #'  Species-specific results tables
-  #'  -------------------------------
+  #'  ------------------------------------
+  ####  Species-specific results tables  ####
+  #'  ------------------------------------
   #'  Create tables from prey-prey overlap estimates in low vs high risk areas
   prey_table <- function(overlap_out, spp2, season, risk_type) {
     Dhat <- round(overlap_out$dhats_spp2.lowhigh, 2)
@@ -484,12 +484,19 @@
   #'  Load data in table format
   pred_prey_tri_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/pred-prey_TRI_overlap_tbl_2022-09-19.csv")
   pred_prey_for_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/pred-prey_PercForest_overlap_tbl_2022-09-19.csv")
-  prey_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/prey_overlap_tbl_2022-09-26.csv")
+  prey_overlap_tbl <- read.csv("./Outputs/Temporal Overlap/prey_overlap_tbl_2022-09-26.csv") %>%
+    mutate(Risk = ifelse(Risk == "Black bear detected", "Bear", Risk),
+           Risk = ifelse(Risk == "Bobcat detected", "Bobcat", Risk),
+           Risk = ifelse(Risk == "Coyote detected", "Coyote", Risk),
+           Risk = ifelse(Risk == "Cougar detected", "Cougar", Risk),
+           Risk = ifelse(Risk == "Wolf detected", "Wolf", Risk))
   
   #'  Set seasonal factor levels
   pred_prey_tri_overlap_tbl$season <- factor(pred_prey_tri_overlap_tbl$season, levels = c("Summer", "Fall", "Winter", "Spring"))
+  pred_prey_tri_overlap_tbl$TRI_level <- factor(pred_prey_tri_overlap_tbl$TRI_level, levels = c("Low", "High"))
   pred_prey_for_overlap_tbl$season <- factor(pred_prey_for_overlap_tbl$season, levels = c("Summer", "Fall", "Winter", "Spring"))
-  prey_overlap_tbl$Risk <- factor(prey_overlap_tbl$Risk, levels = c("TRI", "Percent Forest", "Black bear detected", "Bobcat detected", "Cougar detected", "Coyote detected", "Wolf detected"))
+  pred_prey_for_overlap_tbl$Perc_Forest_level <- factor(pred_prey_for_overlap_tbl$Perc_Forest_level, levels = c("Low", "High"))
+  prey_overlap_tbl$Risk <- factor(prey_overlap_tbl$Risk, levels = c("TRI", "Percent Forest", "Bear", "Bobcat", "Cougar", "Coyote", "Wolf"))
   
   ####  Effect of TRI on predator-prey temporal overlap  ####
   #'  By species
@@ -498,11 +505,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on predator - mule deer diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Mule deer - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_md_tri_coeff_plot
   
@@ -511,11 +518,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on predator - elk diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Elk - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_elk_tri_coeff_plot
   
@@ -524,11 +531,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on predator - moose diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Moose - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_moose_tri_coeff_plot
   
@@ -537,13 +544,13 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on predator - white-tailed deer diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("White-tailed deer - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
-  pred_md_tri_coeff_plot
+  pred_wtd_tri_coeff_plot
   
   #' Save 'em - predator-prey overlap coefficients
   ggsave(pred_md_tri_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_md_TRI_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
@@ -558,11 +565,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on summer predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Summer predator-prey temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_tri_smr_coeff_plot
   
@@ -571,11 +578,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terraint ruggedness index on fall predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Fall predator-prey temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_tri_fall_coeff_plot
   
@@ -584,11 +591,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on winter predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Winter predator-prey temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_tri_wtr_coeff_plot
   
@@ -597,11 +604,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = TRI_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Terrain ruggedness")) + 
-    ggtitle("Effect of terrain ruggedness index on spring predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Spring predator-prey temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_tri_sprg_coeff_plot
   
@@ -619,11 +626,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
-    ggtitle("Effect of percent forest on predator - mule deer diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Mule deer - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_md_for_coeff_plot
   
@@ -632,11 +639,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
-    ggtitle("Effect of percent forest on predator - elk diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Elk - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_elk_for_coeff_plot
   
@@ -645,11 +652,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
-    ggtitle("Effect of percent forest on predator - moose diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Moose - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_moose_for_coeff_plot
   
@@ -658,11 +665,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
-    ggtitle("Effect of percent forest on predator - white-tailed deer diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("White-tailed deer - predator temporal overlap") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~season, scales = "free", space = "free")
   pred_wtd_for_coeff_plot
   
@@ -678,11 +685,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
     ggtitle("Effect of percent forest on summer predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_smr_coeff_plot
   
@@ -691,11 +698,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
     ggtitle("Effect of percent forest on fall predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_fall_coeff_plot
   
@@ -704,11 +711,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
     ggtitle("Effect of percent forest on winter predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_wtr_coeff_plot
   
@@ -717,11 +724,11 @@
     geom_point(stat = "identity", aes(col = predator, shape = Perc_Forest_level), size = 2.75, position = position_dodge(width = 0.4)) +
     scale_color_bright() + 
     ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none", shape = guide_legend(title = "Percent forested habitat")) + 
     ggtitle("Effect of percent forest on spring predator-prey diel activity patterns") +
-    xlab("Species pairing") + ylab("Coefficient of overlap (Dhat)") +
+    xlab("Species pairing") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~prey, scales = "free", space = "free")
   pred_prey_for_sprg_coeff_plot
   
@@ -732,18 +739,78 @@
   ggsave(pred_prey_for_sprg_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_pred_prey_PercForest_sprg_bckgrd_risk.tiff", width = 7, height = 6, dpi = 600, units = "in", device='tiff')
   
     
-  #'  Effect of habitat complexity and predator ID on prey temporal overlap
+  ####  Effect of habitat complexity and predator ID on prey temporal overlap  ####
+  #'  By Species and type of background risk
+  prey_md_byrisk_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Species == "Mule deer",], aes(x = Season, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Season), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Season), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 16), legend.text = element_text(size = 16)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Mule deer temporal overlap") +
+    xlab("Season") + ylab("Coefficient of overlap (\u0394)") +
+    facet_grid(~Risk, scales = "free", space = "free")
+  prey_md_byrisk_coeff_plot
+  
+  prey_elk_byrisk_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Species == "Elk",], aes(x = Season, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Season), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Season), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 16), legend.text = element_text(size = 16)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Elk temporal overlap") +
+    xlab("Season") + ylab("Coefficient of overlap (\u0394)") +
+    facet_grid(~Risk, scales = "free", space = "free")
+  prey_elk_byrisk_coeff_plot
+  
+  prey_moose_byrisk_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Species == "Moose",], aes(x = Season, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Season), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Season), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 16), legend.text = element_text(size = 16)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("Moose temporal overlap") +
+    xlab("Season") + ylab("Coefficient of overlap (\u0394)") +
+    facet_grid(~Risk, scales = "free", space = "free")
+  prey_moose_byrisk_coeff_plot
+  
+  prey_wtd_byrisk_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Species == "White-tailed deer",], aes(x = Season, y = Dhat)) +
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Season), width = 0.3) +
+    geom_point(stat = "identity", aes(col = Season), size = 2.75) +
+    scale_color_bright() + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 16), legend.text = element_text(size = 16)) + 
+    theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
+    guides(color = "none") + 
+    ggtitle("White-tailed deer temporal overlap") +
+    xlab("Season") + ylab("Coefficient of overlap (\u0394)") +
+    facet_grid(~Risk, scales = "free", space = "free")
+  prey_wtd_byrisk_coeff_plot
+  
+  #' Save 'em - predator-prey overlap coefficients
+  ggsave(prey_md_byrisk_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_md_byrisk_bckgrd_risk.tiff", width = 9, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(prey_elk_byrisk_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_elk_byrisk_bckgrd_risk.tiff", width = 9, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(prey_moose_byrisk_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_moose_byrisk_bckgrd_risk.tiff", width = 9, height = 6, dpi = 600, units = "in", device='tiff')
+  ggsave(prey_wtd_byrisk_coeff_plot, filename = "./Outputs/Temporal Overlap/Figures/Coeff_wtd_byrisk_bckgrd_risk.tiff", width = 9, height = 6, dpi = 600, units = "in", device='tiff')
+
+  
   #'  By species
   prey_md_coeff_plot <- ggplot(prey_overlap_tbl[prey_overlap_tbl$Species == "Mule deer",], aes(x = Risk, y = Dhat)) +
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on mule deer activity") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Mule deer temporal overlap") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Season, scales = "free", space = "free")
   prey_md_coeff_plot
   
@@ -751,12 +818,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on elk activity") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Elk temporal overlap") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Season, scales = "free", space = "free")
   prey_elk_coeff_plot
   
@@ -764,12 +831,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on moose activity") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Moose temporal overlap") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Season, scales = "free", space = "free")
   prey_moose_coeff_plot
   
@@ -777,12 +844,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on white-tailed deer activity") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("White-tailed deer temporal overlap") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Season, scales = "free", space = "free")
   prey_wtd_coeff_plot
   
@@ -798,12 +865,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on prey activity in Summer") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Prey activity in Summer") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Species, scales = "free", space = "free")
   prey_smr_coeff_plot
   
@@ -811,12 +878,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on prey activity in Fall") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Prey activity in Fall") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Species, scales = "free", space = "free")
   prey_fall_coeff_plot
   
@@ -824,12 +891,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on prey activity in Winter") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Prey activity in Winter") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Species, scales = "free", space = "free")
   prey_wtr_coeff_plot
   
@@ -837,12 +904,12 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Risk), width = 0.3) +
     geom_point(stat = "identity", aes(col = Risk), size = 2.75) +
     scale_color_bright() + 
-    ylim(0,1) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ylim(0.5,1) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size = 14), legend.text = element_text(size = 14)) + 
     theme(legend.position="top", legend.justification="left", legend.margin=margin(0,0,0,0), legend.box.margin=margin(0,-10,-10,0)) +
     guides(color = "none") + 
-    ggtitle("Effect of low and high background risk on prey activity in Spring") +
-    xlab("Type of background risk") + ylab("Coefficient of overlap (Dhat)") +
+    ggtitle("Prey activity in Spring") +
+    xlab("Type of background risk") + ylab("Coefficient of overlap (\u0394)") +
     facet_grid(~Species, scales = "free", space = "free")
   prey_sprg_coeff_plot
   
