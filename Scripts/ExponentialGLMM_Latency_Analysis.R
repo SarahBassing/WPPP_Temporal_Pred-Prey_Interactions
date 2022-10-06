@@ -108,7 +108,7 @@
   #'  MCMC settings
   nc <- 3; ni <- 100000; nb <- 75000; nt <- 10; na <- 20000
   # nc <- 3; ni <- 75000; nb <- 20000; nt <- 10; na <- 10000
-  nc <- 3; ni <- 7500; nb <- 2000; nt <- 10; na <- 1000
+  # nc <- 3; ni <- 7500; nb <- 2000; nt <- 10; na <- 1000
 
   #'  Function to define and bundle data
   bundle_dat <- function(dat) { 
@@ -225,7 +225,7 @@
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "sigma", "season.tbd", "pred.tbd", 
-              "mu.tbd", "pred.tbd.tri", "pred.tbd.for")  
+              "mu.tbd")   #"sa.tbd", , "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -234,7 +234,7 @@
                   n.adapt = na, parallel = TRUE)
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.pred.elk)
-  mcmcplot(tbd.pred.elk$samples[,1:34])  #'  SIGMA & DEVIANCE not converging well with 75000 interations, better with 100,000 iterations but n.eff relatively low for some parameters
+  mcmcplot(tbd.pred.elk$samples)  #'  SIGMA & DEVIANCE not converging well with 75000 interations, better with 100,000 iterations but n.eff relatively low for some parameters
   save(tbd.pred.elk, file = "./Outputs/TimeBtwnDetections/tbd.pred.elk-season_predID_habitat.RData")
   
   
@@ -326,11 +326,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(md_bundled$y, list(md_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "sa.tbd",  "mu.tbd") #, "pred.tbd.tri", "pred.tbd.for"
+              "season.tbd", "pred.tbd", "mu.tbd") #"sa.tbd",  , "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -352,11 +352,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(elk_bundled$y, list(elk_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "sa.tbd", "mu.tbd")  #, "pred.tbd.tri", "pred.tbd.for"
+              "season.tbd", "pred.tbd", "mu.tbd")  #"sa.tbd", , "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -377,11 +377,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(moose_bundled$y, list(moose_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "sa.tbd", "mu.tbd")   #, "pred.tbd.tri", "pred.tbd.for"
+              "season.tbd", "pred.tbd", "mu.tbd")   #"sa.tbd", , "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -402,11 +402,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(wtd_bundled$y, list(wtd_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "sa.tbd", "mu.tbd") #, "pred.tbd.tri", "pred.tbd.for"
+              "season.tbd", "pred.tbd", "mu.tbd") #"sa.tbd", , "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
