@@ -20,7 +20,7 @@
               alpha0 ~ dnorm(0, 0.001)
               
               #'  Priors for TRI, PercForest, & Study_Area
-              for(k in 1:3){  
+              for(k in 1:2){  #3
                 beta[k] ~ dnorm(0, 0.0001)
               }
               
@@ -51,32 +51,32 @@
                 lambda[i] <- 1/mu[i]
               
                 log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta[1]*covs[i, 2] + beta[2]*covs[i, 3] + 
-                              beta[3]*covs[i, 5] + alpha[site[i]]
+                              alpha[site[i]]  #beta[3]*covs[i, 5] + 
               }
               
               #'  Derived parameters
               #'  ------------------
               #'  Mean tbd per season at mean TRI & PercForest
-              for(sa in 1:2){
-                for(hh in 1:4){
-                  season.sa.tbd[sa, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0 + beta[3]*(sa-1))
-                } 
-              }
-      
-              for(sa in 1:2){
-                sa.tbd[sa] <- mean(season.sa.tbd[sa,])
-              }
-            
-              for(hh in 1:4){
-                season.tbd[hh] <- mean(season.sa.tbd[,hh])
-              }
-                
-              # for(hh in 1:4){
-              #     season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0 + beta[3]*1)
+              # for(sa in 1:2){
+              #   for(hh in 1:4){
+              #     season.sa.tbd[sa, hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0 + beta[3]*(sa-1))
+              #   } 
               # }
+              # 
+              # for(sa in 1:2){
+              #   sa.tbd[sa] <- mean(season.sa.tbd[sa,])
+              # }
+              # 
+              # for(hh in 1:4){
+              #   season.tbd[hh] <- mean(season.sa.tbd[,hh])
+              # }
+                
+              for(hh in 1:4){
+                  season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0)
+              }
       
               #' Mean number of minutes between events
-              mu.tbd <- mean(season.sa.tbd[,])
+              mu.tbd <- mean(season.tbd[])
       
               #' #'  Mean tbd per season across range of TRI values
               #' for(i in 1:100){
