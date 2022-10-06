@@ -49,7 +49,24 @@
                             format="%Y-%m-%d %H:%M:%S",tz="America/Los_Angeles"),
       Date = as.Date(Date, format = "%Y-%m-%d"),
       Time = chron(times = Time)
-    )
+    ) %>%
+    mutate(Category = ifelse(Species == "Bobcat" | Species == "Black Bear" | 
+                               Species == "Cougar" | Species == "Coyote" | 
+                               Species == "Lynx" | Species == "Wolf", "Predator", "Other"),
+           Category = ifelse(Species == "Elk" | Species == "Mule Deer" | 
+                               Species == "Moose" | Species == "White-tailed Deer", "Prey", Category)) 
+  
+  ungulate_mega <- megadata %>%
+    #'  Remove other species - not needed and sometimes random birds or vehicles
+    #'  show up in sequence of same species but breaks up the sequence so code 
+    #'  below thinks they are independent events
+    filter(Category != "Other")
+    #' #'  Remove unknown species - important for situations where blurry deer pix
+    #' #'  (labeled unknown) mixed within images identified to species in a series
+    #' #'  of sequential images 
+    #' filter(Species != "Unknown Deer") %>%
+    #' filter(Species != "Unknown Ungulate") %>%
+    #' filter(Species != "Unknown")
   
   ####  Extract independent detections for wildlife species  ####
   #'  -------------------------------------------------------
@@ -58,59 +75,120 @@
   #'  If species detected is diff from previous row at same site then give unique value. If not then...
   #'  If DateTime is >30 min from previous DateTime at same site for same species then give unique value. If not then...
   #'  Capture value is the same as that in the previous row.
-  dat <- arrange(megadata, CameraLocation, DateTime)
-  caps <- c()
-  caps[1] <- 1
-  for (i in 2:nrow(dat)){
-    if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps[i] = i
-    else (if (dat$Species[i-1] != dat$Species[i]) caps[i] = i
-          else (if (difftime(dat$DateTime[i], dat$DateTime[i-1], units = c("mins")) > 30) caps[i] = i
-                else caps[i] = caps[i-1]))
+  det_events <- function(dets) {
+    dat <- arrange(dets, CameraLocation, DateTime)
+    caps <- c()
+    caps[1] <- 1
+    for (i in 2:nrow(dat)){
+      if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps[i] = i
+      else (if (dat$Species[i-1] != dat$Species[i]) caps[i] = i
+            else (if (difftime(dat$DateTime[i], dat$DateTime[i-1], units = c("mins")) > 30) caps[i] = i
+                  else caps[i] = caps[i-1]))
+    }
+    
+    caps <- as.factor(caps)
+    
+    #'  Add new column to larger data set
+    capdata <- cbind(as.data.frame(dat), caps)
+    
+    #'  Filter data to the first image from each unique detection event
+    firstprey <- capdata[capdata$Category == "Prey",] %>%
+      group_by(caps) %>%
+      slice(1L) %>%
+      ungroup() %>%
+      mutate(Det_type = "first")
+    
+    #'  Filter data to the last image of each unique detection event
+    lastpredator <- capdata[capdata$Category == "Predator",] %>% 
+      group_by(caps) %>% 
+      slice_tail() %>%
+      ungroup() %>%
+      mutate(Det_type = "last")
+    lastprey <- capdata[capdata$Category == "Prey",] %>%
+      group_by(caps) %>%
+      slice_tail() %>%
+      ungroup() %>%
+      mutate(Det_type = "last")
+    lastother <- capdata[capdata$Category == "Other",] %>% 
+      group_by(caps) %>% 
+      slice_tail() %>%
+      ungroup() %>%
+      mutate(Det_type = "last")
+    
+    data_list <- list(firstprey, lastpredator, lastprey, lastother)
+    names(data_list) <- c("firstprey", "lastpredator", "lastprey", "lastother")
+    return(data_list)
   }
+  predprey_caps <- det_events(megadata)
+  prey_caps <- det_events(ungulate_mega)
   
-  caps <- as.factor(caps)
+  #' dat <- arrange(megadata, CameraLocation, DateTime)
+  #' caps <- c()
+  #' caps[1] <- 1
+  #' for (i in 2:nrow(dat)){
+  #'   if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps[i] = i
+  #'   else (if (dat$Species[i-1] != dat$Species[i]) caps[i] = i
+  #'         else (if (difftime(dat$DateTime[i], dat$DateTime[i-1], units = c("mins")) > 30) caps[i] = i
+  #'               else caps[i] = caps[i-1]))
+  #' }
+  #' 
+  #' caps <- as.factor(caps)
+  #' 
+  #' #'  Add new column to larger data set
+  #' capdata <- cbind(as.data.frame(dat), caps)
   
-  #'  Add new column to larger data set
-  capdata <- cbind(as.data.frame(dat), caps)
+  #' #'  Add column identifying predators, prey, and other (includes humans, cattle, 
+  #' #'  other wildlife species not listed below)
+  #' capdata <- capdata %>%
+  #'   mutate(Category = ifelse(Species == "Bobcat" | Species == "Black Bear" | 
+  #'                                    Species == "Cougar" | Species == "Coyote" | 
+  #'                                    Species == "Lynx" | Species == "Wolf", "Predator", "Other"),
+  #'          Category = ifelse(Species == "Elk" | Species == "Mule Deer" | 
+  #'                                    Species == "Moose" | Species == "White-tailed Deer", "Prey", Category)) 
   
-  #'  Add column identifying predators, prey, and other (includes humans, cattle, 
-  #'  other wildlife species not listed below)
-  capdata <- capdata %>%
-    mutate(Category = ifelse(Species == "Bobcat" | Species == "Black Bear" | 
-                                     Species == "Cougar" | Species == "Coyote" | 
-                                     Species == "Lynx" | Species == "Wolf", "Predator", "Other"),
-           Category = ifelse(Species == "Elk" | Species == "Mule Deer" | 
-                                     Species == "Moose" | Species == "White-tailed Deer", "Prey", Category)) 
-  
-  #'  Filter data to the first image from each unique detection event
-  firstprey <- capdata[capdata$Category == "Prey",] %>%
-    group_by(caps) %>%
-    slice(1L) %>%
-    ungroup() %>%
-    mutate(Det_type = "first")
-  
-  #'  Filter data to the last image of each unique detection event
-  lastpredator <- capdata[capdata$Category == "Predator",] %>% 
-    group_by(caps) %>% 
-    slice_tail() %>%
-    ungroup() %>%
-    mutate(Det_type = "last")
-  lastprey <- capdata[capdata$Category == "Prey",] %>%
-    group_by(caps) %>%
-    slice_tail() %>%
-    ungroup() %>%
-    mutate(Det_type = "last")
-  lastother <- capdata[capdata$Category == "Other",] %>% 
-    group_by(caps) %>% 
-    slice_tail() %>%
-    ungroup() %>%
-    mutate(Det_type = "last")
+  #' #'  Filter data to the first image from each unique detection event
+  #' firstprey <- capdata[capdata$Category == "Prey",] %>%
+  #'   group_by(caps) %>%
+  #'   slice(1L) %>%
+  #'   ungroup() %>%
+  #'   mutate(Det_type = "first")
+  #' 
+  #' #'  Filter data to the last image of each unique detection event
+  #' lastpredator <- capdata[capdata$Category == "Predator",] %>% 
+  #'   group_by(caps) %>% 
+  #'   slice_tail() %>%
+  #'   ungroup() %>%
+  #'   mutate(Det_type = "last")
+  #' lastprey <- capdata[capdata$Category == "Prey",] %>%
+  #'   group_by(caps) %>%
+  #'   slice_tail() %>%
+  #'   ungroup() %>%
+  #'   mutate(Det_type = "last")
+  #' lastother <- capdata[capdata$Category == "Other",] %>% 
+  #'   group_by(caps) %>% 
+  #'   slice_tail() %>%
+  #'   ungroup() %>%
+  #'   mutate(Det_type = "last")
   
   #'  Merge data based on last image of each predator/other detection and first 
   #'  image of each prey detection
-  lastPred_firstPrey <- rbind(lastpredator, firstprey, lastother)
-  back2back_prey <- rbind(lastprey, firstprey)
-
+  lastPred_firstPrey <- rbind(predprey_caps$lastpredator, predprey_caps$firstprey, predprey_caps$lastother)
+  #'  Merge last and first images of each ungulate detection
+  back2back_prey <- rbind(prey_caps$lastprey, prey_caps$firstprey) %>%
+    arrange(CameraLocation, DateTime, caps, Det_type)
+  # lastPred_firstPrey <- rbind(lastpredator, firstprey, lastother)
+  # back2back_prey <- rbind(lastprey, firstprey) %>%
+  #   arrange(CameraLocation, DateTime, caps, Det_type) 
+  #'  Detections with only one image get duplicated b/c its the first & last image
+  #'  Identify duplicate images (ignoring last column where they differ) and filter
+  #'  to just one imaage per detection event
+  dups <- back2back_prey %>%
+    group_by_at(vars(-Det_type)) %>% 
+    filter(n() > 1) %>%
+    filter(Det_type == "last")
+  #'  Remove the duplicate images from the larger data set
+  back2back_prey <- anti_join(back2back_prey, dups)
+  
   #'  Merge and filter to specific date ranges of interest
   #'  Want to include detections of ALL specie and humans to account for non-focal
   #'  species that are detected between species of interest, but doesn't matter if
@@ -327,6 +405,7 @@
     #'  Add new column to larger data set
     caps_new <- as.factor(caps_new)
     detection_data <- cbind(as.data.frame(dat), caps_new)
+    detection_data <- arrange(detection_data, CameraLocation, DateTime, caps, Det_type)
     
     #'  Create empty vector to be filled
     detection_data$TimeSinceLastDet <- c()
@@ -346,7 +425,9 @@
     #'  the first to last image of the same detection event, only the tbd from
     #'  the last image of a detection to the first image of the next detection)
     detection_data <- filter(detection_data, Det_type == "first") %>%
-      #'  Filter out times = 0 (first detection at a camera site)
+      #'  Filter out times = 0 (first detection at a camera site) - smallest length
+      #'  of time possible btwn detections is 30min due to definition of "independent
+      #'  detection events" for conspecificss
       filter(TimeSinceLastDet > 0) %>%
       dplyr::select(-c(caps, Det_type, caps_new))
     return(detection_data)
@@ -409,6 +490,16 @@
   #'  Double check there are no negative times-between-detection
   summary(tbd_pred.prey$TimeSinceLastDet)
   summary(tbd_conspif$TimeSinceLastDet)
+  
+  #'  Conspecific data there should be NO tbd < 30min because 30min minimum was
+  #'  required to identify independent detection events of the same species.
+  #'  The few instances where tbd < 30min in this data set arise b/c another spp
+  #'  (usually coyote) shows up within sequential ungulate images. Without 2nd
+  #'  spp being detected in the mix all images would be considered 1 detection
+  #'  event. Removing these instances b/c they are wrong based on definition of
+  #'  independent detection event & because they belong (and are) in the pred-prey
+  #'  tbd data set, not the conspecific data set.
+  tbd_conspif <- filter(tbd_conspif, TimeSinceLastDet >= 30.00)
   
   #'  SAVE!
   write.csv(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".csv"))
