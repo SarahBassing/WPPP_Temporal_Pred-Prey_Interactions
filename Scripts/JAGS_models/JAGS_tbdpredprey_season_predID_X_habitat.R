@@ -21,7 +21,7 @@
         alpha0 ~ dnorm(0, 0.001)
         
         #'  Priors for TRI, PercForest, and Study_Area
-        for(k in 1:3){  
+        for(k in 1:2){  #3
           beta[k] ~ dnorm(0, 0.0001)
         }
         
@@ -70,7 +70,7 @@
           lambda[i] <- 1/mu[i]
         
           log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta2[covs[i,2]] + 
-                        beta[1]*covs[i, 4] + beta[2]*covs[i, 5] + beta[3]*covs[i, 9] +
+                        beta[1]*covs[i, 4] + beta[2]*covs[i, 5] + #beta[3]*covs[i, 9] +
                         beta3[covs[i,2]]*covs[i, 4] + beta4[covs[i,2]]*covs[i, 5] + 
                         alpha[site[i]]
         }
@@ -78,39 +78,39 @@
         #'  Derived parameters
         #'  ------------------
         #'  Mean tbd per season & predator at mean TRI & PercForest
-        for(sa in 1:2){
-          for(hh in 1:4){
-              for(jj in 1:5){
-                tbd[sa, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 +
-                               beta[3]*(sa-1) + beta3[jj]*0 + beta4[jj]*0)
-            }
+        for(hh in 1:4){
+          for(jj in 1:5){
+            tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 +
+                               beta3[jj]*0 + beta4[jj]*0)
           }
-        }
+        }  
       
-        # for(hh in 1:4){
-        #   for(jj in 1:5){
-        #     tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 +
-        #                        beta[3]*1 + beta3[jj]*0 + beta4[jj]*0)
-        #   }
-        # }
-        
+        #' for(sa in 1:2){
+        #'   for(hh in 1:4){
+        #'       for(jj in 1:5){
+        #'         tbd[sa, hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 +
+        #'                        beta[3]*(sa-1) + beta3[jj]*0 + beta4[jj]*0)
+        #'     }
+        #'   }
+        #' }
+        #' 
+        #' #'  Mean tbd per study area
+        #' for(sa in 1:2){
+        #'   sa.tbd[sa] <- mean(tbd[sa,,])
+        #' }
+      
         #'  Mean tbd per season 
         for(hh in 1:4){
-          season.tbd[hh] <- mean(tbd[,hh,])
+          season.tbd[hh] <- mean(tbd[hh,])
         }
       
         #'  Mean tbd per predator 
         for(jj in 1:5){
-          pred.tbd[jj] <- mean(tbd[,,jj])
-        }
-      
-        #'  Mean tbd per study area
-        for(sa in 1:2){
-          sa.tbd[sa] <- mean(tbd[sa,,])
+          pred.tbd[jj] <- mean(tbd[,jj])
         }
       
         #' Mean number of minutes between events
-        mu.tbd <- mean(tbd[,,])
+        mu.tbd <- mean(tbd[,])
         # mu.mu <- mean(mu[])
     
       
