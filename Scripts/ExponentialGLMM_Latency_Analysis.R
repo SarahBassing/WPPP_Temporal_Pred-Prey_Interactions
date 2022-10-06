@@ -31,7 +31,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_pred.prey_2022-09-23.RData") #2022-09-20
+  load("./Outputs/tbd_pred.prey_2022-10-05.RData") #2022-09-23
   #'  Remove observations involving lynx due to too few lynx detections
   tbd_pred.prey <- tbd_pred.prey %>%
     filter(PredatorID != "Lynx") %>%
@@ -84,12 +84,31 @@
   tbd_all_short <- rbind(tbd_md_short, tbd_elk_short, tbd_moose_short, tbd_wtd_short)
   # write.csv(tbd_all_short, "./Outputs/tbd_pred.prey_NoOutliers.csv")
   
+  #'  Are there study area differences for the ungulate mean tbd?
+  (mulie_meanOK <- mean(tbd_md_short$tbd_min[tbd_md_short$Study_Area == "OK"]))
+  (mulie_meanNE <- mean(tbd_md_short$tbd_min[tbd_md_short$Study_Area == "NE"]))
+  (wtd_meanOK <- mean(tbd_wtd_short$tbd_min[tbd_wtd_short$Study_Area == "OK"]))
+  (wtd_meanNE <- mean(tbd_wtd_short$tbd_min[tbd_wtd_short$Study_Area == "NE"]))
+  (moose_meanOK <- mean(tbd_moose_short$tbd_min[tbd_moose_short$Study_Area == "OK"]))
+  (moose_meanNE <- mean(tbd_moose_short$tbd_min[tbd_moose_short$Study_Area == "NE"]))
+  (elk_meanOK <- mean(tbd_elk_short$tbd_min[tbd_elk_short$Study_Area == "OK"]))
+  (elk_meanNE <- mean(tbd_elk_short$tbd_min[tbd_elk_short$Study_Area == "NE"]))
+  
+  (mulie_meanOK <- mean(tbd_md_short$tbd_min[tbd_md_short$Monitoring == "Dirt road"]))
+  (mulie_meanNE <- mean(tbd_md_short$tbd_min[tbd_md_short$Monitoring == "Trail"]))
+  (wtd_meanOK <- mean(tbd_wtd_short$tbd_min[tbd_wtd_short$Monitoring == "Dirt road"]))
+  (wtd_meanNE <- mean(tbd_wtd_short$tbd_min[tbd_wtd_short$Monitoring == "Trail"]))
+  (moose_meanOK <- mean(tbd_moose_short$tbd_min[tbd_moose_short$Monitoring == "Dirt road"]))
+  (moose_meanNE <- mean(tbd_moose_short$tbd_min[tbd_moose_short$Monitoring == "Trail"]))
+  (elk_meanOK <- mean(tbd_elk_short$tbd_min[tbd_elk_short$Monitoring == "Dirt road"]))
+  (elk_meanNE <- mean(tbd_elk_short$tbd_min[tbd_elk_short$Monitoring == "Trail"]))
+  
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
   nc <- 3; ni <- 100000; nb <- 75000; nt <- 10; na <- 20000
   # nc <- 3; ni <- 75000; nb <- 20000; nt <- 10; na <- 10000
-  # nc <- 3; ni <- 7500; nb <- 2000; nt <- 10; na <- 1000
+  nc <- 3; ni <- 7500; nb <- 2000; nt <- 10; na <- 1000
 
   #'  Function to define and bundle data
   bundle_dat <- function(dat) { 
@@ -103,21 +122,22 @@
                                     Complexity_index1, backgroundRisk_HCI,
                                     backgroundRisk_TRI, backgroundRisk_For, 
                                     TRI, TRI_250m, PercForest, Monitoring, 
-                                    Species, spp_pair)) %>%
+                                    Species, spp_pair, Study_Area)) %>%
       mutate(cams = as.numeric(factor(CameraLocation), levels = CameraLocation), # must be 1 - 313 (not 0 - 312) if using nested indexing for random effect
              Season = as.numeric(factor(Season, levels = c("Summer", "Fall", "Winter", "Spring"))), # levels must be 1-4 (not 0-3) for nested indexing
              PredatorID = as.numeric(factor(PredatorID, levels = c("Bobcat", "Coyote", "Black Bear", "Cougar", "Wolf"))), # levels must be 1-5 for nested indexing
              Complexity_index1 = scale(Complexity_index1),
              TRI = scale(TRI),
              PercForest = scale(PercForest),
-             Monitoring = ifelse(Monitoring == "Trail", 0, 1),
+             Monitoring = ifelse(Monitoring == "Dirt road", 0, 1),
              TRI_level = ifelse(backgroundRisk_TRI == "Low", 0, 1),
-             PercFor_level = ifelse(backgroundRisk_For == "Low", 0, 1))
+             PercFor_level = ifelse(backgroundRisk_For == "Low", 0, 1),
+             Study_Area = ifelse(Study_Area == "NE", 0, 1))
     print(summary(tbd_dat))
     print(head(tbd_dat))
     
     #'  Covariate matrix for JAGS
-    covs <- matrix(NA, ncol = 8, nrow = ntbd)
+    covs <- matrix(NA, ncol = 9, nrow = ntbd)
     covs[,1] <- tbd_dat$Season
     covs[,2] <- tbd_dat$PredatorID
     covs[,3] <- tbd_dat$Complexity_index1
@@ -126,6 +146,7 @@
     covs[,6] <- tbd_dat$Monitoring
     covs[,7] <- tbd_dat$TRI_level
     covs[,8] <- tbd_dat$PercFor_level
+    covs[,9] <- tbd_dat$Study_Area
     head(covs)
     
     #'  Generate range of continuous covariate values to predict across
@@ -305,11 +326,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(md_bundled$y, list(md_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for") 
+              "season.tbd", "pred.tbd", "sa.tbd",  "mu.tbd") #, "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -331,11 +352,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(elk_bundled$y, list(elk_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for")  
+              "season.tbd", "pred.tbd", "sa.tbd", "mu.tbd")  #, "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -356,11 +377,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(moose_bundled$y, list(moose_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for")   
+              "season.tbd", "pred.tbd", "sa.tbd", "mu.tbd")   #, "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
@@ -381,11 +402,11 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(wtd_bundled$y, list(wtd_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "beta2", "beta3", "beta4", "sigma", 
-              "season.tbd", "pred.tbd", "mu.tbd", "pred.tbd.tri", "pred.tbd.for")
+              "season.tbd", "pred.tbd", "sa.tbd", "mu.tbd") #, "pred.tbd.tri", "pred.tbd.for"
   
   #'  Run model
   start.time <- Sys.time()
