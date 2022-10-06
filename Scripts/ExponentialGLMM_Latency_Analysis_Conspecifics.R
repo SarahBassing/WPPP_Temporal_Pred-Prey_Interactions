@@ -185,7 +185,7 @@
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.md)
   mcmcplot(tbd.md$samples)
-  save(tbd.md, file = "./Outputs/TimeBtwnDetections/tbd.md-season_habitat.RData")
+  save(tbd.md, file = "./Outputs/TimeBtwnDetections/tbd.md-season_habitat_sa.RData")
   
   
   #'  ------------------
@@ -209,7 +209,7 @@
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.elk)
   mcmcplot(tbd.elk$samples)
-  save(tbd.elk, file = "./Outputs/TimeBtwnDetections/tbd.elk-season_habitat.RData")
+  save(tbd.elk, file = "./Outputs/TimeBtwnDetections/tbd.elk-season_habitat_sa.RData")
   
   
   #'  --------------------
@@ -233,7 +233,7 @@
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.moose)
   mcmcplot(tbd.moose$samples)
-  save(tbd.moose, file = "./Outputs/TimeBtwnDetections/tbd.moose-season_habitat.RData")
+  save(tbd.moose, file = "./Outputs/TimeBtwnDetections/tbd.moose-season_habitat_sa.RData")
   
   
   #'  --------------------------------
@@ -244,10 +244,10 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(wtd_con_bundled$y, list(wtd_con_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
   
   #'  Parameters to be monitored
-  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "sa.tbd", "mu.tbd")  #,"con.tbd.tri", "con.tbd.for" 
+  params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd")  #"sa.tbd", ,"con.tbd.tri", "con.tbd.for" 
   
   #'  Run model
   start.time <- Sys.time()
