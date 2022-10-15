@@ -79,7 +79,7 @@
     geom_sf(data = OK_SA, fill = "grey25", color = "grey20") +
     geom_sf_text(data = OK_SA, aes(label = NAME, hjust = 1.15, vjust = 1.6), size = 4.5) +
     geom_sf(data = NE_SA, fill = "grey25", color = "grey20") +
-    geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 0.55, vjust = 3), size = 4.5) +
+    geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 0.6, vjust = 3), size = 4.5) +
     #'  Get rid of lines and axis labels
     theme_bw() +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -111,7 +111,7 @@
     # geom_sf_text(data = city_sf, aes(label = city, hjust = -0.05, vjust = 1), size = 3) +
     labs(colour = "Camera\nlocations") +
     #'  Constrain plot to two study areas plus some room on the side & bottom
-    coord_sf(xlim = c(-116.8, -121.1), ylim = c(47.3, 49.0), expand = FALSE) +
+    coord_sf(xlim = c(-116.8, -121.1), ylim = c(47.2, 49.0), expand = FALSE) +
     #'  Get rid of lines and axis names
     theme_bw() +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -133,9 +133,7 @@
   #'  Requires "cowplot" package
   #'  Don't use png or other calls to save while plotting- formatting gets messed up
   #'  Use export option in Plot window and formatting holds
-  # tiff(file = "./Outputs/Figures/Maps/StudyAreas_Cameras1820_05.31.22.tiff",
-  #     width = 1000, height = 691) 
-  tiff(file = "./Outputs/Figures/StudyAreaMap_Cameras_2018-2020.tiff",
+  tiff(file = "./Outputs/StudyAreaMap_Cameras_2018-2021.tiff",
        units="in", width=11, height=6.5, res=800, compression = 'lzw') 
   StudyArea_Map <- ggdraw(cam_SA_map) +
     draw_plot(
@@ -146,9 +144,9 @@
         # geom_sf_text(data = WA, aes(label = JURISDIC_3, hjust = 0.5, vjust = 1), size = 5)  
       },
       #'  Distance along a (0,1) x-axis to draw the left edge of the plot
-      x = 0.6,
+      x = 0.57,
       #'  Distance along a (0,1) y-axis to draw the bottom edge of the plot
-      y = 0.20,
+      y = 0.18,
       #'  Width & height of the plot expressed as proportion of the entire ggdraw object
       #'  THIS DEPENDS ON HOW BIG YOUR PLOT WINDOW IS TOO!!!!
       width = 0.25,
