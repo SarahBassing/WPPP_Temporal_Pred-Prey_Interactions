@@ -19,10 +19,13 @@
               #'  Prior for intercept
               alpha0 ~ dnorm(0, 0.001)
               
-              #'  Priors for TRI, PercForest, & Study_Area
-              for(k in 1:2){  #3
-                beta[k] ~ dnorm(0, 0.0001)
-              }
+              #' #'  Priors for TRI, PercForest, & Study_Area
+              #' for(k in 1:2){  #3
+              #'   beta[k] ~ dnorm(0, 0.0001)
+              #' }
+      
+              #'  Prior for TRI
+              beta ~ dnorm(0, 0.0001)
               
               #'  Priors for categorical covariates and interactions
               #'  Season
@@ -50,8 +53,9 @@
         
                 lambda[i] <- 1/mu[i]
               
-                log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta[1]*covs[i, 2] + beta[2]*covs[i, 3] + 
-                              alpha[site[i]]  #beta[3]*covs[i, 5] + 
+                # log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta[1]*covs[i, 2] + beta[2]*covs[i, 3] + 
+                #               alpha[site[i]]  #beta[3]*covs[i, 5] + 
+                log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta*covs[i, 2] + alpha[site[i]]
               }
               
               #'  Derived parameters
@@ -72,7 +76,8 @@
               # }
                 
               for(hh in 1:4){
-                  season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0)
+                  # season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta[1]*0 + beta[2]*0)
+                  season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta*0)
               }
       
               #' Mean number of minutes between events
