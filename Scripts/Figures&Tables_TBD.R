@@ -18,20 +18,20 @@
   #'  Load model results
   load("./Outputs/TimeBtwnDetections/tbd.pred.md-season_predID_X_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.pred.elk-season_predID_habitat.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData") 
   load("./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_X_habitat.RData")
   
-  load("./Outputs/TimeBtwnDetections/tbd.md-season_habitat.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.elk-season_habitat.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.moose-season_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.md-season_habitat_sa.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.elk-season_habitat_sa.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.moose-season_habitat_sa.RData")
   load("./Outputs/TimeBtwnDetections/tbd.wtd-season_habitat.RData")
 
   #'  Pull out and rename coefficient estimates 
   coefs <- function(mod_out, spp) {
     Species <- spp
     Estimate <- unlist(mod_out$mean)
-    lci <- round(unlist(mod_out$q2.5), 2)
-    uci <- round(unlist(mod_out$q97.5), 2)
+    lci <- round(unlist(mod_out$q2.5), 3)
+    uci <- round(unlist(mod_out$q97.5), 3)
     CI <- paste(" ",lci, "-", uci)
     out <- as.data.frame(cbind(Species, Estimate, CI, lci, uci))
     out <- tibble::rownames_to_column(out, "row_names") %>%
@@ -39,8 +39,8 @@
     colnames(out) <- c("Species", "Parameter", "Estimate", "95% CI", "lci", "uci")
     renamed <- out %>%
       mutate(Parameter = ifelse(Parameter == "alpha0", "Intercept", Parameter),
-             Parameter = ifelse(Parameter == "beta1", "Terrain ruggendess", Parameter),
-             Parameter = ifelse(Parameter == "beta2", "Percent forest", Parameter),
+             Parameter = ifelse(Parameter == "beta", "Terrain ruggendess", Parameter),
+             # Parameter = ifelse(Parameter == "beta2", "Percent forest", Parameter),
              Parameter = ifelse(Parameter == "beta11", "Season: Summer", Parameter),
              Parameter = ifelse(Parameter == "beta12", "Season: Fall", Parameter),
              Parameter = ifelse(Parameter == "beta13", "Season: Winter", Parameter),
@@ -55,11 +55,11 @@
              Parameter = ifelse(Parameter == "beta33", "Predator: Black bear TRI", Parameter),
              Parameter = ifelse(Parameter == "beta34", "Predator: Cougar TRI", Parameter),
              Parameter = ifelse(Parameter == "beta35", "Predator: Wolf TRI", Parameter),
-             Parameter = ifelse(Parameter == "beta41", "Predator: Bobcat Forest", Parameter),
-             Parameter = ifelse(Parameter == "beta42", "Predator: Coyote Forest", Parameter),
-             Parameter = ifelse(Parameter == "beta43", "Predator: Black bear Forest", Parameter),
-             Parameter = ifelse(Parameter == "beta44", "Predator: Cougar Forest", Parameter),
-             Parameter = ifelse(Parameter == "beta45", "Predator: Wolf Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta41", "Predator: Bobcat Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta42", "Predator: Coyote Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta43", "Predator: Black bear Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta44", "Predator: Cougar Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta45", "Predator: Wolf Forest", Parameter),
              Parameter = ifelse(Parameter == "mu.tbd", "Mean TBD", Parameter),
              Parameter = ifelse(Parameter == "season.tbd1", "Mean TBD: Summer", Parameter),
              Parameter = ifelse(Parameter == "season.tbd2", "Mean TBD: Fall", Parameter),
@@ -87,15 +87,15 @@
   con.elk.out <- coefs(tbd.elk, spp = "Elk") 
   
   #'  Save coefficient estimates only
-  pred.md.coef.out <- pred.md.out[1:18,1:4]
-  pred.elk.coef.out <- pred.elk.out[1:9,1:4]
-  pred.moose.coef.out <- pred.moose.out[1:18,1:4]
-  pred.wtd.coef.out <- pred.wtd.out[1:18,1:4]
+  pred.md.coef.out <- pred.md.out[1:13,1:4] #pred.md.out[1:18,1:4]
+  pred.elk.coef.out <- pred.elk.out[1:8,1:4] #pred.elk.out[1:9,1:4]
+  pred.moose.coef.out <- pred.moose.out[1:13,1:4] #pred.moose.out[1:18,1:4]
+  pred.wtd.coef.out <- pred.wtd.out[1:13,1:4] #pred.wtd.out[1:18,1:4]
   
-  con.md.coef.out <- con.md.out[1:6,1:4]
-  con.elk.coef.out <- con.elk.out[1:6,1:4]  
-  con.moose.coef.out <- con.moose.out[1:6,1:4]
-  con.wtd.coef.out <- con.wtd.out[1:6,1:4]
+  con.md.coef.out <- con.md.out[1:5,1:4] #con.md.out[1:6,1:4]
+  con.elk.coef.out <- con.elk.out[1:5,1:4]  #con.elk.out[1:6,1:4]
+  con.moose.coef.out <- con.moose.out[1:5,1:4] #con.moose.out[1:6,1:4]
+  con.wtd.coef.out <- con.wtd.out[1:5,1:4] #con.wtd.out[1:6,1:4]
   
   pred.prey.coef.out <- rbind(pred.elk.coef.out, pred.moose.coef.out, pred.md.coef.out, pred.wtd.coef.out)
   # write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
@@ -104,15 +104,36 @@
   # write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_coef_table.csv")
   
   #'  Save mean time-between-detection results only
-  pred.md.mutbd.out <- pred.md.out[20:29,1:6]
-  pred.elk.mutbd.out <- pred.elk.out[11:19,1:6]
-  pred.moose.mutbd.out <- pred.moose.out[20:29,1:6]
-  pred.wtd.mutbd.out <- pred.wtd.out[20:29,1:6]
+  #'  But first change 95% CRI to 2 digits
+  short_CI <- function(out) {
+    out <- out %>%
+      mutate(lci = round(lci, 2),
+             uci = round(uci, 2), 
+             CRI = paste(" ",lci, "-", uci)) %>%
+      dplyr::select(-c(`95% CI`)) %>%
+      relocate(CRI, .before = lci) %>%
+      rename(`95% CI` = CRI)
+    return(out)
+  }
+  pred.md.out2 <- short_CI(pred.md.out)
+  pred.elk.out2 <- short_CI(pred.elk.out)
+  pred.moose.out2 <- short_CI(pred.moose.out)
+  pred.wtd.out2 <- short_CI(pred.wtd.out)
   
-  con.md.mutbd.out <- con.md.out[8:12,1:6]
-  con.wtd.mutbd.out <- con.wtd.out[8:12,1:6]
-  con.moose.mutbd.out <- con.moose.out[8:12,1:6]
-  con.elk.mutbd.out <- con.elk.out[8:12,1:6]
+  pred.md.mutbd.out <- pred.md.out2[15:24,1:6] #pred.md.out[20:29,1:6]
+  pred.elk.mutbd.out <- pred.elk.out2[10:18,1:6] #pred.elk.out[11:19,1:6]
+  pred.moose.mutbd.out <- pred.moose.out2[15:24,1:6] #pred.moose.out[20:29,1:6]
+  pred.wtd.mutbd.out <- pred.wtd.out2[15:24,1:6] #pred.wtd.out[20:29,1:6]
+  
+  con.md.out2 <- short_CI(con.md.out)
+  con.wtd.out2 <- short_CI(con.wtd.out)
+  con.moose.out2 <- short_CI(con.moose.out)
+  con.elk.out2 <- short_CI(con.elk.out)
+  
+  con.md.mutbd.out <- con.md.out2[7:11,1:6] #con.md.out[8:12,1:6]
+  con.wtd.mutbd.out <- con.wtd.out2[7:11,1:6] #con.wtd.out[8:12,1:6]
+  con.moose.mutbd.out <- con.moose.out2[7:11,1:6] #con.moose.out[8:12,1:6]
+  con.elk.mutbd.out <- con.elk.out2[7:11,1:6] #con.elk.out[8:12,1:6]
   
   pred.prey.mu.tbd.out <- rbind(pred.elk.mutbd.out, pred.moose.mutbd.out, pred.md.mutbd.out, pred.wtd.mutbd.out) 
   pred.prey.mu.tbd.tbl <- dplyr::select(pred.prey.mu.tbd.out, -c("lci", "uci"))
@@ -166,7 +187,7 @@
     ylab("Mean number of minutes between detections") +
     ggtitle("Mean time between detections of interacting species")
   mean_tbd_plot
-  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_PredatorID_plot.tiff", mean_tbd_plot, 
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_PredatorID_plot.tiff", mean_tbd_plot,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
@@ -211,7 +232,7 @@
     ylab("Mean number of minutes between detections") +
     ggtitle("Seasonal mean time between detections of interacting species")
   season_tbd_plot
-  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot, 
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   #' #'  Load tbd data with covariates
