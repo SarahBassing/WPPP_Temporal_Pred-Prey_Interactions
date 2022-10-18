@@ -20,10 +20,13 @@
         #'  Prior for intercept
         alpha0 ~ dnorm(0, 0.001)
         
-        #'  Priors for TRI, PercForest, and Study_Area
-        for(k in 1:2){  #3
-          beta[k] ~ dnorm(0, 0.0001)
-        }
+        #' #'  Priors for TRI, PercForest, and Study_Area
+        #' for(k in 1:2){  #3
+        #'   beta[k] ~ dnorm(0, 0.0001)
+        #' }
+      
+        #'  Prior for TRI
+        beta ~ dnorm(0, 0.0001)
         
         #'  Priors for categorical covariates and interactions
         #'  Season
@@ -44,11 +47,11 @@
           beta3[jj] ~ dnorm(0, 0.01)  
         }
         
-        #'  Interaction for PercForest * predator species ID
-        beta4[1] <- 0
-        for(jj in 2:5){
-          beta4[jj] ~ dnorm(0, 0.01)  
-        }
+        #' #'  Interaction for PercForest * predator species ID
+        #' beta4[1] <- 0
+        #' for(jj in 2:5){
+        #'   beta4[jj] ~ dnorm(0, 0.01)  
+        #' }
         
         #'  Prior for random effect for each camera location
         for(j in 1:ncams){
@@ -69,10 +72,12 @@
   
           lambda[i] <- 1/mu[i]
         
-          log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta2[covs[i,2]] + 
-                        beta[1]*covs[i, 4] + beta[2]*covs[i, 5] + #beta[3]*covs[i, 9] +
-                        beta3[covs[i,2]]*covs[i, 4] + beta4[covs[i,2]]*covs[i, 5] + 
-                        alpha[site[i]]
+          log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta2[covs[i,2]] + beta*covs[i, 4] +
+                        beta3[covs[i,2]]*covs[i, 4] + alpha[site[i]]
+          # log(mu[i]) <- alpha0 + beta1[covs[i,1]] + beta2[covs[i,2]] + 
+          #               beta[1]*covs[i, 4] + beta[2]*covs[i, 5] + #beta[3]*covs[i, 9] +
+          #               beta3[covs[i,2]]*covs[i, 4] + beta4[covs[i,2]]*covs[i, 5] + 
+          #               alpha[site[i]]
         }
         
         #'  Derived parameters
@@ -80,8 +85,8 @@
         #'  Mean tbd per season & predator at mean TRI & PercForest
         for(hh in 1:4){
           for(jj in 1:5){
-            tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 +
-                               beta3[jj]*0 + beta4[jj]*0)
+            tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta*0 + beta3[jj]*0)
+            #tbd[hh, jj] <- exp(alpha0 + beta1[hh] + beta2[jj] + beta[1]*0 + beta[2]*0 + beta3[jj]*0 + beta4[jj]*0) 
           }
         }  
       
