@@ -96,8 +96,8 @@
   ####  Setup data & MCMC specifications for JAGS  ####
   #'  ----------------------------------------------
   #'  MCMC settings
-  nc <- 3; ni <- 100000; nb <- 75000; nt <- 10; na <- 20000
-  # nc <- 3; ni <- 75000; nb <- 20000; nt <- 10; na <- 10000
+  # nc <- 3; ni <- 100000; nb <- 75000; nt <- 1; na <- 20000
+  nc <- 3; ni <- 75000; nb <- 25000; nt <- 1; na <- 5000
   # nc <- 3; ni <- 7500; nb <- 2000; nt <- 10; na <- 1000
   
   #'  Function to define and bundle data
@@ -172,7 +172,7 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(md_con_bundled$y, list(md_con_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(1,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "sa.tbd", "mu.tbd")  #,"con.tbd.tri", "con.tbd.for" 
@@ -185,7 +185,7 @@
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.md)
   mcmcplot(tbd.md$samples)
-  save(tbd.md, file = "./Outputs/TimeBtwnDetections/tbd.md-season_habitat_sa.RData")
+  save(tbd.md, file = "./Outputs/TimeBtwnDetections/tbd.md-season_habitat.RData")
   
   
   #'  ------------------
@@ -196,7 +196,7 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(elk_con_bundled$y, list(elk_con_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(1,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "sa.tbd", "mu.tbd")  #,"con.tbd.tri", "con.tbd.for" 
@@ -209,7 +209,7 @@
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.elk)
   mcmcplot(tbd.elk$samples)
-  save(tbd.elk, file = "./Outputs/TimeBtwnDetections/tbd.elk-season_habitat_sa.RData")
+  save(tbd.elk, file = "./Outputs/TimeBtwnDetections/tbd.elk-season_habitat.RData")
   
   
   #'  --------------------
@@ -220,7 +220,7 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(moose_con_bundled$y, list(moose_con_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(3,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(1,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "sa.tbd", "mu.tbd") #,"con.tbd.tri", "con.tbd.for" 
@@ -233,7 +233,7 @@
   end.time <- Sys.time(); (run.time <- end.time - start.time)
   print(tbd.moose)
   mcmcplot(tbd.moose$samples)
-  save(tbd.moose, file = "./Outputs/TimeBtwnDetections/tbd.moose-season_habitat_sa.RData")
+  save(tbd.moose, file = "./Outputs/TimeBtwnDetections/tbd.moose-season_habitat.RData")
   
   
   #'  --------------------------------
@@ -244,7 +244,7 @@
   
   #'  Set up initial values
   alpha.init <- log(aggregate(wtd_con_bundled$y, list(wtd_con_bundled$site), FUN = mean)[,2])
-  inits <- function(){list(alpha = alpha.init, beta = runif(2,-1,1))} 
+  inits <- function(){list(alpha = alpha.init, beta = runif(1,-1,1))} 
   
   #'  Parameters to be monitored
   params <- c("alpha0", "beta", "beta1", "sigma", "season.tbd", "mu.tbd")  #"sa.tbd", ,"con.tbd.tri", "con.tbd.for" 
