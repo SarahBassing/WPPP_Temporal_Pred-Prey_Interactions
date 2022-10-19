@@ -21,9 +21,9 @@
   load("./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData") 
   load("./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_X_habitat.RData")
   
-  load("./Outputs/TimeBtwnDetections/tbd.md-season_habitat_sa.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.elk-season_habitat_sa.RData")
-  load("./Outputs/TimeBtwnDetections/tbd.moose-season_habitat_sa.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.md-season_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.elk-season_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.moose-season_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.wtd-season_habitat.RData")
 
   #'  Pull out and rename coefficient estimates 
