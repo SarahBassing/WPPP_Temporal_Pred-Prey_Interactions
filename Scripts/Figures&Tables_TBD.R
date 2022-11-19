@@ -30,13 +30,14 @@
   coefs <- function(mod_out, spp) {
     Species <- spp
     Estimate <- unlist(mod_out$mean)
+    Median <- unlist(mod_out$q50)
     lci <- round(unlist(mod_out$q2.5), 3)
     uci <- round(unlist(mod_out$q97.5), 3)
     CI <- paste(" ",lci, "-", uci)
-    out <- as.data.frame(cbind(Species, Estimate, CI, lci, uci))
+    out <- as.data.frame(cbind(Species, Estimate, Median, CI, lci, uci))
     out <- tibble::rownames_to_column(out, "row_names") %>%
       relocate(row_names, .after = Species)
-    colnames(out) <- c("Species", "Parameter", "Estimate", "95% CI", "lci", "uci")
+    colnames(out) <- c("Species", "Parameter", "Estimate", "Median", "95% CI", "lci", "uci")
     renamed <- out %>%
       mutate(Parameter = ifelse(Parameter == "alpha0", "Intercept", Parameter),
              Parameter = ifelse(Parameter == "beta", "Terrain ruggendess", Parameter),
@@ -72,6 +73,7 @@
              Parameter = ifelse(Parameter == "pred.tbd5", "Mean TBD: Wolf", Parameter)) %>%
       filter(Estimate != 0) %>%
       mutate(Estimate = round(as.numeric(Estimate), 2),
+             Median = round(as.numeric(Median), 2),
              lci = as.numeric(lci),
              uci = as.numeric(uci))
     return(renamed)
@@ -87,15 +89,15 @@
   con.elk.out <- coefs(tbd.elk, spp = "Elk") 
   
   #'  Save coefficient estimates only
-  pred.md.coef.out <- pred.md.out[1:13,1:4] #pred.md.out[1:18,1:4]
-  pred.elk.coef.out <- pred.elk.out[1:8,1:4] #pred.elk.out[1:9,1:4]
-  pred.moose.coef.out <- pred.moose.out[1:13,1:4] #pred.moose.out[1:18,1:4]
-  pred.wtd.coef.out <- pred.wtd.out[1:13,1:4] #pred.wtd.out[1:18,1:4]
+  pred.md.coef.out <- pred.md.out[1:13,1:5] #pred.md.out[1:18,1:4]
+  pred.elk.coef.out <- pred.elk.out[1:8,1:5] #pred.elk.out[1:9,1:4]
+  pred.moose.coef.out <- pred.moose.out[1:13,1:5] #pred.moose.out[1:18,1:4]
+  pred.wtd.coef.out <- pred.wtd.out[1:13,1:5] #pred.wtd.out[1:18,1:4]
   
-  con.md.coef.out <- con.md.out[1:5,1:4] #con.md.out[1:6,1:4]
-  con.elk.coef.out <- con.elk.out[1:5,1:4]  #con.elk.out[1:6,1:4]
-  con.moose.coef.out <- con.moose.out[1:5,1:4] #con.moose.out[1:6,1:4]
-  con.wtd.coef.out <- con.wtd.out[1:5,1:4] #con.wtd.out[1:6,1:4]
+  con.md.coef.out <- con.md.out[1:5,1:5] #con.md.out[1:6,1:4]
+  con.elk.coef.out <- con.elk.out[1:5,1:5]  #con.elk.out[1:6,1:4]
+  con.moose.coef.out <- con.moose.out[1:5,1:5] #con.moose.out[1:6,1:4]
+  con.wtd.coef.out <- con.wtd.out[1:5,1:5] #con.wtd.out[1:6,1:4]
   
   pred.prey.coef.out <- rbind(pred.elk.coef.out, pred.moose.coef.out, pred.md.coef.out, pred.wtd.coef.out)
   # write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
@@ -120,20 +122,20 @@
   pred.moose.out2 <- short_CI(pred.moose.out)
   pred.wtd.out2 <- short_CI(pred.wtd.out)
   
-  pred.md.mutbd.out <- pred.md.out2[15:24,1:6] #pred.md.out[20:29,1:6]
-  pred.elk.mutbd.out <- pred.elk.out2[10:18,1:6] #pred.elk.out[11:19,1:6]
-  pred.moose.mutbd.out <- pred.moose.out2[15:24,1:6] #pred.moose.out[20:29,1:6]
-  pred.wtd.mutbd.out <- pred.wtd.out2[15:24,1:6] #pred.wtd.out[20:29,1:6]
+  pred.md.mutbd.out <- pred.md.out2[15:24,1:7] #pred.md.out[20:29,1:6]
+  pred.elk.mutbd.out <- pred.elk.out2[10:18,1:7] #pred.elk.out[11:19,1:6]
+  pred.moose.mutbd.out <- pred.moose.out2[15:24,1:7] #pred.moose.out[20:29,1:6]
+  pred.wtd.mutbd.out <- pred.wtd.out2[15:24,1:7] #pred.wtd.out[20:29,1:6]
   
   con.md.out2 <- short_CI(con.md.out)
   con.wtd.out2 <- short_CI(con.wtd.out)
   con.moose.out2 <- short_CI(con.moose.out)
   con.elk.out2 <- short_CI(con.elk.out)
   
-  con.md.mutbd.out <- con.md.out2[7:11,1:6] #con.md.out[8:12,1:6]
-  con.wtd.mutbd.out <- con.wtd.out2[7:11,1:6] #con.wtd.out[8:12,1:6]
-  con.moose.mutbd.out <- con.moose.out2[7:11,1:6] #con.moose.out[8:12,1:6]
-  con.elk.mutbd.out <- con.elk.out2[7:11,1:6] #con.elk.out[8:12,1:6]
+  con.md.mutbd.out <- con.md.out2[7:11,1:7] #con.md.out[8:12,1:6]
+  con.wtd.mutbd.out <- con.wtd.out2[7:11,1:7] #con.wtd.out[8:12,1:6]
+  con.moose.mutbd.out <- con.moose.out2[7:11,1:7] #con.moose.out[8:12,1:6]
+  con.elk.mutbd.out <- con.elk.out2[7:11,1:7] #con.elk.out[8:12,1:6]
   
   pred.prey.mu.tbd.out <- rbind(pred.elk.mutbd.out, pred.moose.mutbd.out, pred.md.mutbd.out, pred.wtd.mutbd.out) 
   pred.prey.mu.tbd.tbl <- dplyr::select(pred.prey.mu.tbd.out, -c("lci", "uci"))
