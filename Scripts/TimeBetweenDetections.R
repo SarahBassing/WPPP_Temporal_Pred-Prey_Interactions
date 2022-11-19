@@ -121,54 +121,7 @@
   }
   predprey_caps <- det_events(megadata)
   prey_caps <- det_events(ungulate_mega)
-  
-  #' dat <- arrange(megadata, CameraLocation, DateTime)
-  #' caps <- c()
-  #' caps[1] <- 1
-  #' for (i in 2:nrow(dat)){
-  #'   if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps[i] = i
-  #'   else (if (dat$Species[i-1] != dat$Species[i]) caps[i] = i
-  #'         else (if (difftime(dat$DateTime[i], dat$DateTime[i-1], units = c("mins")) > 30) caps[i] = i
-  #'               else caps[i] = caps[i-1]))
-  #' }
-  #' 
-  #' caps <- as.factor(caps)
-  #' 
-  #' #'  Add new column to larger data set
-  #' capdata <- cbind(as.data.frame(dat), caps)
-  
-  #' #'  Add column identifying predators, prey, and other (includes humans, cattle, 
-  #' #'  other wildlife species not listed below)
-  #' capdata <- capdata %>%
-  #'   mutate(Category = ifelse(Species == "Bobcat" | Species == "Black Bear" | 
-  #'                                    Species == "Cougar" | Species == "Coyote" | 
-  #'                                    Species == "Lynx" | Species == "Wolf", "Predator", "Other"),
-  #'          Category = ifelse(Species == "Elk" | Species == "Mule Deer" | 
-  #'                                    Species == "Moose" | Species == "White-tailed Deer", "Prey", Category)) 
-  
-  #' #'  Filter data to the first image from each unique detection event
-  #' firstprey <- capdata[capdata$Category == "Prey",] %>%
-  #'   group_by(caps) %>%
-  #'   slice(1L) %>%
-  #'   ungroup() %>%
-  #'   mutate(Det_type = "first")
-  #' 
-  #' #'  Filter data to the last image of each unique detection event
-  #' lastpredator <- capdata[capdata$Category == "Predator",] %>% 
-  #'   group_by(caps) %>% 
-  #'   slice_tail() %>%
-  #'   ungroup() %>%
-  #'   mutate(Det_type = "last")
-  #' lastprey <- capdata[capdata$Category == "Prey",] %>%
-  #'   group_by(caps) %>%
-  #'   slice_tail() %>%
-  #'   ungroup() %>%
-  #'   mutate(Det_type = "last")
-  #' lastother <- capdata[capdata$Category == "Other",] %>% 
-  #'   group_by(caps) %>% 
-  #'   slice_tail() %>%
-  #'   ungroup() %>%
-  #'   mutate(Det_type = "last")
+
   
   #'  Merge data based on last image of each predator/other detection and first 
   #'  image of each prey detection
@@ -176,12 +129,12 @@
   #'  Merge last and first images of each ungulate detection
   back2back_prey <- rbind(prey_caps$lastprey, prey_caps$firstprey) %>%
     arrange(CameraLocation, DateTime, caps, Det_type)
-  # lastPred_firstPrey <- rbind(lastpredator, firstprey, lastother)
-  # back2back_prey <- rbind(lastprey, firstprey) %>%
-  #   arrange(CameraLocation, DateTime, caps, Det_type) 
+  #'  Merge all together to be used for last ungulate vs first ungulate of diff spp
+  lastUng_firstUng <- rbind(predprey_caps$lastprey, predprey_caps$lastpredator, predprey_caps$firstprey, predprey_caps$lastother)
+  
   #'  Detections with only one image get duplicated b/c its the first & last image
   #'  Identify duplicate images (ignoring last column where they differ) and filter
-  #'  to just one imaage per detection event
+  #'  to just one image per detection event
   dups <- back2back_prey %>%
     group_by_at(vars(-Det_type)) %>% 
     filter(n() > 1) %>%
@@ -223,6 +176,10 @@
   lastfirst19 <- seasonal_filter(lastPred_firstPrey, yr = 2019)
   lastfirst20 <- seasonal_filter(lastPred_firstPrey, yr = 2020)
   
+  lastfirstung18 <- seasonal_filter(lastUng_firstUng, yr = 2018)
+  lastfirstung19 <- seasonal_filter(lastUng_firstUng, yr = 2019)
+  lastfirstung20 <- seasonal_filter(lastUng_firstUng, yr = 2020)
+  
   back2back18 <- seasonal_filter(back2back_prey, yr = 2018)
   back2back19 <- seasonal_filter(back2back_prey, yr = 2019)
   back2back20 <- seasonal_filter(back2back_prey, yr = 2020)
@@ -232,6 +189,11 @@
   lpfp_fall <- rbind(lastfirst18[[2]], lastfirst19[[2]], lastfirst20[[2]])
   lpfp_wtr <- rbind(lastfirst18[[3]], lastfirst19[[3]], lastfirst20[[3]])
   lpfp_sprg <- rbind(lastfirst18[[4]], lastfirst19[[4]], lastfirst20[[4]])
+  
+  lufu_smr <- rbind(lastfirstung18[[1]], lastfirstung19[[1]], lastfirstung20[[1]])
+  lufu_fall <- rbind(lastfirstung18[[2]], lastfirstung19[[2]], lastfirstung20[[2]])
+  lufu_wtr <- rbind(lastfirstung18[[3]], lastfirstung19[[3]], lastfirstung20[[3]])
+  lufu_sprg <- rbind(lastfirstung18[[4]], lastfirstung19[[4]], lastfirstung20[[4]])
   
   b2b_smr <- rbind(back2back18[[1]], back2back19[[1]], back2back20[[1]])
   b2b_fall <- rbind(back2back18[[2]], back2back19[[2]], back2back20[[2]])
@@ -336,10 +298,9 @@
       filter(spp_new1 == "Y" | spp_new2 == "Y") %>%
       #'  Add columns designating predator hunting modes (ambush vs coursing) &  
       #'  trophic level of each predator (apex vs meso). Note, considering
-      #'  black bears to be coursing predators for now even though they're more
-      #'  of a rambling, bump into prey sort or predator. But they are more of a
-      #'  courser than an ambush predator.
-      mutate(HuntingMode = ifelse(Species == "Bobcat" | Species == "Cougar" | Species == "Lynx", "Ambush", "Coursing"),
+      #'  black bears to be ambush predators for now because can't really run
+      #'  down prey over long distances.
+      mutate(HuntingMode = ifelse(Species == "Coyote" | Species == "Wolf", "Coursing", "Ambush"),
              HuntingMode = ifelse(grepl("Bobcat", spp_pair), "Ambush", HuntingMode),
              HuntingMode = ifelse(grepl("Cougar", spp_pair), "Ambush", HuntingMode),
              HuntingMode = ifelse(grepl("Lynx", spp_pair), "Ambush", HuntingMode),
@@ -386,6 +347,60 @@
   tbd_pred.prey_fall <- tbd(resp2pred_fall, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_wtr <- tbd(resp2pred_wtr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_sprg <- tbd(resp2pred_sprg, spp1 = "Predator", unittime = "min")
+  
+  
+  ####  Calculate times between detection events of different ungulate species  ####
+  #'  --------------------------------------------------------------------------
+  #'  Function to calculate time between detection events of ungulate species
+  #'  Data structured so only first and last image per detection event are included.
+  tbd_ungulate <- function(dat, unittime) {
+    detection_data <- arrange(dat, CameraLocation, DateTime, File)
+    
+    #'  Identify the species pair for easier filtering later on
+    spp1spp2 <- c()
+    spp1spp2[1] <- NA
+    for(i in 2:nrow(detection_data)){
+      if (detection_data$Species[i-1] != detection_data$Species[i]) spp1spp2[i] = paste0(detection_data$Species[i-1], "_", detection_data$Species[i])
+      else spp1spp2[i] =  NA
+    }
+    spp_pair <- as.factor(spp1spp2)
+    detection_data <- cbind(detection_data, spp_pair) %>%
+      mutate(PreviousDet = gsub("_.*","", spp_pair))
+    
+    #'  Create empty vector to be filled
+    detection_data$TimeSinceLastDet <- c()
+    #'  Fill first element of the vector to get it started
+    detection_data$TimeSinceLastDet[1] <- 0
+    #'  Loop through each row to calculate elapsed time since previous detection
+    for (i in 2:nrow(detection_data)){
+      #'  If previous detection was different species, calculate
+      #'  the difference in time from previous detection to current detection
+      if (detection_data$Species[i-1] != detection_data$Species[i]) detection_data$TimeSinceLastDet[i] = difftime(detection_data$DateTime[i], detection_data$DateTime[i-1], units = unittime)
+      #'  If previous detection is same species as current detection, set to 0 
+      if (detection_data$Species[i-1] == detection_data$Species[i]) detection_data$TimeSinceLastDet[i] = 0
+      #'  If previous detection is not an ungulate, set to 0 
+      if (detection_data$Category[i-1] != "Prey") detection_data$TimeSinceLastDet[i] = 0
+      #'  If current detection is not an ungulate, set to 0 
+      if (detection_data$Category[i] != "Prey") detection_data$TimeSinceLastDet[i] = 0
+      #'  If previous detection was from a different camera site, set to 0
+      if (detection_data$CameraLocation[i-1] != detection_data$CameraLocation[i]) detection_data$TimeSinceLastDet[i] = 0
+    }
+    
+    #'  Filter to just back-to-back ungulate detections
+    ungulates_only <- detection_data %>%
+      filter(Category == "Prey") %>%
+      filter(TimeSinceLastDet > 0) %>%
+      dplyr::select(-c(caps, Det_type))
+    return(ungulates_only)
+  }
+  #'  Calculate time between detections for different pairs of ungulate species.
+  #'  unittime is unit of time to make calculations in ("sec", "min", "hour", "day")
+  #'  Note: there should be NO negative values! If there are negative values this
+  #'  means the script is calculating times between detections across camera sites
+  tbd_lufu_smr <- tbd_ungulate(lufu_smr, unittime = "min")
+  tbd_lufu_fall <- tbd_ungulate(lufu_fall, unittime = "min")
+  tbd_lufu_wtr <- tbd_ungulate(lufu_wtr, unittime = "min")
+  tbd_lufu_sprg <- tbd_ungulate(lufu_sprg, unittime = "min")
   
   ####  Calculate times between detection events of conspecifics  ####
   #'  ------------------------------------------------------------
@@ -461,6 +476,15 @@
   tbd_pred.prey_sprg <- left_join(tbd_pred.prey_sprg, stations_data, by = "CameraLocation") %>%
     mutate(Season = "Spring")
   
+  tbd_ungulate_smr <- left_join(tbd_lufu_smr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Summer")
+  tbd_ungulate_fall <- left_join(tbd_lufu_fall, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Fall")
+  tbd_ungulate_wtr <- left_join(tbd_lufu_wtr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Winter")
+  tbd_ungulate_sprg <- left_join(tbd_lufu_sprg, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Spring")
+  
   tbd_conspif_smr <- left_join(tbd_conspif_smr, stations_data, by = "CameraLocation") %>%
     mutate(Season = "Summer")
   tbd_conspif_fall <- left_join(tbd_conspif_fall, stations_data, by = "CameraLocation") %>%
@@ -479,6 +503,14 @@
     relocate(Season, .before = DateTime) %>%
     relocate(TimeSinceLastDet, .after = backgroundRisk_For)
   
+  tbd_ungulate <- rbind(tbd_ungulate_smr, tbd_ungulate_fall, tbd_ungulate_wtr, tbd_ungulate_sprg) %>%
+    arrange(CameraLocation, DateTime) %>%
+    dplyr::select(-c(File, Category)) %>%
+    relocate(Year, .before = DateTime) %>%
+    relocate(Study_Area, .before = Year) %>%
+    relocate(Season, .before = DateTime) %>%
+    relocate(TimeSinceLastDet, .after = backgroundRisk_For)
+  
   tbd_conspif <- rbind(tbd_conspif_smr, tbd_conspif_fall, tbd_conspif_wtr, tbd_conspif_sprg) %>%
     arrange(CameraLocation, DateTime) %>%
     dplyr::select(-c(File, Category)) %>%
@@ -489,6 +521,7 @@
   
   #'  Double check there are no negative times-between-detection
   summary(tbd_pred.prey$TimeSinceLastDet)
+  summary(tbd_ungulate$TimeSinceLastDet)
   summary(tbd_conspif$TimeSinceLastDet)
   
   #'  Conspecific data there should be NO tbd < 30min because 30min minimum was
@@ -499,7 +532,7 @@
   #'  event. Removing these instances b/c they are wrong based on definition of
   #'  independent detection event & because they belong (and are) in the pred-prey
   #'  tbd data set, not the conspecific data set.
-  tbd_conspif <- filter(tbd_conspif, TimeSinceLastDet >= 30.00)
+  tbd_conspif <- filter(tbd_conspif, TimeSinceLastDet >= 30.00) #5.00 for 5-min interval
   
   #'  SAVE!
   write.csv(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".csv"))
