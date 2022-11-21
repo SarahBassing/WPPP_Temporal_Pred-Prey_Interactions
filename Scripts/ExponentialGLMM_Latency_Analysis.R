@@ -170,16 +170,17 @@
   md_bundled <- bundle_dat(tbd_md_short) 
   wtd_bundled <- bundle_dat(tbd_wtd_short)
   #'  Remove single wolf-elk observation
-  tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf")
+  tbd_elk_shorter <- tbd_elk_short %>% filter(PredatorID != "Wolf") %>%
+    filter(Study_Area == "NE")
   elk_bundled <- bundle_dat(tbd_elk_shorter)
   moose_bundled <- bundle_dat(tbd_moose_short)
   all_bundled <- bundle_dat(tbd_all_short)
   
   #'  Save for making figures
   pred_md_bundled <- md_bundled; save(pred_md_bundled, file = "./Data/pred_md_bundled.RData")
-  pred_elk_bundled <- md_bundled; save(pred_elk_bundled, file = "./Data/pred_elk_bundled.RData")
-  pred_moose_bundled <- md_bundled; save(pred_moose_bundled, file = "./Data/pred_moose_bundled.RData")
-  pred_wtd_bundled <- md_bundled; save(pred_wtd_bundled, file = "./Data/pred_wtd_bundled.RData")
+  pred_elk_bundled <- elk_bundled; save(pred_elk_bundled, file = "./Data/pred_elk_bundled.RData")
+  pred_moose_bundled <- moose_bundled; save(pred_moose_bundled, file = "./Data/pred_moose_bundled.RData")
+  pred_wtd_bundled <- wtd_bundled; save(pred_wtd_bundled, file = "./Data/pred_wtd_bundled.RData")
   
   #'  ==========================
   ####  No Interaction Models  ####
