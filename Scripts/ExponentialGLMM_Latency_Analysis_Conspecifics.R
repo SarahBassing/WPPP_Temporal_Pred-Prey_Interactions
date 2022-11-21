@@ -21,8 +21,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_conspif_2022-10-05.RData") #2022-09-23 
-  #'  Remove observations involving lynx due to too few lynx detections
+  load("./Outputs/tbd_conspif_2022-10-05.RData") #tbd_conspif_5min_2022-11-18 5-min interval
   tbd_conspif <- tbd_conspif %>%
     #'  Change units of time
     mutate(tbd_min_round = round(TimeSinceLastDet, 0),
@@ -157,9 +156,9 @@
   
   #'  Save for making figures
   con_md_bundled <- md_con_bundled; save(con_md_bundled, file = "./Data/con_md_bundled.RData")
-  con_elk_bundled <- md_con_bundled; save(con_elk_bundled, file = "./Data/con_elk_bundled.RData")
-  con_moose_bundled <- md_con_bundled; save(con_moose_bundled, file = "./Data/con_moose_bundled.RData")
-  con_wtd_bundled <- md_con_bundled; save(con_wtd_bundled, file = "./Data/con_wtd_bundled.RData")
+  con_elk_bundled <- elk_con_bundled; save(con_elk_bundled, file = "./Data/con_elk_bundled.RData")
+  con_moose_bundled <- moose_con_bundled; save(con_moose_bundled, file = "./Data/con_moose_bundled.RData")
+  con_wtd_bundled <- wtd_con_bundled; save(con_wtd_bundled, file = "./Data/con_wtd_bundled.RData")
   
   
   #'  ------------------------
