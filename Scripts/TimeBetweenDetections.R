@@ -538,6 +538,9 @@
   write.csv(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".csv"))
   save(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".RData"))
   
+  write.csv(tbd_ungulate, file = paste0("./Outputs/tbd_ungulate_", Sys.Date(), ".csv"))
+  save(tbd_ungulate, file = paste0("./Outputs/tbd_ungulate_", Sys.Date(), ".RData"))
+  
   write.csv(tbd_conspif, file = paste0("./Outputs/tbd_conspif_", Sys.Date(), ".csv"))
   save(tbd_conspif, file = paste0("./Outputs/tbd_conspif_", Sys.Date(), ".RData"))
 
