@@ -21,12 +21,17 @@
   load("./Outputs/TimeBtwnDetections/tbd.pred.moose-season_predID_X_habitat.RData") 
   load("./Outputs/TimeBtwnDetections/tbd.pred.wtd-season_predID_X_habitat.RData")
   
+  load("./Outputs/TimeBtwnDetections/tbd.ung.md-season_ungID_X_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.ung.elk-season_ungID_habitat.RData")
+  load("./Outputs/TimeBtwnDetections/tbd.ung.moose-season_ungID_X_habitat.RData") 
+  load("./Outputs/TimeBtwnDetections/tbd.ung.wtd-season_ungID_X_habitat.RData")
+  
   load("./Outputs/TimeBtwnDetections/tbd.md-season_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.elk-season_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.moose-season_habitat.RData")
   load("./Outputs/TimeBtwnDetections/tbd.wtd-season_habitat.RData")
 
-  #'  Pull out and rename coefficient estimates 
+  #'  Pull out and rename coefficient estimates for pred.prey & conspecific models
   coefs <- function(mod_out, spp) {
     Species <- spp
     Estimate <- unlist(mod_out$mean)
@@ -82,17 +87,108 @@
   pred.elk.out <- coefs(tbd.pred.elk, spp = "Elk")
   pred.moose.out <- coefs(tbd.pred.moose, spp = "Moose")
   pred.wtd.out <- coefs(tbd.pred.wtd, spp = "White-tailed deer") 
-  
+
   con.md.out <- coefs(tbd.md, spp = "Mule deer") 
   con.wtd.out <- coefs(tbd.wtd, spp = "White-tailed deer") 
   con.moose.out <- coefs(tbd.moose, spp = "Moose")
   con.elk.out <- coefs(tbd.elk, spp = "Elk") 
+  
+  #'  Pull out and rename coefficient estimates for ungulate-ungulate models
+  coefs <- function(mod_out, spp) {
+    Species <- spp
+    Estimate <- unlist(mod_out$mean)
+    Median <- unlist(mod_out$q50)
+    lci <- round(unlist(mod_out$q2.5), 3)
+    uci <- round(unlist(mod_out$q97.5), 3)
+    CI <- paste(" ",lci, "-", uci)
+    out <- as.data.frame(cbind(Species, Estimate, Median, CI, lci, uci))
+    out <- tibble::rownames_to_column(out, "row_names") %>%
+      relocate(row_names, .after = Species)
+    colnames(out) <- c("Species", "Parameter", "Estimate", "Median", "95% CI", "lci", "uci")
+    renamed <- out %>%
+      mutate(Parameter = ifelse(Parameter == "alpha0", "Intercept", Parameter),
+             Parameter = ifelse(Parameter == "beta", "Terrain ruggendess", Parameter),
+             # Parameter = ifelse(Parameter == "beta2", "Percent forest", Parameter),
+             Parameter = ifelse(Parameter == "beta11", "Season: Summer", Parameter),
+             Parameter = ifelse(Parameter == "beta12", "Season: Fall", Parameter),
+             Parameter = ifelse(Parameter == "beta13", "Season: Winter", Parameter),
+             Parameter = ifelse(Parameter == "beta14", "Season: Spring", Parameter),
+             Parameter = ifelse(Parameter == "beta21", "Ungulate: 1", Parameter),
+             Parameter = ifelse(Parameter == "beta22", "Ungulate: 2", Parameter),
+             Parameter = ifelse(Parameter == "beta23", "Ungulate: 3", Parameter),
+             Parameter = ifelse(Parameter == "beta31", "Ungulate: 1 TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta32", "Ungulate: 2 TRI", Parameter),
+             Parameter = ifelse(Parameter == "beta33", "Ungulate: 3 TRI", Parameter),
+             # Parameter = ifelse(Parameter == "beta41", "Ungulate: 1 Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta42", "Ungulate: 2 Forest", Parameter),
+             # Parameter = ifelse(Parameter == "beta43", "Ungulate: 3 Forest", Parameter),
+             Parameter = ifelse(Parameter == "mu.tbd", "Mean TBD", Parameter),
+             Parameter = ifelse(Parameter == "season.tbd1", "Mean TBD: Summer", Parameter),
+             Parameter = ifelse(Parameter == "season.tbd2", "Mean TBD: Fall", Parameter),
+             Parameter = ifelse(Parameter == "season.tbd3", "Mean TBD: Winter", Parameter),
+             Parameter = ifelse(Parameter == "season.tbd4", "Mean TBD: Spring", Parameter),
+             Parameter = ifelse(Parameter == "ung.tbd1", "Mean TBD: 1", Parameter),
+             Parameter = ifelse(Parameter == "ung.tbd2", "Mean TBD: 2", Parameter),
+             Parameter = ifelse(Parameter == "ung.tbd3", "Mean TBD: 3", Parameter)) %>%
+      filter(Estimate != 0) %>%
+      mutate(Estimate = round(as.numeric(Estimate), 2),
+             Median = round(as.numeric(Median), 2),
+             lci = as.numeric(lci),
+             uci = as.numeric(uci))
+    return(renamed)
+  }
+  ung.md.out <- coefs(tbd.ung.md, spp = "Mule deer") %>%
+    mutate(Parameter = ifelse(Parameter == "Ungulate: 1", "Ungulate: White-tailed Deer", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2", "Ungulate: Elk", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3", "Ungulate: Moose", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 1 TRI", "Ungulate: White-tailed Deer TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2 TRI", "Ungulate: Elk TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3 TRI", "Ungulate: Moose TRI", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 1", "Mean TBD: White-tailed Deer", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 2", "Mean TBD: Elk", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 3", "Mean TBD: Moose", Parameter))
+  ung.elk.out <- coefs(tbd.ung.elk, spp = "Elk") %>%
+    mutate(Parameter = ifelse(Parameter == "Ungulate: 1", "Ungulate: Mule Deer", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2", "Ungulate: White-tailed Deer", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3", "Ungulate: Moose", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 1 TRI", "Ungulate: Mule Deer TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2 TRI", "Ungulate: White-tailed Deer TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3 TRI", "Ungulate: Moose TRI", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 1", "Mean TBD: Mule Deer", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 2", "Mean TBD: White-tailed Deer", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 3", "Mean TBD: Moose", Parameter))
+  ung.moose.out <- coefs(tbd.ung.moose, spp = "Moose") %>%
+    mutate(Parameter = ifelse(Parameter == "Ungulate: 1", "Ungulate: Mule Deer", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2", "Ungulate: White-tailed Deer", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3", "Ungulate: Elk", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 1 TRI", "Ungulate: Mule Deer TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2 TRI", "Ungulate: White-tailed Deer TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3 TRI", "Ungulate: Elk TRI", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 1", "Mean TBD: Mule Deer", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 2", "Mean TBD: White-tailed Deer", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 3", "Mean TBD: Elk", Parameter))
+  ung.wtd.out <- coefs(tbd.ung.wtd, spp = "White-tailed deer") %>%
+    mutate(Parameter = ifelse(Parameter == "Ungulate: 1", "Ungulate: Mule Deer", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2", "Ungulate: Elk", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3", "Ungulate: Moose", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 1 TRI", "Ungulate: Mule Deer TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 2 TRI", "Ungulate: Elk TRI", Parameter),
+           Parameter = ifelse(Parameter == "Ungulate: 3 TRI", "Ungulate: Moose TRI", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 1", "Mean TBD: Mule Deer", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 2", "Mean TBD: Elk", Parameter),
+           Parameter = ifelse(Parameter == "Mean TBD: 3", "Mean TBD: Moose", Parameter))
+  
   
   #'  Save coefficient estimates only
   pred.md.coef.out <- pred.md.out[1:13,1:5] #pred.md.out[1:18,1:4]
   pred.elk.coef.out <- pred.elk.out[1:8,1:5] #pred.elk.out[1:9,1:4]
   pred.moose.coef.out <- pred.moose.out[1:13,1:5] #pred.moose.out[1:18,1:4]
   pred.wtd.coef.out <- pred.wtd.out[1:13,1:5] #pred.wtd.out[1:18,1:4]
+  
+  ung.md.coef.out <- ung.md.out[1:9,1:5] #ung.md.out[1:9,1:4]
+  ung.elk.coef.out <- ung.elk.out[1:7,1:5] #ung.elk.out[1:7,1:4]
+  ung.moose.coef.out <- ung.moose.out[1:9,1:5] #ung.moose.out[1:9,1:4]
+  ung.wtd.coef.out <- ung.wtd.out[1:9,1:5] #ung.wtd.out[1:9,1:4]
   
   con.md.coef.out <- con.md.out[1:5,1:5] #con.md.out[1:6,1:4]
   con.elk.coef.out <- con.elk.out[1:5,1:5]  #con.elk.out[1:6,1:4]
@@ -101,6 +197,9 @@
   
   pred.prey.coef.out <- rbind(pred.elk.coef.out, pred.moose.coef.out, pred.md.coef.out, pred.wtd.coef.out)
   # write.csv(pred.prey.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_coef_table.csv")
+  
+  ungulate.coef.out <- rbind(ung.elk.coef.out, ung.moose.coef.out, ung.md.coef.out, ung.wtd.coef.out)
+  # write.csv(ungulate.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.ungulate_coef_table.csv")
   
   conspif.coef.out <- rbind(con.elk.coef.out, con.moose.coef.out, con.md.coef.out, con.wtd.coef.out)
   # write.csv(conspif.coef.out, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_coef_table.csv")
@@ -127,6 +226,16 @@
   pred.moose.mutbd.out <- pred.moose.out2[15:24,1:7] #pred.moose.out[20:29,1:6]
   pred.wtd.mutbd.out <- pred.wtd.out2[15:24,1:7] #pred.wtd.out[20:29,1:6]
   
+  ung.md.out2 <- short_CI(ung.md.out)
+  ung.elk.out2 <- short_CI(ung.elk.out)
+  ung.moose.out2 <- short_CI(ung.moose.out)
+  ung.wtd.out2 <- short_CI(ung.wtd.out)
+  
+  ung.md.mutbd.out <- ung.md.out2[11:18,1:7] #ung.md.out[11:18,1:6]
+  ung.elk.mutbd.out <- ung.elk.out2[9:16,1:7] #ung.elk.out[9:13,1:6]
+  ung.moose.mutbd.out <- ung.moose.out2[11:18,1:7] #ung.moose.out[11:18,1:6]
+  ung.wtd.mutbd.out <- ung.wtd.out2[11:18,1:7] #ung.wtd.out[11:18,1:6]
+  
   con.md.out2 <- short_CI(con.md.out)
   con.wtd.out2 <- short_CI(con.wtd.out)
   con.moose.out2 <- short_CI(con.moose.out)
@@ -141,6 +250,10 @@
   pred.prey.mu.tbd.tbl <- dplyr::select(pred.prey.mu.tbd.out, -c("lci", "uci"))
   # write.csv(pred.prey.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.pred.prey_meanTBD_table.csv")
   
+  ungulate.mu.tbd.out <- rbind(ung.elk.mutbd.out, ung.moose.mutbd.out, ung.md.mutbd.out, ung.wtd.mutbd.out) 
+  ungulate.mu.tbd.tbl <- dplyr::select(ungulate.mu.tbd.out, -c("lci", "uci"))
+  # write.csv(ungulate.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.ungulate_meanTBD_table.csv")
+  
   conspif.mu.tbd.out <- rbind(con.elk.mutbd.out, con.moose.mutbd.out, con.md.mutbd.out, con.wtd.mutbd.out)
   conspif.mu.tbd.tbl <- dplyr::select(conspif.mu.tbd.out, -c("lci", "uci"))
   # write.csv(conspif.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_meanTBD_table.csv")
@@ -148,7 +261,7 @@
   
   ####  Plot mean TBD  ####
   #'  ------------------
-  #'  Effect of predator species vs conspecific on tbd
+  #'  Effect of predator species vs ungulate vs conspecific on tbd
   #'  Filter to means of interest
   mean_conspif <- conspif.mu.tbd.out[conspif.mu.tbd.out$Parameter == "Mean TBD",] %>%
     dplyr::select(-c("95% CI")) %>%
@@ -165,10 +278,21 @@
     dplyr::select(-c("95% CI")) %>%
     #'  Reduce parameter name to just the interacting species
     mutate(Parameter = gsub("Mean TBD: *", "", Parameter))
-  mean_TBD <- rbind(mean_conspif, mean_pred) %>%
+  mean_ungulate <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD",] %>%
+    mutate(Parameter = "Mean Ungulate")
+  mean_elk <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Elk",]
+  mean_moose <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Moose",]
+  mean_md <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Mule Deer",]
+  mean_wtd <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: White-tailed Deer",]
+  mean_ung <- rbind(mean_ungulate, mean_elk, mean_moose, mean_md, mean_wtd) %>%  
+    dplyr::select(-c("95% CI")) %>%
+    #'  Reduce parameter name to just the interacting species
+    mutate(Parameter = gsub("Mean TBD: *", "", Parameter))
+  
+  mean_TBD <- rbind(mean_conspif, mean_ung, mean_pred) %>%
     arrange(Species, Estimate) %>%
     mutate(Species = factor(Species, levels = c("Elk", "Moose", "Mule deer", "White-tailed deer")),
-           Parameter = factor(Parameter, levels = c("Conspecific", "Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")),
+           Parameter = factor(Parameter, levels = c("Conspecific", "Mean Ungulate", "Elk", "Moose", "Mule Deer", "White-tailed Deer", "Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")),
            Estimate = as.numeric(Estimate),
            lci = as.numeric(lci),
            uci = as.numeric(uci))
@@ -177,10 +301,11 @@
   bright <- colour("bright")
   bright(6)
   
-  mean_tbd_plot <- ggplot(mean_TBD, aes(x = Parameter, y = Estimate, group = Species)) +
+  mean_TBD_skinny <- dplyr::filter(mean_TBD, mean_TBD$Parameter != "Mean Ungulate")
+  mean_tbd_plot <- ggplot(mean_TBD_skinny, aes(x = Parameter, y = Estimate, group = Species)) +
     geom_errorbar(aes(ymin = lci, ymax = uci, color = Parameter), width = 0, position = position_dodge(width = 0.4)) +
     geom_point(stat = 'identity', aes(col = Parameter), size = 2.5, position = position_dodge(width = 0.4)) +
-    scale_colour_bright() +
+    # scale_colour_bright() +
     theme_bw() +
     ylim(0,10000) +
     facet_wrap(~Species, scales = "free_y") +
@@ -189,7 +314,27 @@
     ylab("Mean number of minutes between detections") +
     ggtitle("Mean time between detections of interacting species")
   mean_tbd_plot
-  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_PredatorID_plot.tiff", mean_tbd_plot,
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_SpeciesID_plot.tiff", mean_tbd_plot,
+  #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  mean_TBD_skinnier <- mean_TBD %>%
+    filter(Parameter != "Elk") %>%
+    filter(Parameter != "Moose") %>%
+    filter(Parameter != "Mule Deer") %>%
+    filter(Parameter != "White-tailed Deer")
+  mean_tbd_plot2 <- ggplot(mean_TBD_skinnier, aes(x = Parameter, y = Estimate, group = Species)) +
+    geom_errorbar(aes(ymin = lci, ymax = uci, color = Parameter), width = 0, position = position_dodge(width = 0.4)) +
+    geom_point(stat = 'identity', aes(col = Parameter), size = 2.5, position = position_dodge(width = 0.4)) +
+    # scale_colour_bright() +
+    theme_bw() +
+    ylim(0,10000) +
+    facet_wrap(~Species, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    xlab("Species detected prior to ungulate detection") +
+    ylab("Mean number of minutes between detections") +
+    ggtitle("Mean time between detections of interacting species")
+  mean_tbd_plot2
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_SpeciesID_plot2.tiff", mean_tbd_plot2,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
@@ -212,10 +357,20 @@
     mutate(Season = gsub("Mean TBD: *", "", Parameter),
            Parameter = "Predator") %>%
     rename(Interacting_spp = Parameter) 
-  season_TBD <- rbind(season_conspif, season_pred) %>%
+  mean_ung_smr <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Summer",]
+  mean_ung_fall <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Fall",]
+  mean_ung_wtr <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Winter",]
+  mean_ung_sprg <- ungulate.mu.tbd.out[ungulate.mu.tbd.out$Parameter == "Mean TBD: Spring",]
+  season_ung <- rbind(mean_ung_smr, mean_ung_fall, mean_ung_wtr, mean_ung_sprg) %>%
+    dplyr::select(-c("95% CI")) %>%
+    #'  Reduce parameter name to just the interacting species
+    mutate(Season = gsub("Mean TBD: *", "", Parameter),
+           Parameter = "Ungulate") %>%
+    rename(Interacting_spp = Parameter) 
+  season_TBD <- rbind(season_conspif, season_ung, season_pred) %>%
     arrange(Species, Season, Estimate) %>%
     mutate(Species = factor(Species, levels = c("Elk", "Moose", "Mule deer", "White-tailed deer")),
-           Interacting_spp = factor(Interacting_spp, levels = c("Conspecific", "Predator")),
+           Interacting_spp = factor(Interacting_spp, levels = c("Conspecific", "Ungulate", "Predator")),
            Season = factor(Season, levels = c("Summer", "Fall", "Winter", "Spring")),
            Estimate = as.numeric(Estimate),
            lci = as.numeric(lci),
