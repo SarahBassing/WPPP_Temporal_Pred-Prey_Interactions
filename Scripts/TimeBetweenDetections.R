@@ -97,6 +97,11 @@
       slice(1L) %>%
       ungroup() %>%
       mutate(Det_type = "first")
+    firstpred <- capdata[capdata$Category == "Predator",] %>%
+      group_by(caps) %>%
+      slice(1L) %>%
+      ungroup() %>%
+      mutate(Det_type = "first")
     
     #'  Filter data to the last image of each unique detection event
     lastpredator <- capdata[capdata$Category == "Predator",] %>% 
@@ -115,8 +120,8 @@
       ungroup() %>%
       mutate(Det_type = "last")
     
-    data_list <- list(firstprey, lastpredator, lastprey, lastother)
-    names(data_list) <- c("firstprey", "lastpredator", "lastprey", "lastother")
+    data_list <- list(firstprey, firstpred, lastpredator, lastprey, lastother)
+    names(data_list) <- c("firstprey", "firstpred", "lastpredator", "lastprey", "lastother")
     return(data_list)
   }
   predprey_caps <- det_events(megadata)
@@ -126,6 +131,9 @@
   #'  Merge data based on last image of each predator/other detection and first 
   #'  image of each prey detection
   lastPred_firstPrey <- rbind(predprey_caps$lastpredator, predprey_caps$firstprey, predprey_caps$lastother)
+  #'  Merge data based on last image of each prey/other detection and first image
+  #'  of each predatory detection
+  lastPrey_firstPred <- rbind(predprey_caps$lastprey, predprey_caps$firstpred, predprey_caps$lastother)
   #'  Merge last and first images of each ungulate detection
   back2back_prey <- rbind(prey_caps$lastprey, prey_caps$firstprey) %>%
     arrange(CameraLocation, DateTime, caps, Det_type)
@@ -176,6 +184,10 @@
   lastfirst19 <- seasonal_filter(lastPred_firstPrey, yr = 2019)
   lastfirst20 <- seasonal_filter(lastPred_firstPrey, yr = 2020)
   
+  lastfirstpreypred18 <- seasonal_filter(lastPrey_firstPred, yr = 2018)
+  lastfirstpreypred19 <- seasonal_filter(lastPrey_firstPred, yr = 2019)
+  lastfirstpreypred20 <- seasonal_filter(lastPrey_firstPred, yr = 2020)
+  
   lastfirstung18 <- seasonal_filter(lastUng_firstUng, yr = 2018)
   lastfirstung19 <- seasonal_filter(lastUng_firstUng, yr = 2019)
   lastfirstung20 <- seasonal_filter(lastUng_firstUng, yr = 2020)
@@ -185,10 +197,15 @@
   back2back20 <- seasonal_filter(back2back_prey, yr = 2020)
   
   #'  Join all detection data per season, across years
-  lpfp_smr <- rbind(lastfirst18[[1]], lastfirst19[[1]], lastfirst20[[1]])
-  lpfp_fall <- rbind(lastfirst18[[2]], lastfirst19[[2]], lastfirst20[[2]])
-  lpfp_wtr <- rbind(lastfirst18[[3]], lastfirst19[[3]], lastfirst20[[3]])
-  lpfp_sprg <- rbind(lastfirst18[[4]], lastfirst19[[4]], lastfirst20[[4]])
+  lpfprey_smr <- rbind(lastfirst18[[1]], lastfirst19[[1]], lastfirst20[[1]])
+  lpfprey_fall <- rbind(lastfirst18[[2]], lastfirst19[[2]], lastfirst20[[2]])
+  lpfprey_wtr <- rbind(lastfirst18[[3]], lastfirst19[[3]], lastfirst20[[3]])
+  lpfprey_sprg <- rbind(lastfirst18[[4]], lastfirst19[[4]], lastfirst20[[4]])
+  
+  lpfpred_smr <- rbind(lastfirstpreypred18[[1]], lastfirstpreypred19[[1]], lastfirstpreypred20[[1]])
+  lpfpred_fall <- rbind(lastfirstpreypred18[[2]], lastfirstpreypred19[[2]], lastfirstpreypred20[[2]])
+  lpfpred_wtr <- rbind(lastfirstpreypred18[[3]], lastfirstpreypred19[[3]], lastfirstpreypred20[[3]])
+  lpfpred_sprg <- rbind(lastfirstpreypred18[[4]], lastfirstpreypred19[[4]], lastfirstpreypred20[[4]])
   
   lufu_smr <- rbind(lastfirstung18[[1]], lastfirstung19[[1]], lastfirstung20[[1]])
   lufu_fall <- rbind(lastfirstung18[[2]], lastfirstung19[[2]], lastfirstung20[[2]])
@@ -236,10 +253,46 @@
       arrange(CameraLocation, DateTime)
     return(dets)
   }
-  lpfp_smr_thin <- thin_dat(lpfp_smr)
-  lpfp_fall_thin <- thin_dat(lpfp_fall)
-  lpfp_wtr_thin <- thin_dat(lpfp_wtr)
-  lpfp_sprg_thin <- thin_dat(lpfp_sprg)
+  lpfprey_smr_thin <- thin_dat(lpfprey_smr)
+  lpfprey_fall_thin <- thin_dat(lpfprey_fall)
+  lpfprey_wtr_thin <- thin_dat(lpfprey_wtr)
+  lpfprey_sprg_thin <- thin_dat(lpfprey_sprg)
+  
+  #'  For first predator detection
+  thin_dat <- function(dets) {
+    dat <- arrange(dets, CameraLocation, DateTime) %>%
+      dplyr::select(-c(caps, Det_type))
+    caps_new <- c()
+    caps_new[1] <- 1
+    for (i in 2:nrow(dat)){
+      if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps_new[i] = i
+      else(if (dat$Category[i-1] != dat$Category[i]) caps_new[i] = i
+           else caps_new[i] = caps_new[i-1])
+    }
+    
+    caps_new <- as.factor(caps_new)
+    
+    #'  Add new column to larger data set
+    capdata <- cbind(as.data.frame(dat), caps_new)
+    
+    #'  Remove all extra detections when multiple detections of same category occur in a row
+    firstpredspp <- capdata[capdata$Category == "Predator",] %>%
+      group_by(caps_new) %>% 
+      slice(1L) %>%
+      ungroup()
+    lasteverythingelse <- capdata[capdata$Category != "Predator",] %>%
+      group_by(caps_new) %>% 
+      slice_tail() %>%
+      ungroup()
+    #'  Combine into final data set
+    dets <- rbind(firstpredspp, lasteverythingelse) %>%
+      arrange(CameraLocation, DateTime)
+    return(dets)
+  }
+  lpfpred_smr_thin <- thin_dat(lpfpred_smr)
+  lpfpred_fall_thin <- thin_dat(lpfpred_fall)
+  lpfpred_wtr_thin <- thin_dat(lpfpred_wtr)
+  lpfpred_sprg_thin <- thin_dat(lpfpred_sprg)
   
   #'  Function to reduce detections to just series of a spp1 detection followed
   #'  by a spp2 detection (e.g., predator then prey, but no other species detected 
@@ -311,10 +364,15 @@
              PredatorID = gsub("_.*","", spp_pair))
     return(capdata)
   }
-  resp2pred_smr <- spppair_dat(lpfp_smr_thin, spp1 = "Predator", spp2 = "Prey")
-  resp2pred_fall <- spppair_dat(lpfp_fall_thin, spp1 = "Predator", spp2 = "Prey")
-  resp2pred_wtr <- spppair_dat(lpfp_wtr_thin, spp1 = "Predator", spp2 = "Prey")
-  resp2pred_sprg <- spppair_dat(lpfp_sprg_thin, spp1 = "Predator", spp2 = "Prey")
+  resp2pred_smr <- spppair_dat(lpfprey_smr_thin, spp1 = "Predator", spp2 = "Prey")
+  resp2pred_fall <- spppair_dat(lpfprey_fall_thin, spp1 = "Predator", spp2 = "Prey")
+  resp2pred_wtr <- spppair_dat(lpfprey_wtr_thin, spp1 = "Predator", spp2 = "Prey")
+  resp2pred_sprg <- spppair_dat(lpfprey_sprg_thin, spp1 = "Predator", spp2 = "Prey")
+  
+  resp2prey_smr <- spppair_dat(lpfpred_smr_thin, spp1 = "Prey", spp2 = "Predator")
+  resp2prey_fall <- spppair_dat(lpfpred_fall_thin, spp1 = "Prey", spp2 = "Predator")
+  resp2prey_wtr <- spppair_dat(lpfpred_wtr_thin, spp1 = "Prey", spp2 = "Predator")
+  resp2prey_sprg <- spppair_dat(lpfpred_sprg_thin, spp1 = "Prey", spp2 = "Predator")
   
   ####  Calculate times between detection events of predator-prey  ####
   #'  -------------------------------------------------------------
@@ -347,6 +405,13 @@
   tbd_pred.prey_fall <- tbd(resp2pred_fall, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_wtr <- tbd(resp2pred_wtr, spp1 = "Predator", unittime = "min")
   tbd_pred.prey_sprg <- tbd(resp2pred_sprg, spp1 = "Predator", unittime = "min")
+  
+  #'  Calculate time between detections for different pairings of prey species
+  #'  followed by predator species
+  tbd_prey.pred_smr <- tbd(resp2prey_smr, spp1 = "Prey", unittime = "min")
+  tbd_prey.pred_fall <- tbd(resp2prey_fall, spp1 = "Prey", unittime = "min")
+  tbd_prey.pred_wtr <- tbd(resp2prey_wtr, spp1 = "Prey", unittime = "min")
+  tbd_prey.pred_sprg <- tbd(resp2prey_sprg, spp1 = "Prey", unittime = "min")
   
   
   ####  Calculate times between detection events of different ungulate species  ####
@@ -476,6 +541,15 @@
   tbd_pred.prey_sprg <- left_join(tbd_pred.prey_sprg, stations_data, by = "CameraLocation") %>%
     mutate(Season = "Spring")
   
+  tbd_prey.pred_smr <- left_join(tbd_prey.pred_smr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Summer")
+  tbd_prey.pred_fall <- left_join(tbd_prey.pred_fall, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Fall")
+  tbd_prey.pred_wtr <- left_join(tbd_prey.pred_wtr, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Winter")
+  tbd_prey.pred_sprg <- left_join(tbd_prey.pred_sprg, stations_data, by = "CameraLocation") %>%
+    mutate(Season = "Spring")
+  
   tbd_ungulate_smr <- left_join(tbd_lufu_smr, stations_data, by = "CameraLocation") %>%
     mutate(Season = "Summer")
   tbd_ungulate_fall <- left_join(tbd_lufu_fall, stations_data, by = "CameraLocation") %>%
@@ -503,6 +577,14 @@
     relocate(Season, .before = DateTime) %>%
     relocate(TimeSinceLastDet, .after = backgroundRisk_For)
   
+  tbd_prey.pred <- rbind(tbd_prey.pred_smr, tbd_prey.pred_fall, tbd_prey.pred_wtr, tbd_prey.pred_sprg) %>%
+    arrange(CameraLocation, DateTime) %>%
+    dplyr::select(-c(File, Category, caps_new, cam, spp_new1, spp_new2)) %>%
+    relocate(Year, .before = DateTime) %>%
+    relocate(Study_Area, .before = Year) %>%
+    relocate(Season, .before = DateTime) %>%
+    relocate(TimeSinceLastDet, .after = backgroundRisk_For)
+  
   tbd_ungulate <- rbind(tbd_ungulate_smr, tbd_ungulate_fall, tbd_ungulate_wtr, tbd_ungulate_sprg) %>%
     arrange(CameraLocation, DateTime) %>%
     dplyr::select(-c(File, Category)) %>%
@@ -521,6 +603,7 @@
   
   #'  Double check there are no negative times-between-detection
   summary(tbd_pred.prey$TimeSinceLastDet)
+  summary(tbd_prey.pred$TimeSinceLastDet)
   summary(tbd_ungulate$TimeSinceLastDet)
   summary(tbd_conspif$TimeSinceLastDet)
   
@@ -537,6 +620,9 @@
   #'  SAVE!
   write.csv(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".csv"))
   save(tbd_pred.prey, file = paste0("./Outputs/tbd_pred.prey_", Sys.Date(), ".RData"))
+  
+  write.csv(tbd_prey.pred, file = paste0("./Outputs/tbd_prey.pred_", Sys.Date(), ".csv"))
+  save(tbd_prey.pred, file = paste0("./Outputs/tbd_prey.pred_", Sys.Date(), ".RData"))
   
   write.csv(tbd_ungulate, file = paste0("./Outputs/tbd_ungulate_", Sys.Date(), ".csv"))
   save(tbd_ungulate, file = paste0("./Outputs/tbd_ungulate_", Sys.Date(), ".RData"))
