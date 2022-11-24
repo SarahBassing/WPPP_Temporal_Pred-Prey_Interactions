@@ -21,7 +21,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_conspif_2022-10-05.RData") #tbd_conspif_5min_2022-11-18 5-min interval
+  load("./Outputs/tbd_conspif_2022-10-05.RData") #tbd_conspif_2022-10-05 tbd_conspif_5min_2022-11-18 5-min interval
   tbd_conspif <- tbd_conspif %>%
     #'  Change units of time
     mutate(tbd_min_round = round(TimeSinceLastDet, 0),
@@ -149,6 +149,7 @@
     return(bundled)
   }
   md_con_bundled <- bundle_dat(tbd_md_con_short)
+  tbd_elk_con_short <- filter(tbd_elk_con_short, Study_Area == "NE")
   elk_con_bundled <- bundle_dat(tbd_elk_con_short)
   moose_con_bundled <- bundle_dat(tbd_moose_con_short)
   wtd_con_bundled <- bundle_dat(tbd_wtd_con_short)
