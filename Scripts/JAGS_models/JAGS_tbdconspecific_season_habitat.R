@@ -80,7 +80,9 @@
                   season.tbd[hh] <- exp(alpha0 + beta1[hh] + beta*0)
               }
       
-              #' Mean number of minutes between events
+              #' Mean number of minutes between events 
+              #' Consider multiplying each season by total number of observations, 
+              #' then average so it accounts for differences in sample size across seasons
               mu.tbd <- mean(season.tbd[])
       
               #' #'  Mean tbd per season across range of TRI values
