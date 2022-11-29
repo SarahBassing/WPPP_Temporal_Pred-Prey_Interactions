@@ -283,7 +283,105 @@
   mcmcplot(tbd.con.all$samples)
   save(tbd.con.all, file = "./Outputs/TimeBtwnDetections/tbd.con.all-season_habitat.RData")
   
+  
+  
+  #'  Intercept only model
+  #'  ------------------------
+  #####  MULE DEER Analysis  ####
+  #'  ------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdconspecific_intercept_only.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(md_con_bundled$y, list(md_con_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init)} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "mu.tbd")  
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.md.intonly <- jags(md_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_intercept_only.txt',
+                 inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                 n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.md.intonly)
+  mcmcplot(tbd.md.intonly$samples)
+  save(tbd.md.intonly, file = "./Outputs/TimeBtwnDetections/tbd.md-intercept_only.RData")
+  
+  
+  #'  ------------------------
+  #####  ELK Analysis  ####
+  #'  ------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdconspecific_intercept_only.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(elk_con_bundled$y, list(elk_con_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init)} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "mu.tbd")  
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.elk.intonly <- jags(elk_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_intercept_only.txt',
+                         inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                         n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.elk.intonly)
+  mcmcplot(tbd.elk.intonly$samples)
+  save(tbd.elk.intonly, file = "./Outputs/TimeBtwnDetections/tbd.elk-intercept_only.RData")
+  
+  
+  #'  ------------------------
+  #####  MOOSE Analysis  ####
+  #'  ------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdconspecific_intercept_only.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(moose_con_bundled$y, list(moose_con_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init)} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "mu.tbd")  
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.moose.intonly <- jags(moose_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_intercept_only.txt',
+                          inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                          n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.moose.intonly)
+  mcmcplot(tbd.moose.intonly$samples)
+  save(tbd.moose.intonly, file = "./Outputs/TimeBtwnDetections/tbd.moose-intercept_only.RData")
+  
 
+  #'  -------------------------------
+  #####  WHITE-TAILED DEER Analysis  ####
+  #'  -------------------------------
+  #'  Source JAGS model
+  source("./Scripts/JAGS_models/JAGS_tbdconspecific_intercept_only.R")
+  
+  #'  Set up initial values
+  alpha.init <- log(aggregate(wtd_con_bundled$y, list(wtd_con_bundled$site), FUN = mean)[,2])
+  inits <- function(){list(alpha = alpha.init)} 
+  
+  #'  Parameters to be monitored
+  params <- c("alpha0", "mu.tbd")  
+  
+  #'  Run model
+  start.time <- Sys.time()
+  tbd.wtd.intonly <- jags(wtd_con_bundled, params, './Outputs/TimeBtwnDetections/tbd_intercept_only.txt',
+                            inits = inits, n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt,
+                            n.adapt = na, parallel = TRUE)
+  end.time <- Sys.time(); (run.time <- end.time - start.time)
+  print(tbd.wtd.intonly)
+  mcmcplot(tbd.wtd.intonly$samples)
+  save(tbd.wtd.intonly, file = "./Outputs/TimeBtwnDetections/tbd.wtd-intercept_only.RData")
+  
+  
   ####  EVENTUALLY DO SOME ASSESSMENT OF GOODNESS OF FIT  ####
   
   
