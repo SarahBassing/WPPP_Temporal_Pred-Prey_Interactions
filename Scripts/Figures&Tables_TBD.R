@@ -14,6 +14,7 @@
   library(stringr)
   library(tidyverse)
   library(khroma)
+  library(patchwork)
   
   #'  Load model results
   #'  Predator-Prey Analyses
@@ -356,8 +357,9 @@
   # write.csv(conspif.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_meanTBD_table.csv")
   
   
-  ####  Plot mean TBD  ####
-  #'  ------------------
+  #'  ---------------------
+  ####  PREY-PREDATOR TBD  ####
+  #'  ---------------------
   #'  Effect of predator, ungulate, and conspecific on tbd
   #'  Filter to means of interest
   mean_conspif <- conspif.mu.tbd.out[conspif.mu.tbd.out$Parameter == "Mean TBD",] %>%
@@ -397,7 +399,8 @@
   mean_TBD <- rbind(mean_ung, mean_pred) %>%
     arrange(Species, Estimate) %>%
     mutate(Species = factor(Species, levels = c("Elk", "Moose", "Mule deer", "White-tailed deer")),
-           Parameter = factor(Parameter, levels = c("Mean Ungulate", "Elk", "Moose", "Mule Deer", "White-tailed Deer", "Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")),
+           Parameter = ifelse(Parameter == "Mean Ungulate", "Ungulate", Parameter),
+           Parameter = factor(Parameter, levels = c("Ungulate", "Elk", "Moose", "Mule Deer", "White-tailed Deer", "Bobcat", "Coyote", "Black bear", "Cougar", "Wolf")),
            Estimate = as.numeric(Estimate),
            lci = as.numeric(lci),
            uci = as.numeric(uci))
@@ -415,18 +418,20 @@
   bright(6)
   
   #'  Effect of predator and ungulate species on latency
-  mean_TBD_skinny <- dplyr::filter(mean_TBD, mean_TBD$Parameter != "Mean Ungulate")
+  mean_TBD_skinny <- dplyr::filter(mean_TBD, mean_TBD$Parameter != "Ungulate")
   mean_tbd_plot <- ggplot(mean_TBD_skinny, aes(x = Parameter, y = (Estimate/60), group = Species)) +
     geom_errorbar(aes(ymin = (lci/60), ymax = (uci/60), color = Parameter), width = 0, position = position_dodge(width = 0.4)) +
     geom_point(stat = 'identity', aes(col = Parameter), size = 2.5, position = position_dodge(width = 0.4)) +
     # scale_colour_bright() +
     theme_bw() +
+    guides(color = guide_legend(title = "Previous detection")) +
     # ylim(0,10000) +
     facet_wrap(~Species, scales = "free_y") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-    xlab("Species detected prior to ungulate detection") +
+    xlab("Species detected prior to focal ungulate species") +
     ylab("Mean number of hours between detections") +
-    ggtitle("Mean time between detections of interacting species")
+    ggtitle("Effect of previously detected species on latency of site use")
+    # ggtitle("Mean time between detections of interacting species")
   mean_tbd_plot
   # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_SpeciesID_hr_plot.tiff", mean_tbd_plot,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
@@ -437,22 +442,28 @@
     filter(Parameter != "Elk") %>%
     filter(Parameter != "Moose") %>%
     filter(Parameter != "Mule Deer") %>%
-    filter(Parameter != "White-tailed Deer")
+    filter(Parameter != "White-tailed Deer") 
   mean_tbd_plot2 <- ggplot(mean_TBD_skinnier, aes(x = Parameter, y = (Estimate/60), group = Species)) +
     geom_errorbar(aes(ymin = (lci/60), ymax = (uci/60), color = Parameter), width = 0, position = position_dodge(width = 0.4)) +
     geom_point(stat = 'identity', aes(col = Parameter), size = 2.5, position = position_dodge(width = 0.4)) +
     # scale_colour_bright() +
     theme_bw() +
+    guides(color = guide_legend(title = "Previous detection")) +
     # ylim(0,10000) +
     facet_wrap(~Species, scales = "free_y") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-    xlab("Species detected prior to ungulate detection") +
+    xlab("Species detected prior to focal ungulate species") +
     ylab("Mean number of hours between detections") +
-    ggtitle("Mean time between detections of interacting species")
+    ggtitle("Effect of previously detected species across seasons")
+    # ggtitle("Mean time between detections of interacting species")
   mean_tbd_plot2
   # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_SpeciesID_hr_plot2.tiff", mean_tbd_plot2,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
+  
+  #'  -------------------------------------------------
+  ####  AVOIDANCE VS ATTRACTION BTWN PREDATORS & PREY  ####
+  #'  -------------------------------------------------
   #'  Effect of predator on ungulate latency vs ungulate prey on predator latency
   species_tbd_plot_v1 <- ggplot(mean_TBD_v2, aes(x = Parameter, y = Estimate, group = Species)) +
     geom_errorbar(aes(ymin = lci, ymax = uci, color = Parameter), width = 0, position = position_dodge(width = 0.4)) +
@@ -490,8 +501,10 @@
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   
-  
-  #'  Effect of predator species vs conspecific on tbd
+  #'  -----------------
+  ####  SEASON EFFECT  ####
+  #'  -----------------
+  #'  Effect of season on tbd
   #'  Filter to means of interest
   season_conspif <- conspif.mu.tbd.out[conspif.mu.tbd.out$Parameter != "Mean TBD",] %>%
     dplyr::select(-c("95% CI")) %>%
@@ -529,10 +542,10 @@
     mutate(Season = gsub("Mean TBD: *", "", Parameter),
            Parameter = "Prey") %>%
     rename(Interacting_spp = Parameter) 
-  season_TBD <- rbind(season_conspif, season_ung, season_pred) %>%
+  season_TBD <- rbind(season_ung, season_pred) %>%
     arrange(Species, Season, Estimate) %>%
     mutate(Species = factor(Species, levels = c("Elk", "Moose", "Mule deer", "White-tailed deer")),
-           Interacting_spp = factor(Interacting_spp, levels = c("Conspecific", "Ungulate", "Predator")),
+           Interacting_spp = factor(Interacting_spp, levels = c("Ungulate", "Predator")),
            Season = factor(Season, levels = c("Summer", "Fall", "Winter", "Spring")),
            Estimate = as.numeric(Estimate),
            lci = as.numeric(lci),
@@ -546,20 +559,22 @@
            lci = as.numeric(lci),
            uci = as.numeric(uci))
  
-  season_tbd_plot <- ggplot(season_TBD, aes(x = Season, y = Estimate, group = Interacting_spp)) +
-    geom_errorbar(aes(ymin = lci, ymax = uci, color = Interacting_spp), width = 0.2, position = position_dodge(0.4)) +
+  season_tbd_plot <- ggplot(season_TBD, aes(x = Season, y = (Estimate/60), group = Interacting_spp)) +
+    geom_errorbar(aes(ymin = (lci/60), ymax = (uci/60), color = Interacting_spp), width = 0.2, position = position_dodge(0.4)) +
     geom_point(stat = 'identity', aes(col = Interacting_spp), size = 2.5, position = position_dodge(0.4)) +
     scale_colour_bright() +
+    guides(color = guide_legend(title = "Previous taxa \ndetected")) +
     theme_bw() +
-    ylim(0,12500) +
+    # ylim(0,12500) +
     facet_wrap(~Species, scales = "free_y") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-    labs(color = "Interacting species") +
+    # labs(color = "Interacting species") +
     # xlab("Species detected prior to ungulate detection") +
-    ylab("Mean number of minutes between detections") +
-    ggtitle("Seasonal mean time between detections of interacting species")
+    ylab("Mean number of hours between detections") +
+    ggtitle("Effect of season across species")
+    # ggtitle("Seasonal mean time between detections of interacting species")
   season_tbd_plot
-  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_plot.tiff", season_tbd_plot,
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_hr_plot.tiff", season_tbd_plot,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
   
   season_predprey_tbd_plot <- ggplot(season_TBD2, aes(x = Season, y = Estimate, group = Interacting_spp)) +
@@ -567,17 +582,31 @@
     geom_point(stat = 'identity', aes(col = Interacting_spp), size = 2.5, position = position_dodge(0.4)) +
     scale_colour_bright() +
     theme_bw() +
+    guides(color = guide_legend(title = "Previous taxa \ndetected")) +
     ylim(0,12500) +
     facet_wrap(~Species, scales = "free_y") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-    labs(color = "Interacting species") +
+    # labs(color = "Interacting species") +
     xlab("Species detected prior to focal species") +
     ylab("Mean number of minutes between detections") +
-    ggtitle("Seasonal mean time between detections of interacting species: \nPredator-prey & prey-predator")
+    ggtitle("Seasonal effect")
+    # ggtitle("Seasonal mean time between detections of interacting species: \nPredator-prey & prey-predator")
   season_predprey_tbd_plot
   # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_Season_pred&prey_plot.tiff", season_predprey_tbd_plot,
   #        units = "in", width = 6, height = 5, dpi = 600, device = 'tiff', compression = 'lzw')
 
+  
+  ####  PATCHWORK PLOTS  ####
+  #'  -------------------
+  tbd_patchwork <- mean_tbd_plot2 + season_tbd_plot + 
+    plot_annotation(
+      title = 'Species-specific latency of site use at camera traps',
+      tag_levels = 'a')
+  tbd_patchwork
+  # ggsave("./Outputs/TimeBtwnDetections/Figures/TBD_predprey_season_patchwork.tiff", tbd_patchwork,
+  #        units = "in", width = 12, height = 6, dpi = 600, device = 'tiff', compression = 'lzw')
+  
+  
   
   #' #'  Load tbd data with covariates
   #' load("./Outputs/tbd_pred.prey_2022-09-23.RData")
