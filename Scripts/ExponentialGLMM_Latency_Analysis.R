@@ -84,6 +84,21 @@
   tbd_all_short <- rbind(tbd_md_short, tbd_elk_short, tbd_moose_short, tbd_wtd_short)
   # write.csv(tbd_all_short, "./Outputs/tbd_pred.prey_NoOutliers.csv")
   
+  #'  Quick summary stats
+  #'  Range of values
+  round(range(tbd_all_short$tbd_min), 2) # minutes
+  round(range(tbd_all_short$tbd_min)/60, 2) # hours
+  round(range(tbd_all_short$tbd_min)/1440, 2) # days
+  #'  Mean
+  mean(tbd_all_short$tbd_min) # minutes
+  mean(tbd_all_short$tbd_min)/60 # hours
+  #'  Median
+  median(tbd_all_short$tbd_min) # minutes
+  median(tbd_all_short$tbd_min)/60 # hours
+  #'  Standard error
+  sd(tbd_all_short$tbd_min)/(sqrt(nrow(tbd_all_short))) # minutes
+  sd(tbd_all_short$tbd_min)/(sqrt(nrow(tbd_all_short)))/60 # hours
+  
   #'  Are there study area differences for the ungulate mean tbd?
   (mulie_meanOK <- mean(tbd_md_short$tbd_min[tbd_md_short$Study_Area == "OK"]))
   (mulie_meanNE <- mean(tbd_md_short$tbd_min[tbd_md_short$Study_Area == "NE"]))
