@@ -21,7 +21,7 @@
   library(tidyverse)
   
   #'  Read in data
-  load("./Outputs/tbd_ungulate_2022-11-18.RData") #tbd_conspif_5min_2022-11-18 5-min interval
+  load("./Outputs/tbd_ungulate_2022-11-18.RData") 
   tbd_ungulate <- tbd_ungulate %>%
     #'  Change units of time
     mutate(tbd_min_round = round(TimeSinceLastDet, 0),
