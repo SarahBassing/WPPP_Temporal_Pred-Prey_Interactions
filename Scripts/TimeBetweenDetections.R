@@ -1,13 +1,15 @@
   #'  =======================================
-  #'  Time-between-detections analysis
+  #'  Time-between-detections metric
   #'  Washington Predator-Prey Project
   #'  Sarah Bassing, Cameron Ho, Hunter Hicks
   #'  July 2022
   #'  =======================================
-  #'  Calculate times-between-detections of predators and prey at sites where 
-  #'  cattle/hunters are and are not detected. Also calculate times-between-
-  #'  detections of wildlife and cattle/hunters. Analyzed whether times-between-
-  #'  detections differ as a result of recent cattle/hunter present.
+  #'  Calculate times-between-detections of predators followed by prey detected 
+  #'  at the same camera site, of different ungulate species detected at the same
+  #'  camera site, of individuals of the same species (conspecifics) detected at
+  #'  the same camera site, and of prey followed by predators detected at the same
+  #'  camera site. GLMMs will be fit to these measures of TBD to estimate the 
+  #'  latency of site-use by ungulates in response to predation risk.
   #'  ================================
   
   #'  Load packages
@@ -32,13 +34,7 @@
       HumanActivity = ifelse(HumanActivity == "", "NA", HumanActivity),
       Monitoring = ifelse(Monitoring == "Closed road", "Dirt road", Monitoring),
       Monitoring = ifelse(Monitoring == "Decommissioned road", "Dirt road", Monitoring),
-      Monitoring = ifelse(Monitoring == "Game trail", "Trail", Monitoring)#,
-      #' #'  Identify if cameras were on public (1) or private (0) land
-      #' Public1 = ifelse(Land_Mgnt != "Private", 1, 0),
-      #' #'  Even though timberland is private, it's generally open to public recreation
-      #' #'  so considering it public for these purposes
-      #' Public1 = ifelse(Land_Mgnt == "Private" & Land_Owner == "Private timber", 1, Public1)
-    ) %>%
+      Monitoring = ifelse(Monitoring == "Game trail", "Trail", Monitoring)) %>%
     #  Remove rows where no detection occurred but snuck into this data set somehow
     filter(!(Animal == "FALSE" & Human == "FALSE" & Vehicle == "FALSE") | (Animal == "false" & Human == "false" & Vehicle == "false")) %>%
     #'  Remove observations that are still NA
@@ -61,12 +57,6 @@
     #'  show up in sequence of same species but breaks up the sequence so code 
     #'  below thinks they are independent events
     filter(Category != "Other")
-    #' #'  Remove unknown species - important for situations where blurry deer pix
-    #' #'  (labeled unknown) mixed within images identified to species in a series
-    #' #'  of sequential images 
-    #' filter(Species != "Unknown Deer") %>%
-    #' filter(Species != "Unknown Ungulate") %>%
-    #' filter(Species != "Unknown")
   
   ####  Extract independent detections for wildlife species  ####
   #'  -------------------------------------------------------
@@ -197,21 +187,26 @@
   back2back20 <- seasonal_filter(back2back_prey, yr = 2020)
   
   #'  Join all detection data per season, across years
+  #'  Last image of predator followed by first image of prey
   lpfprey_smr <- rbind(lastfirst18[[1]], lastfirst19[[1]], lastfirst20[[1]])
   lpfprey_fall <- rbind(lastfirst18[[2]], lastfirst19[[2]], lastfirst20[[2]])
   lpfprey_wtr <- rbind(lastfirst18[[3]], lastfirst19[[3]], lastfirst20[[3]])
   lpfprey_sprg <- rbind(lastfirst18[[4]], lastfirst19[[4]], lastfirst20[[4]])
   
+  #'  Last image of prey followed by first image of predator
   lpfpred_smr <- rbind(lastfirstpreypred18[[1]], lastfirstpreypred19[[1]], lastfirstpreypred20[[1]])
   lpfpred_fall <- rbind(lastfirstpreypred18[[2]], lastfirstpreypred19[[2]], lastfirstpreypred20[[2]])
   lpfpred_wtr <- rbind(lastfirstpreypred18[[3]], lastfirstpreypred19[[3]], lastfirstpreypred20[[3]])
   lpfpred_sprg <- rbind(lastfirstpreypred18[[4]], lastfirstpreypred19[[4]], lastfirstpreypred20[[4]])
   
+  #'  Last image of one ungulate species followed by first image of different ungulate species
   lufu_smr <- rbind(lastfirstung18[[1]], lastfirstung19[[1]], lastfirstung20[[1]])
   lufu_fall <- rbind(lastfirstung18[[2]], lastfirstung19[[2]], lastfirstung20[[2]])
   lufu_wtr <- rbind(lastfirstung18[[3]], lastfirstung19[[3]], lastfirstung20[[3]])
   lufu_sprg <- rbind(lastfirstung18[[4]], lastfirstung19[[4]], lastfirstung20[[4]])
   
+  #'  Last image of ungulate in an independent detection followed by first image 
+  #'  of same ungulate species in a next independent detection
   b2b_smr <- rbind(back2back18[[1]], back2back19[[1]], back2back20[[1]])
   b2b_fall <- rbind(back2back18[[2]], back2back19[[2]], back2back20[[2]])
   b2b_wtr <- rbind(back2back18[[3]], back2back19[[3]], back2back20[[3]])
@@ -253,6 +248,7 @@
       arrange(CameraLocation, DateTime)
     return(dets)
   }
+  #'  Last predator followed by first prey images by season
   lpfprey_smr_thin <- thin_dat(lpfprey_smr)
   lpfprey_fall_thin <- thin_dat(lpfprey_fall)
   lpfprey_wtr_thin <- thin_dat(lpfprey_wtr)
@@ -289,6 +285,7 @@
       arrange(CameraLocation, DateTime)
     return(dets)
   }
+  #'  Last prey followed by first predator images by season
   lpfpred_smr_thin <- thin_dat(lpfpred_smr)
   lpfpred_fall_thin <- thin_dat(lpfpred_fall)
   lpfpred_wtr_thin <- thin_dat(lpfpred_wtr)
@@ -632,7 +629,8 @@
 
   
   
-  
+  #'  Next up: ExponentialGLMM_Latency_Analysis scripts (the exact script depends 
+  #'  on which data set is being analyzed - Pred-Prey, Prey-Pred, Ungulate, Conspecific)
   
   
     
