@@ -10,6 +10,11 @@
   #'  following detection of the same species. To be compared to mean latency of
   #'  prey detections following predators. 
   #'  
+  #'  NOTE: results of these models are HIGHLY dependent on how an independent 
+  #'  detection event is defined. Difficult to determine if results are 
+  #'  biologically meaningful or a product of arbitrary definition of independence. 
+  #'  Not a good metric to compare to predator-prey TBD. Not recommended for use.
+  #'  
   #'  Time-between-detections data generated in TimeBetweenDetections.R script
   #'  -------------------------------------------
   
