@@ -357,10 +357,10 @@
   # write.csv(conspif.mu.tbd.tbl, "./Outputs/TimeBtwnDetections/Tables/tbd.conspecific_meanTBD_table.csv")
   
   
-  #'  ---------------------
-  ####  PREY-PREDATOR TBD  ####
-  #'  ---------------------
-  #'  Effect of predator, ungulate, and conspecific on tbd
+  #'  ------------------------
+  ####  PLOTTING TBD RESULTS  ####
+  #'  ------------------------
+  #'  Effect of predator, ungulate, and conspecific on prey latency
   #'  Filter to means of interest
   mean_conspif <- conspif.mu.tbd.out[conspif.mu.tbd.out$Parameter == "Mean TBD",] %>%
     dplyr::select(-c("95% CI")) %>%
