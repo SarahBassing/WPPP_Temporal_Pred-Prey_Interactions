@@ -5,7 +5,11 @@
   #'  August 2022
   #'  =====================================================
   #'  Script pulls in outputs from temporal overlap analyses conducted with the
-  #'  Temporal_overlap.R script, then generates result tables & figures for publication.
+  #'  Temporal_overlap_PredPrey_HabitatComplexity.R (script that calculates overlap 
+  #'  of predator-prey activity under different levels of habtiat compleixty) & 
+  #'  Temporal_overlap_PredPrey_HabitatComplexity&Predators.R (script that calculates 
+  #'  prey activity under varying levels of risk and predator activity under varying 
+  #'  levels of habitat complexity) scripts, then makes tables & figures for publication.
   #'  =====================================================
   
   #'  Libraries
