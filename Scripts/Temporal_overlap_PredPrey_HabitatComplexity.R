@@ -4,10 +4,10 @@
   #'  Sarah Bassing
   #'  Sept 2022
   #'  ==================================================================
-  #'  Script to estimate temporal overlap of prey species in response to varying
-  #'  levels of background predation risk in a multi-predator system. Risk is
-  #'  based on two measures of habitat complexity: an index of terrain ruggedness 
-  #'  (TRI) and percentage of forested habitat within 250m of each site. 
+  #'  Script to estimate temporal overlap of predator and prey activity in response 
+  #'  to varying levels of background predation risk in a multi-predator system. 
+  #'  Risk is based on two measures of habitat complexity - an index of terrain 
+  #'  ruggedness (TRI) and percentage of forested habitat within 250m of each site. 
   #'  Sites < mean TRI (or % forest) are classified as LOW risk;
   #'  sites >= mean TRI (or % forest) are classified as HIGH risk. 
   #'  ==================================================================
@@ -1209,6 +1209,6 @@
   save(pred_prey_for_overlap, file = paste0("./Outputs/Temporal Overlap/PredPrey_PercForest_Overlap_", Sys.Date(), ".RData"))
   
   
-  
+  #'  Up next: Figures&Tables_OverlapEstiamtes.R script
   
   
