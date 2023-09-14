@@ -352,6 +352,10 @@
                                  name1 = "Coyote detected", name2 = "Mule Deer", 
                                  nboot = nboot, dhat = "Dhat4",
                                  risktype = stations_data$Summer_coyote)
+  #'  Overall summer mule deer activity
+  md_smr <- filter(dets_smr, Species == "Mule Deer")
+  md_smr_activity <- densityPlot(md_smr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Fall activity
   md_fall_tri_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Mule Deer"),
                                   name1 = "TRI", name2 = "Mule Deer", 
@@ -381,6 +385,10 @@
                                   name1 = "Coyote detected", name2 = "Mule Deer", 
                                   nboot = nboot, dhat = "Dhat4",
                                   risktype = stations_data$Fall_coyote)
+  #'  Overall fall mule deer activity
+  md_fall <- filter(dets_fall, Species == "Mule Deer")
+  md_fall_activity <- densityPlot(md_fall$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Winter activity
   md_wtr_tri_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Mule Deer"),
                                  name1 = "TRI", name2 = "Mule Deer", 
@@ -410,6 +418,10 @@
                                  name1 = "Coyote detected", name2 = "Mule Deer", 
                                  nboot = nboot, dhat = "Dhat4",
                                  risktype = stations_data$Winter_coyote)
+  #'  Overall winter mule deer activity
+  md_wtr <- filter(dets_wtr, Species == "Mule Deer")
+  md_wtr_activity <- densityPlot(md_wtr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Spring activity
   md_sprg_tri_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Mule Deer"),
                                   name1 = "TRI", name2 = "Mule Deer", 
@@ -440,11 +452,16 @@
                                   name1 = "Coyote detected", name2 = "Mule Deer", 
                                   nboot = nboot, dhat = "Dhat4",
                                   risktype = stations_data$Spring_coyote)
+  #'  Overall spring mule deer activity
+  md_sprg <- filter(dets_sprg, Species == "Mule Deer")
+  md_sprg_activity <- densityPlot(md_sprg$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  List all mule deer overlap results together
   md_overlap_list <- list(md_smr_tri_over, md_smr_for_over, md_smr_coug_over, md_smr_wolf_over, md_smr_bear_over, md_smr_bob_over, md_smr_coy_over,
                           md_fall_tri_over, md_fall_for_over, md_fall_coug_over, md_fall_wolf_over, md_fall_bear_over, md_fall_bob_over, md_fall_coy_over,
                           md_wtr_tri_over, md_wtr_for_over, md_wtr_coug_over, md_wtr_wolf_over, md_wtr_bob_over, md_wtr_coy_over, #md_wtr_bear_over, 
                           md_sprg_tri_over, md_sprg_for_over, md_sprg_coug_over, md_sprg_wolf_over, md_sprg_bear_over, md_sprg_bob_over, md_sprg_coy_over)
+  md_overall_activity <- list(md_smr_activity, md_fall_activity, md_wtr_activity, md_sprg_activity)
   
   ####  Elk  ####
   #'  Summer activity
@@ -468,6 +485,10 @@
                                    name1 = "Black bear detected", name2 = "Elk", 
                                    nboot = nboot, dhat = "Dhat4", 
                                    risktype = stations_data$Summer_bear)
+  #'  Overall summer elk activity
+  elk_smr <- filter(dets_smr, Species == "Elk")
+  elk_smr_activity <- densityPlot(elk_smr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Fall activity
   elk_fall_tri_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Elk"),
                                    name1 = "TRI", name2 = "Elk", 
@@ -489,6 +510,10 @@
                                     name1 = "Black bear detected", name2 = "Elk", 
                                     nboot = nboot, dhat = "Dhat1", 
                                     risktype = stations_data$Fall_bear) # 10 detections high risk
+  #'  Overall fall elk activity
+  elk_fall <- filter(dets_fall, Species == "Elk")
+  elk_fall_activity <- densityPlot(elk_fall$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Winter activity
   elk_wtr_tri_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Elk"),
                                   name1 = "TRI", name2 = "Elk", 
@@ -510,6 +535,10 @@
   #                                 name1 = "Black bear detected", name2 = "Elk",
   #                                 nboot = nboot, dhat = "Dhat4", 
   #                                 risktype = stations_data$Winter_bear)
+  #'  Overall winter elk activity
+  elk_wtr <- filter(dets_wtr, Species == "Elk")
+  elk_wtr_activity <- densityPlot(elk_wtr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Spring activity
   elk_sprg_tri_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Elk"),
                                    name1 = "TRI", name2 = "Elk", 
@@ -531,12 +560,17 @@
                                     name1 = "Black bear detected", name2 = "Elk", 
                                     nboot = nboot, dhat = "Dhat1", 
                                     risktype = stations_data$Spring_bear) # 35 detections high risk cameras
+  #'  Overall spring elk activity
+  elk_sprg <- filter(dets_sprg, Species == "Elk")
+  elk_sprg_activity <- densityPlot(elk_sprg$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   
   #'  List all elk overlap results together
   elk_overlap_list <- list(elk_smr_tri_over, elk_smr_for_over, elk_smr_coug_over, elk_smr_wolf_over, elk_smr_bear_over,
                            elk_fall_tri_over, elk_fall_for_over, elk_fall_coug_over, elk_fall_bear_over, #elk_fall_wolf_over, 
                            elk_wtr_tri_over, elk_wtr_for_over, elk_wtr_coug_over, #elk_wtr_wolf_over,
                            elk_sprg_tri_over, elk_sprg_for_over, elk_sprg_coug_over, elk_sprg_bear_over) #elk_sprg_wolf_over, 
+  elk_overall_activity <- list(elk_smr_activity, elk_fall_activity, elk_wtr_activity, elk_sprg_activity)
   
   ####  Moose  ####
   #'  Summer activity
@@ -560,6 +594,10 @@
                                      name1 = "Black bear detected", name2 = "Moose", 
                                      nboot = nboot, dhat = "Dhat1", 
                                      risktype = stations_data$Summer_bear)
+  #'  Overall summer moose activity
+  moose_smr <- filter(dets_smr, Species == "Moose")
+  moose_smr_activity <- densityPlot(moose_smr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Fall activity
   moose_fall_tri_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "Moose"),
                                      name1 = "TRI", name2 = "Moose", 
@@ -581,6 +619,10 @@
                                       name1 = "Black bear detected", name2 = "Moose",
                                       nboot = nboot, dhat = "Dhat1",
                                       risktype = stations_data$Fall_bear)
+  #'  Overall fall moose activity
+  moose_fall <- filter(dets_fall, Species == "Moose")
+  moose_fall_activity <- densityPlot(moose_fall$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Winter activity
   moose_wtr_tri_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "Moose"),
                                     name1 = "TRI", name2 = "Moose", 
@@ -602,6 +644,10 @@
   #                                 name1 = "Black bear detected", name2 = "Moose", 
   #                                 nboot = nboot, dhat = "Dhat4", 
   #                                 risktype = stations_data$Winter_bear)
+  #'  Overall winter moose activity
+  moose_wtr <- filter(dets_wtr, Species == "Moose")
+  moose_wtr_activity <- densityPlot(moose_wtr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Spring activity
   moose_sprg_tri_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "Moose"),
                                      name1 = "TRI", name2 = "Moose", 
@@ -623,11 +669,16 @@
                                       name1 = "Black bear detected", name2 = "Moose", 
                                       nboot = nboot, dhat = "Dhat4", 
                                       risktype = stations_data$Spring_bear) # 60 detections high risk cameras
+  #'  Overall spring moose activity
+  moose_sprg <- filter(dets_sprg, Species == "Moose")
+  moose_sprg_activity <- densityPlot(moose_sprg$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  List all moose overlap results together
   moose_overlap_list <- list(moose_smr_tri_over, moose_smr_for_over, moose_smr_coug_over, moose_smr_wolf_over, moose_smr_bear_over,
                              moose_fall_tri_over, moose_fall_for_over, moose_fall_coug_over, moose_fall_wolf_over, moose_fall_bear_over,
                              moose_wtr_tri_over, moose_wtr_for_over, moose_wtr_coug_over, moose_wtr_wolf_over,
                              moose_sprg_tri_over, moose_sprg_for_over, moose_sprg_coug_over, moose_sprg_wolf_over, moose_sprg_bear_over)
+  moose_overall_activity <- list(moose_smr_activity, moose_fall_activity, moose_wtr_activity, moose_sprg_activity)
   
   ####  White-tailed deer  ####
   #'  Summer activity
@@ -659,6 +710,10 @@
                                   name1 = "Coyote detected", name2 = "White-tailed Deer", 
                                   nboot = nboot, dhat = "Dhat4", 
                                   risktype = stations_data$Summer_coyote)
+  #'  Overall summer white-tailed deer activity
+  wtd_smr <- filter(dets_smr, Species == "White-tailed Deer")
+  wtd_smr_activity <- densityPlot(wtd_smr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Fall activity
   wtd_fall_tri_over <- spp_overlap(spp2_dat = filter(dets_fall, Species == "White-tailed Deer"),
                                    name1 = "TRI", name2 = "White-tailed Deer", 
@@ -688,6 +743,10 @@
                                    name1 = "Coyote detected", name2 = "White-tailed Deer", 
                                    nboot = nboot, dhat = "Dhat4", 
                                    risktype = stations_data$Fall_coyote)
+  #'  Overall fall white-tailed deer activity
+  wtd_fall <- filter(dets_fall, Species == "White-tailed Deer")
+  wtd_fall_activity <- densityPlot(wtd_fall$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Winter activity
   wtd_wtr_tri_over <- spp_overlap(spp2_dat = filter(dets_wtr, Species == "White-tailed Deer"),
                                   name1 = "TRI", name2 = "White-tailed Deer", 
@@ -717,6 +776,10 @@
                                   name1 = "Coyote detected", name2 = "White-tailed Deer", 
                                   nboot = nboot, dhat = "Dhat4", 
                                   risktype = stations_data$Winter_coyote)
+  #'  Overall winter white-tailed deer activity
+  wtd_wtr <- filter(dets_wtr, Species == "White-tailed Deer")
+  wtd_wtr_activity <- densityPlot(wtd_wtr$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  Spring activity
   wtd_sprg_tri_over <- spp_overlap(spp2_dat = filter(dets_sprg, Species == "White-tailed Deer"),
                                    name1 = "TRI", name2 = "White-tailed Deer", 
@@ -746,15 +809,23 @@
                                    name1 = "Coyote detected", name2 = "White-tailed Deer", 
                                    nboot = nboot, dhat = "Dhat4", 
                                    risktype = stations_data$Spring_coyote)
+  #'  Overall spring white-tailed deer activity
+  wtd_sprg <- filter(dets_sprg, Species == "White-tailed Deer")
+  wtd_sprg_activity <- densityPlot(wtd_sprg$sunTime, rug = T, col = "blue", main = paste0("Density Plot of ", name2, " Daily Activity"))
+  
   #'  List all white-tailed deer overlap results together
   wtd_overlap_list <- list(wtd_smr_tri_over, wtd_smr_for_over, wtd_smr_coug_over, wtd_smr_wolf_over, wtd_smr_bear_over, wtd_smr_bob_over, wtd_smr_coy_over,
                            wtd_fall_tri_over, wtd_fall_for_over, wtd_fall_coug_over, wtd_fall_wolf_over, wtd_fall_bear_over, wtd_fall_bob_over, wtd_fall_coy_over,
                            wtd_wtr_tri_over, wtd_wtr_for_over, wtd_wtr_coug_over, wtd_wtr_wolf_over, wtd_wtr_bob_over, wtd_wtr_coy_over, #wtd_wtr_bear_over, 
                            wtd_sprg_tri_over, wtd_sprg_for_over, wtd_sprg_coug_over, wtd_sprg_wolf_over, wtd_sprg_bear_over, wtd_sprg_bob_over, wtd_sprg_coy_over)
+  wtd_overall_activity <- list(wtd_smr_activity, wtd_fall_activity, wtd_wtr_activity, wtd_sprg_activity)
   
   #'  Save all species-specific overlap plots in one giant list
   prey_overlap <- list(md_overlap_list, elk_overlap_list, moose_overlap_list, wtd_overlap_list)
   save(prey_overlap, file = paste0("./Outputs/Temporal Overlap/PreyOnly_TRI_Forest_Pred_Overlap_", Sys.Date(), ".RData"))
+  
+  prey_activity <- list(md_overall_activity, elk_overall_activity, moose_overall_activity, wtd_overall_activity)
+  save(prey_activity, file = paste0("./Outputs/Temporal Overlap/Prey_Overall_Activity_", Sys.Date(), ".RData"))
   
   
   ####  Predator Activity Overlap  ####
