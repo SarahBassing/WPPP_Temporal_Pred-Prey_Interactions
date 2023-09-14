@@ -25,6 +25,7 @@
   load("./Outputs/Temporal Overlap/PredPrey_PercForest_Overlap_2022-09-19.RData")
   load("./Outputs/Temporal Overlap/PreyOnly_TRI_Forest_Pred_Overlap_2022-09-26.RData")
   load("./Outputs/Temporal Overlap/PredOnly_TRI_Forest_Overlap_2022-10-15.RData")
+  load("./Outputs/Temporal OVerlap/Prey_Overall_Activity_2023-09-13.RData")
   
   
   ####  Results Tables  ####
@@ -1945,5 +1946,48 @@
   wolf_sprg_for_overPlot <- overlap_singlespp_plots(pred_overlap[[5]][[8]], name2 = "Wolf", name3 = "% Forest", dhat = wolf_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28)
   ggsave(wolf_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wolf_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
+  
+  
+  #'  --------------------------------
+  ####  General Prey Activity Curves  ####
+  #'  --------------------------------
+  #'  Plot overall activity curves for each prey species
+  singlespp_activity_df <- function(dat, spp) {
+    dat[[1]]$Season <- "Summer"
+    dat[[2]]$Season <- "Fall"
+    dat[[3]]$Season <- "Winter"
+    dat[[4]]$Season <- "Spring"
+    allactivity <- rbind(dat[[1]], dat[[2]], dat[[3]], dat[[4]])
+    allactivity$Species <- spp
+    colnames(allactivity) <- c("Time", "Density", "Season", "Species")
+    allactivity <- allactivity %>%
+      filter(Time >= 0 & Time <= 24.0) %>%
+      mutate(Season = factor(Season, levels = c("Summer", "Fall", "Winter", "Spring")))
+    return(allactivity)
+  }
+  ####  Mule deer summer  ####
+  md_activity <- singlespp_activity_df(prey_activity[[1]], spp = "Mule deer")
+  elk_activity <- singlespp_activity_df(prey_activity[[2]], spp = "Elk")
+  moose_activity <- singlespp_activity_df(prey_activity[[3]], spp = "Moose")
+  wtd_activity <- singlespp_activity_df(prey_activity[[4]], spp = "White-tailed deer")
+  spp_activity_df <- rbind(md_activity, elk_activity, moose_activity, wtd_activity)
+  
+  spp_activity_plot <- ggplot(spp_activity_df, aes(Time, Density, colour = Season)) + #, linetype = Season
+    geom_line(lwd = 0.75) + 
+    scale_color_manual(values = c("#009E73", "#F0E442", "#56B4E9", "#CC79A7")) +
+    # scale_linetype_manual(values = c("solid", "dashed", "dotted", "longdash")) +
+    scale_x_continuous(breaks = c(0, 6.0, 12.0, 18.0, 24.0),
+                       labels = c('Midnight', 'Dawn', 'Noon', 'Dusk', 'Midnight')) +
+    facet_wrap(.~Species, scales = "free_y", ncol = 4) +
+    geom_vline(xintercept = 6.0, linetype="dotted") +
+    geom_vline(xintercept = 18.0, linetype="dotted") +
+    theme_bw() +
+    theme(legend.background = element_rect(fill = "transparent"),
+          legend.key = element_rect(colour = NA, fill = NA)) +
+    theme(axis.text.x=element_text(angle = 45, vjust = 1, hjust=1)) +
+    labs(x = "Time of day", y = "Density") +
+    theme(text = element_text(size = 14), legend.text = element_text(size = 14)) 
+  plot(spp_activity_plot)  
+  ggsave(spp_activity_plot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Ungulate_Overall_Activity_Plots.tiff", width = 15, height = 4, dpi = 600, units = "in", device='tiff')
   
   
