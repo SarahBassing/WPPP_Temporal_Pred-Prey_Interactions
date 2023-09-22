@@ -230,7 +230,7 @@
   
   # write.csv(seasonal_detections, paste0("./Outputs/seasonal_detections_", Sys.Date(), ".csv"))
   
-  # #'  --------------------------------------------
+  #'  --------------------------------------------
   ####  Single species temporal overlap analysis  ####
   #'  --------------------------------------------
   #'  Function to estimate differences in temporal activity for a species at camera  
