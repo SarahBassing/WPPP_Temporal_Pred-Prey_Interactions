@@ -1716,156 +1716,168 @@
   # ggsave(md_sprg_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_md_sprg_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  Elk summer  ####
-  elk_smr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[1]], name2 = "Elk", name3 = "TRI", dhat = elk_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20)
-  ggsave(elk_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_smr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[2]], name2 = "Elk", name3 = "% Forest", dhat = elk_smr_for_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(elk_smr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_smr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[3]], name2 = "Elk", name3 = "cougar risk", dhat = elk_smr_coug_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(elk_smr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_smr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[4]], name2 = "Elk", name3 = "wolf risk", dhat = elk_smr_wolf_out, y_up = 0.6, season = "Summer", x_start = 0.25)
-  ggsave(elk_smr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_smr_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[5]], name2 = "Elk", name3 = "black bear risk", dhat = elk_smr_bear_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(elk_smr_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  elk_smr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[1]], name2 = "Elk", name3 = "TRI", dhat = elk_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  elk_smr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[2]], name2 = "Elk", name3 = "% Forest", dhat = elk_smr_for_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  elk_smr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[3]], name2 = "Elk", name3 = "cougar risk", dhat = elk_smr_coug_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  elk_smr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[4]], name2 = "Elk", name3 = "wolf risk", dhat = elk_smr_wolf_out, y_up = 0.6, season = "Summer", x_start = 0.25, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  elk_smr_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[5]], name2 = "Elk", name3 = "black bear risk", dhat = elk_smr_bear_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+   
+  # ggsave(elk_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_smr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_smr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_smr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_smr_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_smr_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  Elk fall  ####
-  elk_fall_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[6]], name2 = "Elk", name3 = "TRI", dhat = elk_fall_tri_out, y_up = 0.6, season = "Fall", x_start = 0.20)
-  ggsave(elk_fall_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_fall_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[7]], name2 = "Elk", name3 = "% Forest", dhat = elk_fall_for_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(elk_fall_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_fall_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[8]], name2 = "Elk", name3 = "cougar risk", dhat = elk_fall_coug_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(elk_fall_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_fall_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[9]], name2 = "Elk", name3 = "black bear risk", dhat = elk_fall_bear_out, y_up = 0.6, season = "Fall", x_start = 0.30)
-  ggsave(elk_fall_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  elk_fall_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[6]], name2 = "Elk", name3 = "TRI", dhat = elk_fall_tri_out, y_up = 0.6, season = "Fall", x_start = 0.20, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  elk_fall_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[7]], name2 = "Elk", name3 = "% Forest", dhat = elk_fall_for_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  elk_fall_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[8]], name2 = "Elk", name3 = "cougar risk", dhat = elk_fall_coug_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  elk_fall_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[9]], name2 = "Elk", name3 = "black bear risk", dhat = elk_fall_bear_out, y_up = 0.6, season = "Fall", x_start = 0.30, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+    
+  # ggsave(elk_fall_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_fall_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_fall_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_fall_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_fall_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  Elk winter  ####
-  elk_wtr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[10]], name2 = "Elk", name3 = "TRI", dhat = elk_wtr_tri_out, y_up = 0.6, season = "Winter", x_start = 0.20)
-  ggsave(elk_wtr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_wtr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_wtr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[11]], name2 = "Elk", name3 = "% Forest", dhat = elk_wtr_for_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(elk_wtr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_wtr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_wtr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[12]], name2 = "Elk", name3 = "cougar risk", dhat = elk_wtr_coug_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(elk_wtr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_wtr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  elk_wtr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[10]], name2 = "Elk", name3 = "TRI", dhat = elk_wtr_tri_out, y_up = 0.6, season = "Winter", x_start = 0.20, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  elk_wtr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[11]], name2 = "Elk", name3 = "% Forest", dhat = elk_wtr_for_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  elk_wtr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[12]], name2 = "Elk", name3 = "cougar risk", dhat = elk_wtr_coug_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+    
+  # ggsave(elk_wtr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_wtr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_wtr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_wtr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_wtr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_wtr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  Elk spring  ####
-  elk_sprg_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[13]], name2 = "Elk", name3 = "TRI", dhat = elk_sprg_tri_out, y_up = 0.6, season = "Spring", x_start = 0.20)
-  ggsave(elk_sprg_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_sprg_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[14]], name2 = "Elk", name3 = "% Forest", dhat = elk_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(elk_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_sprg_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[15]], name2 = "Elk", name3 = "cougar risk", dhat = elk_sprg_coug_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(elk_sprg_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  elk_sprg_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[16]], name2 = "Elk", name3 = "black bear risk", dhat = elk_sprg_bear_out, y_up = 0.6, season = "Spring", x_start = 0.30)
-  ggsave(elk_sprg_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  
+  elk_sprg_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[13]], name2 = "Elk", name3 = "TRI", dhat = elk_sprg_tri_out, y_up = 0.6, season = "Spring", x_start = 0.20, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  elk_sprg_for_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[14]], name2 = "Elk", name3 = "% Forest", dhat = elk_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  elk_sprg_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[15]], name2 = "Elk", name3 = "cougar risk", dhat = elk_sprg_coug_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  elk_sprg_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[2]][[16]], name2 = "Elk", name3 = "black bear risk", dhat = elk_sprg_bear_out, y_up = 0.6, season = "Spring", x_start = 0.30, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+    
+  # ggsave(elk_sprg_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_sprg_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(elk_sprg_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_elk_sprg_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+
   
   ####  Moose summer  ####
-  moose_smr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[1]], name2 = "Moose", name3 = "TRI", dhat = moose_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20)
-  ggsave(moose_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_smr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[2]], name2 = "Moose", name3 = "% Forest", dhat = moose_smr_for_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(moose_smr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_smr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[3]], name2 = "Moose", name3 = "cougar risk", dhat = moose_smr_coug_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(moose_smr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_smr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[4]], name2 = "Moose", name3 = "wolf risk", dhat = moose_smr_wolf_out, y_up = 0.6, season = "Summer", x_start = 0.25)
-  ggsave(moose_smr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_smr_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[5]], name2 = "Moose", name3 = "black bear risk", dhat = moose_smr_bear_out, y_up = 0.6, season = "Summer", x_start = 0.30)
-  ggsave(moose_smr_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  
+  moose_smr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[1]], name2 = "Moose", name3 = "TRI", dhat = moose_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  moose_smr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[2]], name2 = "Moose", name3 = "% Forest", dhat = moose_smr_for_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  moose_smr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[3]], name2 = "Moose", name3 = "cougar risk", dhat = moose_smr_coug_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  moose_smr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[4]], name2 = "Moose", name3 = "wolf risk", dhat = moose_smr_wolf_out, y_up = 0.6, season = "Summer", x_start = 0.25, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  moose_smr_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[5]], name2 = "Moose", name3 = "black bear risk", dhat = moose_smr_bear_out, y_up = 0.6, season = "Summer", x_start = 0.30, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+    
+  # ggsave(moose_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_smr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_smr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_smr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_smr_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_smr_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+
   ####  Moose fall  ####
-  moose_fall_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[6]], name2 = "Moose", name3 = "TRI", dhat = moose_fall_tri_out, y_up = 0.6, season = "Fall", x_start = 0.20)
-  ggsave(moose_fall_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_fall_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[7]], name2 = "Moose", name3 = "% Forest", dhat = moose_fall_for_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(moose_fall_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_fall_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[8]], name2 = "Moose", name3 = "cougar risk", dhat = moose_fall_coug_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(moose_fall_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_fall_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[9]], name2 = "Moose", name3 = "wolf risk", dhat = moose_fall_wolf_out, y_up = 0.6, season = "Fall", x_start = 0.25)
-  ggsave(moose_fall_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_fall_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[10]], name2 = "Moose", name3 = "black bear risk", dhat = moose_fall_bear_out, y_up = 0.6, season = "Fall", x_start = 0.30)
-  ggsave(moose_fall_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  moose_fall_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[6]], name2 = "Moose", name3 = "TRI", dhat = moose_fall_tri_out, y_up = 0.6, season = "Fall", x_start = 0.20, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  moose_fall_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[7]], name2 = "Moose", name3 = "% Forest", dhat = moose_fall_for_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  moose_fall_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[8]], name2 = "Moose", name3 = "cougar risk", dhat = moose_fall_coug_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  moose_fall_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[9]], name2 = "Moose", name3 = "wolf risk", dhat = moose_fall_wolf_out, y_up = 0.6, season = "Fall", x_start = 0.25, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  moose_fall_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[10]], name2 = "Moose", name3 = "black bear risk", dhat = moose_fall_bear_out, y_up = 0.6, season = "Fall", x_start = 0.30, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+    
+  # ggsave(moose_fall_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_fall_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_fall_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_fall_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_fall_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_fall_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  Moose winter  ####
-  moose_wtr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[11]], name2 = "Moose", name3 = "TRI", dhat = moose_wtr_tri_out, y_up = 0.6, season = "Winter", x_start = 0.20)
-  ggsave(moose_wtr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_wtr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[12]], name2 = "Moose", name3 = "% Forest", dhat = moose_wtr_for_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(moose_wtr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_wtr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[13]], name2 = "Moose", name3 = "cougar risk", dhat = moose_wtr_coug_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(moose_wtr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_wtr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[14]], name2 = "Moose", name3 = "wolf risk", dhat = moose_wtr_wolf_out, y_up = 0.6, season = "Winter", x_start = 0.25)
-  ggsave(moose_wtr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  moose_wtr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[11]], name2 = "Moose", name3 = "TRI", dhat = moose_wtr_tri_out, y_up = 0.6, season = "Winter", x_start = 0.20, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  moose_wtr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[12]], name2 = "Moose", name3 = "% Forest", dhat = moose_wtr_for_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  moose_wtr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[13]], name2 = "Moose", name3 = "cougar risk", dhat = moose_wtr_coug_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  moose_wtr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[14]], name2 = "Moose", name3 = "wolf risk", dhat = moose_wtr_wolf_out, y_up = 0.6, season = "Winter", x_start = 0.25, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+    
+  # ggsave(moose_wtr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_wtr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_wtr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_wtr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_wtr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  Moose spring  ####
-  moose_sprg_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[15]], name2 = "Moose", name3 = "TRI", dhat = moose_sprg_tri_out, y_up = 0.6, season = "Spring", x_start = 0.20)
-  ggsave(moose_sprg_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_sprg_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[16]], name2 = "Moose", name3 = "% Forest", dhat = moose_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(moose_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_sprg_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[17]], name2 = "Moose", name3 = "cougar risk", dhat = moose_sprg_coug_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(moose_sprg_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_sprg_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[18]], name2 = "Moose", name3 = "wolf risk", dhat = moose_sprg_wolf_out, y_up = 0.6, season = "Spring", x_start = 0.25)
-  ggsave(moose_sprg_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  moose_sprg_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[19]], name2 = "Moose", name3 = "black bear risk", dhat = moose_sprg_bear_out, y_up = 0.6, season = "Spring", x_start = 0.30)
-  ggsave(moose_sprg_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  
-  
+  moose_sprg_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[15]], name2 = "Moose", name3 = "TRI", dhat = moose_sprg_tri_out, y_up = 0.6, season = "Spring", x_start = 0.20, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  moose_sprg_for_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[16]], name2 = "Moose", name3 = "% Forest", dhat = moose_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  moose_sprg_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[17]], name2 = "Moose", name3 = "cougar risk", dhat = moose_sprg_coug_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  moose_sprg_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[18]], name2 = "Moose", name3 = "wolf risk", dhat = moose_sprg_wolf_out, y_up = 0.6, season = "Spring", x_start = 0.25, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  moose_sprg_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[3]][[19]], name2 = "Moose", name3 = "black bear risk", dhat = moose_sprg_bear_out, y_up = 0.6, season = "Spring", x_start = 0.30, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+    
+  # ggsave(moose_sprg_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_sprg_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_sprg_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(moose_sprg_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_moose_sprg_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+
   ####  White-tailed deer summer  ####
-  wtd_smr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[1]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20)
-  ggsave(wtd_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_smr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[2]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_smr_for_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(wtd_smr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_smr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[3]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_smr_coug_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(wtd_smr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_smr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[4]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_smr_wolf_out, y_up = 0.6, season = "Summer", x_start = 0.25)
-  ggsave(wtd_smr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_smr_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[5]], name2 = "White-tailed deer", name3 = "black bear risk", dhat = wtd_smr_bear_out, y_up = 0.6, season = "Summer", x_start = 0.30)
-  ggsave(wtd_smr_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_smr_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[6]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_smr_bob_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(wtd_smr_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_smr_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[7]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_smr_coy_out, y_up = 0.6, season = "Summer", x_start = 0.28)
-  ggsave(wtd_smr_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  wtd_smr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[1]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  wtd_smr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[2]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_smr_for_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  wtd_smr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[3]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_smr_coug_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  wtd_smr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[4]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_smr_wolf_out, y_up = 0.6, season = "Summer", x_start = 0.25, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  wtd_smr_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[5]], name2 = "White-tailed deer", name3 = "black bear risk", dhat = wtd_smr_bear_out, y_up = 0.6, season = "Summer", x_start = 0.30, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  wtd_smr_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[6]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_smr_bob_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+  wtd_smr_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[7]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_smr_coy_out, y_up = 0.6, season = "Summer", x_start = 0.28, seasoncol = "#009E73", linecol1 = "#74bfa0", linecol2 = "#4d5c55")
+    
+  # ggsave(wtd_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_smr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_smr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_smr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_smr_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_smr_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_smr_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_smr_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  White-tailed deer fall  ####
-  wtd_fall_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[8]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_fall_tri_out, y_up = 0.6, season = "Fall", x_start = 0.20)
-  ggsave(wtd_fall_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_fall_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[9]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_fall_for_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(wtd_fall_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_fall_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[10]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_fall_coug_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(wtd_fall_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_fall_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[11]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_fall_wolf_out, y_up = 0.6, season = "Fall", x_start = 0.25)
-  ggsave(wtd_fall_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_fall_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[12]], name2 = "White-tailed deer", name3 = "black bear risk", dhat = wtd_fall_bear_out, y_up = 0.6, season = "Fall", x_start = 0.30)
-  ggsave(wtd_fall_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_fall_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[13]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_fall_bob_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(wtd_fall_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_fall_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[14]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_fall_coy_out, y_up = 0.6, season = "Fall", x_start = 0.28)
-  ggsave(wtd_fall_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  wtd_fall_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[8]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_fall_tri_out, y_up = 0.6, season = "Fall", x_start = 0.20, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  wtd_fall_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[9]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_fall_for_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  wtd_fall_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[10]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_fall_coug_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  wtd_fall_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[11]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_fall_wolf_out, y_up = 0.6, season = "Fall", x_start = 0.25, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  wtd_fall_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[12]], name2 = "White-tailed deer", name3 = "black bear risk", dhat = wtd_fall_bear_out, y_up = 0.6, season = "Fall", x_start = 0.30, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  wtd_fall_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[13]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_fall_bob_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+  wtd_fall_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[14]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_fall_coy_out, y_up = 0.6, season = "Fall", x_start = 0.28, seasoncol = "#F0E442", linecol1 = "#f5e867", linecol2 = "#716b27")
+    
+  # ggsave(wtd_fall_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_fall_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_fall_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_fall_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_fall_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_fall_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_fall_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_fall_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  White-tailed deer winter  ####
-  wtd_wtr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[15]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_wtr_tri_out, y_up = 0.6, season = "Winter", x_start = 0.20)
-  ggsave(wtd_wtr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_wtr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[16]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_wtr_for_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(wtd_wtr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_wtr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[17]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_wtr_coug_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(wtd_wtr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_wtr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[18]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_wtr_wolf_out, y_up = 0.6, season = "Winter", x_start = 0.25)
-  ggsave(wtd_wtr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_wtr_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[19]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_wtr_bob_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(wtd_wtr_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_wtr_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[20]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_wtr_coy_out, y_up = 0.6, season = "Winter", x_start = 0.28)
-  ggsave(wtd_wtr_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  wtd_wtr_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[15]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_wtr_tri_out, y_up = 0.6, season = "Winter", x_start = 0.20, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  wtd_wtr_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[16]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_wtr_for_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  wtd_wtr_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[17]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_wtr_coug_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  wtd_wtr_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[18]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_wtr_wolf_out, y_up = 0.6, season = "Winter", x_start = 0.25, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  wtd_wtr_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[19]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_wtr_bob_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+  wtd_wtr_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[20]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_wtr_coy_out, y_up = 0.6, season = "Winter", x_start = 0.28, seasoncol = "#56B4E9", linecol1 = "#b4d9f4", linecol2 = "#99a3ac")
+    
+  # ggsave(wtd_wtr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_wtr_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_wtr_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_wtr_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_wtr_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_wtr_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_wtr_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   ####  White-tailed deer spring  ####
-  wtd_sprg_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[21]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_sprg_tri_out, y_up = 0.6, season = "Spring", x_start = 0.20)
-  ggsave(wtd_sprg_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_sprg_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[22]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(wtd_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_sprg_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[23]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_sprg_coug_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(wtd_sprg_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_sprg_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[24]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_sprg_wolf_out, y_up = 0.6, season = "Spring", x_start = 0.25)
-  ggsave(wtd_sprg_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_sprg_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[25]], name2 = "White-tailed deer", name3 = "black bear risk", dhat = wtd_sprg_bear_out, y_up = 0.6, season = "Spring", x_start = 0.30)
-  ggsave(wtd_sprg_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_sprg_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[26]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_sprg_bob_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(wtd_sprg_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
-  wtd_sprg_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[27]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_sprg_coy_out, y_up = 0.6, season = "Spring", x_start = 0.28)
-  ggsave(wtd_sprg_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  wtd_sprg_tri_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[21]], name2 = "White-tailed deer", name3 = "TRI", dhat = wtd_sprg_tri_out, y_up = 0.6, season = "Spring", x_start = 0.20, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  wtd_sprg_for_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[22]], name2 = "White-tailed deer", name3 = "% Forest", dhat = wtd_sprg_for_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  wtd_sprg_coug_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[23]], name2 = "White-tailed deer", name3 = "cougar risk", dhat = wtd_sprg_coug_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  wtd_sprg_wolf_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[24]], name2 = "White-tailed deer", name3 = "wolf risk", dhat = wtd_sprg_wolf_out, y_up = 0.6, season = "Spring", x_start = 0.25, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  wtd_sprg_bear_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[25]], name2 = "White-tailed deer", name3 = "black bear risk", dhat = wtd_sprg_bear_out, y_up = 0.6, season = "Spring", x_start = 0.30, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  wtd_sprg_bob_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[26]], name2 = "White-tailed deer", name3 = "bobcat risk", dhat = wtd_sprg_bob_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+  wtd_sprg_coy_overPlot <- overlap_singlespp_plots(prey_overlap[[4]][[27]], name2 = "White-tailed deer", name3 = "coyote risk", dhat = wtd_sprg_coy_out, y_up = 0.6, season = "Spring", x_start = 0.28, seasoncol = "#CC79A7", linecol1 = "#e8bcd2", linecol2 = "#ab9da4")
+    
+  # ggsave(wtd_sprg_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_sprg_for_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_for.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_sprg_coug_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_coug.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_sprg_wolf_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_wolf.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_sprg_bear_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_bear.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_sprg_bob_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_bob.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
+  # ggsave(wtd_sprg_coy_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_wtd_sprg_coy.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
   
   
+ 
   ####  Black bear  ####
   bear_smr_tri_overPlot <- overlap_singlespp_plots(pred_overlap[[1]][[1]], name2 = "Black bear", name3 = "TRI", dhat = bear_smr_tri_out, y_up = 0.6, season = "Summer", x_start = 0.20)
   ggsave(bear_smr_tri_overPlot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Overlap_Plot_bear_smr_tri.tiff", width = 6, height = 6, dpi = 600, units = "in", device='tiff')
@@ -1999,5 +2011,29 @@
     theme(text = element_text(size = 14), legend.text = element_text(size = 14)) 
   plot(spp_activity_plot)  
   ggsave(spp_activity_plot, filename = "./Outputs/Temporal Overlap/Figures/Overlap Plots/Ungulate_Overall_Activity_Plots.tiff", width = 15, height = 4, dpi = 600, units = "in", device='tiff')
+  
+  
+  seasonal_activity_plot <- function(activity_df, spp) {
+    all_seasons <- ggplot(activity_df, aes(Time, Density, colour = Season)) + #, linetype = Season
+      geom_line(lwd = 0.75) + 
+      scale_color_manual(values = c("#009E73", "#F0E442", "#56B4E9", "#CC79A7")) +
+      scale_x_continuous(breaks = c(0, 6.0, 12.0, 18.0, 24.0),
+                         labels = c('Midnight', 'Dawn', 'Noon', 'Dusk', 'Midnight')) +
+      geom_vline(xintercept = 6.0, linetype="dotted") +
+      geom_vline(xintercept = 18.0, linetype="dotted") +
+      theme_bw() +
+      theme(legend.background = element_rect(fill = "transparent"),
+            legend.key = element_rect(colour = NA, fill = NA)) +
+      theme(panel.border = element_blank(), 
+            axis.text.x=element_text(angle = 45, vjust = 1, hjust=1)) +
+      ggtitle(spp) +
+      labs(x = "Time of day", y = "Density") +
+      theme(plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),  #face = "bold.italic"
+            text = element_text(size = 14), legend.text = element_text(size = 14)) 
+  }
+  (md_all_seasons <- seasonal_activity_plot(md_activity, spp = "Mule deer"))
+  (elk_all_seasons <- seasonal_activity_plot(elk_activity, spp = "Elk"))
+  (moose_all_seasons <- seasonal_activity_plot(moose_activity, spp = "Moose"))
+  (wtd_all_seasons <- seasonal_activity_plot(wtd_activity, spp = "White-tailed deer"))
   
   
